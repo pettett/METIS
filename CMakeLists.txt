@@ -24,7 +24,7 @@ message(STATUS "${PROJECT_NAME} ${PROJECT_VERSION} CMake ${CMAKE_VERSION} instal
 
 FetchContent_Declare(GKlib
 GIT_REPOSITORY https://github.com/scivision/GKlib.git
-GIT_TAG 6897bfe
+GIT_TAG 078042614ff5192ab4c9bde0575bfef0d4572687
 GIT_SHALLOW true
 )
 FetchContent_MakeAvailable(GKlib)
