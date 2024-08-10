@@ -1,0 +1,261 @@
+use ::libc;
+extern "C" {
+    fn exit(_: libc::c_int) -> !;
+    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
+    fn ComputeFillIn(
+        graph: *mut graph_t,
+        perm: *mut idx_t,
+        iperm: *mut idx_t,
+        r_maxlnz: *mut size_t,
+        r_opc: *mut size_t,
+    );
+    fn ReadPOVector(
+        graph: *mut graph_t,
+        filename: *mut libc::c_char,
+        vector: *mut idx_t,
+    );
+    fn ReadGraph(_: *mut params_t) -> *mut graph_t;
+    fn libmetis__FreeGraph(graph: *mut *mut graph_t);
+    fn libmetis__imalloc(n: size_t, msg: *mut libc::c_char) -> *mut idx_t;
+    fn gk_strdup(orgstr: *mut libc::c_char) -> *mut libc::c_char;
+}
+pub type __int32_t = libc::c_int;
+pub type int32_t = __int32_t;
+pub type size_t = libc::c_ulong;
+pub type idx_t = int32_t;
+pub type real_t = libc::c_float;
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct ckrinfo_t {
+    pub id: idx_t,
+    pub ed: idx_t,
+    pub nnbrs: idx_t,
+    pub inbr: idx_t,
+}
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct vkrinfo_t {
+    pub nid: idx_t,
+    pub ned: idx_t,
+    pub gv: idx_t,
+    pub nnbrs: idx_t,
+    pub inbr: idx_t,
+}
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct nrinfo_t {
+    pub edegrees: [idx_t; 2],
+}
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct graph_t {
+    pub nvtxs: idx_t,
+    pub nedges: idx_t,
+    pub ncon: idx_t,
+    pub xadj: *mut idx_t,
+    pub vwgt: *mut idx_t,
+    pub vsize: *mut idx_t,
+    pub adjncy: *mut idx_t,
+    pub adjwgt: *mut idx_t,
+    pub tvwgt: *mut idx_t,
+    pub invtvwgt: *mut real_t,
+    pub free_xadj: libc::c_int,
+    pub free_vwgt: libc::c_int,
+    pub free_vsize: libc::c_int,
+    pub free_adjncy: libc::c_int,
+    pub free_adjwgt: libc::c_int,
+    pub label: *mut idx_t,
+    pub cmap: *mut idx_t,
+    pub mincut: idx_t,
+    pub minvol: idx_t,
+    pub where_0: *mut idx_t,
+    pub pwgts: *mut idx_t,
+    pub nbnd: idx_t,
+    pub bndptr: *mut idx_t,
+    pub bndind: *mut idx_t,
+    pub id: *mut idx_t,
+    pub ed: *mut idx_t,
+    pub ckrinfo: *mut ckrinfo_t,
+    pub vkrinfo: *mut vkrinfo_t,
+    pub nrinfo: *mut nrinfo_t,
+    pub coarser: *mut graph_t,
+    pub finer: *mut graph_t,
+}
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct params_t {
+    pub ptype: idx_t,
+    pub objtype: idx_t,
+    pub ctype: idx_t,
+    pub iptype: idx_t,
+    pub rtype: idx_t,
+    pub no2hop: idx_t,
+    pub minconn: idx_t,
+    pub contig: idx_t,
+    pub nooutput: idx_t,
+    pub balance: idx_t,
+    pub ncuts: idx_t,
+    pub niter: idx_t,
+    pub gtype: idx_t,
+    pub ncommon: idx_t,
+    pub seed: idx_t,
+    pub dbglvl: idx_t,
+    pub nparts: idx_t,
+    pub nseps: idx_t,
+    pub ufactor: idx_t,
+    pub pfactor: idx_t,
+    pub compress: idx_t,
+    pub ccorder: idx_t,
+    pub filename: *mut libc::c_char,
+    pub outfile: *mut libc::c_char,
+    pub xyzfile: *mut libc::c_char,
+    pub tpwgtsfile: *mut libc::c_char,
+    pub ubvecstr: *mut libc::c_char,
+    pub wgtflag: idx_t,
+    pub numflag: idx_t,
+    pub tpwgts: *mut real_t,
+    pub ubvec: *mut real_t,
+    pub iotimer: real_t,
+    pub parttimer: real_t,
+    pub reporttimer: real_t,
+    pub maxmemory: size_t,
+}
+unsafe fn main_0(
+    mut argc: libc::c_int,
+    mut argv: *mut *mut libc::c_char,
+) -> libc::c_int {
+    let mut i: idx_t = 0;
+    let mut perm: *mut idx_t = 0 as *mut idx_t;
+    let mut iperm: *mut idx_t = 0 as *mut idx_t;
+    let mut graph: *mut graph_t = 0 as *mut graph_t;
+    let mut params: params_t = params_t {
+        ptype: 0,
+        objtype: 0,
+        ctype: 0,
+        iptype: 0,
+        rtype: 0,
+        no2hop: 0,
+        minconn: 0,
+        contig: 0,
+        nooutput: 0,
+        balance: 0,
+        ncuts: 0,
+        niter: 0,
+        gtype: 0,
+        ncommon: 0,
+        seed: 0,
+        dbglvl: 0,
+        nparts: 0,
+        nseps: 0,
+        ufactor: 0,
+        pfactor: 0,
+        compress: 0,
+        ccorder: 0,
+        filename: 0 as *mut libc::c_char,
+        outfile: 0 as *mut libc::c_char,
+        xyzfile: 0 as *mut libc::c_char,
+        tpwgtsfile: 0 as *mut libc::c_char,
+        ubvecstr: 0 as *mut libc::c_char,
+        wgtflag: 0,
+        numflag: 0,
+        tpwgts: 0 as *mut real_t,
+        ubvec: 0 as *mut real_t,
+        iotimer: 0.,
+        parttimer: 0.,
+        reporttimer: 0.,
+        maxmemory: 0,
+    };
+    let mut maxlnz: size_t = 0;
+    let mut opc: size_t = 0;
+    if argc != 3 as libc::c_int {
+        printf(
+            b"Usage: %s <GraphFile> <PermFile\n\0" as *const u8 as *const libc::c_char,
+            *argv.offset(0 as libc::c_int as isize),
+        );
+        exit(0 as libc::c_int);
+    }
+    params.filename = gk_strdup(*argv.offset(1 as libc::c_int as isize));
+    graph = ReadGraph(&mut params);
+    if (*graph).nvtxs <= 0 as libc::c_int {
+        printf(b"Empty graph. Nothing to do.\n\0" as *const u8 as *const libc::c_char);
+        exit(0 as libc::c_int);
+    }
+    if (*graph).ncon != 1 as libc::c_int {
+        printf(
+            b"Ordering can only be applied to graphs with one constraint.\n\0"
+                as *const u8 as *const libc::c_char,
+        );
+        exit(0 as libc::c_int);
+    }
+    perm = libmetis__imalloc(
+        (*graph).nvtxs as size_t,
+        b"main: perm\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
+    );
+    iperm = libmetis__imalloc(
+        (*graph).nvtxs as size_t,
+        b"main: iperm\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
+    );
+    ReadPOVector(graph, *argv.offset(2 as libc::c_int as isize), iperm);
+    i = 0 as libc::c_int;
+    while i < (*graph).nvtxs {
+        *perm.offset(*iperm.offset(i as isize) as isize) = i;
+        i += 1;
+        i;
+    }
+    printf(
+        b"**********************************************************************\n\0"
+            as *const u8 as *const libc::c_char,
+    );
+    printf(
+        b"%s\0" as *const u8 as *const libc::c_char,
+        b"METIS 5.0 Copyright 1998-13, Regents of the University of Minnesota\n\0"
+            as *const u8 as *const libc::c_char,
+    );
+    printf(
+        b"Graph Information ---------------------------------------------------\n\0"
+            as *const u8 as *const libc::c_char,
+    );
+    printf(
+        b"  Name: %s, #Vertices: %d, #Edges: %d\n\n\0" as *const u8
+            as *const libc::c_char,
+        *argv.offset(1 as libc::c_int as isize),
+        (*graph).nvtxs,
+        (*graph).nedges / 2 as libc::c_int,
+    );
+    printf(
+        b"Fillin... -----------------------------------------------------------\n\0"
+            as *const u8 as *const libc::c_char,
+    );
+    ComputeFillIn(graph, perm, iperm, &mut maxlnz, &mut opc);
+    printf(
+        b"  Nonzeros: %6.3le \tOperation Count: %6.3le\n\0" as *const u8
+            as *const libc::c_char,
+        maxlnz as libc::c_double,
+        opc as libc::c_double,
+    );
+    printf(
+        b"**********************************************************************\n\0"
+            as *const u8 as *const libc::c_char,
+    );
+    libmetis__FreeGraph(&mut graph);
+    return 0;
+}
+pub fn main() {
+    let mut args: Vec::<*mut libc::c_char> = Vec::new();
+    for arg in ::std::env::args() {
+        args.push(
+            (::std::ffi::CString::new(arg))
+                .expect("Failed to convert argument into CString.")
+                .into_raw(),
+        );
+    }
+    args.push(::core::ptr::null_mut());
+    unsafe {
+        ::std::process::exit(
+            main_0(
+                (args.len() - 1) as libc::c_int,
+                args.as_mut_ptr() as *mut *mut libc::c_char,
+            ) as i32,
+        )
+    }
+}

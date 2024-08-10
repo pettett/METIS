@@ -1,0 +1,407 @@
+[
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/b64.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/b64.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/b64.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/blas.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/blas.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/blas.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/csr.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/csr.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/csr.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/error.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/error.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/error.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/evaluate.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/evaluate.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/evaluate.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/fkvkselect.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/fkvkselect.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/fkvkselect.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/fs.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/fs.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/fs.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/getopt.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/getopt.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/getopt.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/gkregex.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/gkregex.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/gkregex.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/graph.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/graph.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/graph.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/htable.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/htable.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/htable.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/io.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/io.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/io.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/itemsets.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/itemsets.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/itemsets.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/mcore.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/mcore.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/mcore.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/memory.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/memory.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/memory.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/omp.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/omp.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/omp.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/pdb.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/pdb.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/pdb.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/pqueue.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/pqueue.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/pqueue.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/random.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/random.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/random.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/rw.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/rw.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/rw.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/seq.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/seq.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/seq.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/sort.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/sort.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/sort.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/string.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/string.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/string.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/timers.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/timers.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/timers.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/tokenizer.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/tokenizer.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/tokenizer.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/__/GKlib/util.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/util.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib/util.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/auxapi.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/auxapi.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/auxapi.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/balance.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/balance.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/balance.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/bucketsort.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/bucketsort.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/bucketsort.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/checkgraph.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/checkgraph.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/checkgraph.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/coarsen.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/coarsen.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/coarsen.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/compress.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/compress.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/compress.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/contig.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/contig.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/contig.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/debug.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/debug.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/debug.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/fm.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/fm.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/fm.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/fortran.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/fortran.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/fortran.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/frename.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/frename.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/frename.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/gklib.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/gklib.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/gklib.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/graph.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/graph.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/graph.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/initpart.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/initpart.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/initpart.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/kmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/kmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/kmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/kwayfm.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/kwayfm.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/kwayfm.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/kwayrefine.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/kwayrefine.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/kwayrefine.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/mcutil.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/mcutil.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/mcutil.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/mesh.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/mesh.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/mesh.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/meshpart.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/meshpart.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/meshpart.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/minconn.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/minconn.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/minconn.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/mincover.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/mincover.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/mincover.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/mmd.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/mmd.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/mmd.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/ometis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/ometis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/ometis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/options.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/options.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/options.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/parmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/parmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/parmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/pmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/pmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/pmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/refine.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/refine.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/refine.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/separator.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/separator.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/separator.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/sfm.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/sfm.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/sfm.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/srefine.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/srefine.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/srefine.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/stat.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/stat.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/stat.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/timing.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/timing.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/timing.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/util.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/util.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/util.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis",
+  "command": "/usr/bin/cc  -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/metis.dir/wspace.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/wspace.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis/wspace.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/gpmetis.dir/gpmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/gpmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/gpmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/gpmetis.dir/cmdline_gpmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmdline_gpmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmdline_gpmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/gpmetis.dir/io.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/gpmetis.dir/stat.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/stat.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/stat.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/ndmetis.dir/ndmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/ndmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/ndmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/ndmetis.dir/cmdline_ndmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmdline_ndmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmdline_ndmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/ndmetis.dir/io.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/ndmetis.dir/smbfactor.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/smbfactor.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/smbfactor.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/mpmetis.dir/mpmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/mpmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/mpmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/mpmetis.dir/cmdline_mpmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmdline_mpmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmdline_mpmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/mpmetis.dir/io.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/mpmetis.dir/stat.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/stat.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/stat.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/m2gmetis.dir/m2gmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/m2gmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/m2gmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/m2gmetis.dir/cmdline_m2gmetis.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmdline_m2gmetis.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmdline_m2gmetis.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/m2gmetis.dir/io.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/graphchk.dir/graphchk.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/graphchk.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/graphchk.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/graphchk.dir/io.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/cmpfillin.dir/cmpfillin.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmpfillin.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/cmpfillin.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/cmpfillin.dir/io.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/io.c"
+},
+{
+  "directory": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs",
+  "command": "/usr/bin/cc -DSVNINFO=\\\"\\\" -I/home/maxwell/Documents/metis_in_rust/METIS/src/GKlib -I/home/maxwell/Documents/metis_in_rust/METIS/src/include -I/home/maxwell/Documents/metis_in_rust/METIS/src/libmetis  -DLINUX -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -fPIC -Wall -pedantic -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -DNDEBUG -DNDEBUG2 -DHAVE_EXECINFO_H -DHAVE_GETLINE  -O3 -DNDEBUG -std=gnu99 -o CMakeFiles/cmpfillin.dir/smbfactor.c.o -c /home/maxwell/Documents/metis_in_rust/METIS/src/programs/smbfactor.c",
+  "file": "/home/maxwell/Documents/metis_in_rust/METIS/src/programs/smbfactor.c"
+}
+]
