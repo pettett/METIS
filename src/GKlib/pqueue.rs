@@ -113,14 +113,14 @@ pub unsafe extern "C" fn gk_ipqCheckHeap(mut queue: *mut gk_ipq_t) -> libc::c_in
     locator = (*queue).locator;
     nnodes = (*queue).nnodes as size_t;
     if nnodes == 0 as libc::c_int as u64 {
-        return 1 as libc::c_int;
+        return 1;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
@@ -128,14 +128,14 @@ pub unsafe extern "C" fn gk_ipqCheckHeap(mut queue: *mut gk_ipq_t) -> libc::c_in
     i = 0 as libc::c_int as gk_idx_t;
     j = i;
     while i < (*queue).maxnodes {
-        if *locator.offset(i as isize) != -(1 as libc::c_int) as i64 {
+        if *locator.offset(i as isize) != -(1) as i64 {
             j += 1;
             j;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_ipqInit(mut queue: *mut gk_ipq_t, mut maxnodes: size_t) {
@@ -147,7 +147,7 @@ pub unsafe extern "C" fn gk_ipqInit(mut queue: *mut gk_ipq_t, mut maxnodes: size
     );
     (*queue).locator = gk_idxsmalloc(
         maxnodes,
-        -(1 as libc::c_int) as gk_idx_t,
+        -(1) as gk_idx_t,
         b"gk_PQInit: locator\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
 }
@@ -156,9 +156,9 @@ pub unsafe extern "C" fn gk_ipqReset(mut queue: *mut gk_ipq_t) {
     let mut i: gk_idx_t = 0;
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_ikv_t = (*queue).heap;
-    i = (*queue).nnodes - 1 as libc::c_int as i64;
+    i = (*queue).nnodes - 1 as i64;
     while i >= 0 as libc::c_int as i64 {
-        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1 as libc::c_int) as gk_idx_t;
+        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1) as gk_idx_t;
         i -= 1;
         i;
     }
@@ -205,7 +205,7 @@ pub unsafe extern "C" fn gk_ipqInsert(
     (*queue).nnodes = (*queue).nnodes + 1;
     i = fresh0;
     while i > 0 as libc::c_int as i64 {
-        j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+        j = i - 1 as i64 >> 1;
         if !(key > (*heap.offset(j as isize)).key) {
             break;
         }
@@ -228,7 +228,7 @@ pub unsafe extern "C" fn gk_ipqDelete(mut queue: *mut gk_ipq_t, mut node: gk_idx
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_ikv_t = (*queue).heap;
     i = *locator.offset(node as isize);
-    *locator.offset(node as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(node as isize) = -(1) as gk_idx_t;
     (*queue).nnodes -= 1;
     if (*queue).nnodes > 0 as libc::c_int as i64
         && (*heap.offset((*queue).nnodes as isize)).val != node
@@ -238,7 +238,7 @@ pub unsafe extern "C" fn gk_ipqDelete(mut queue: *mut gk_ipq_t, mut node: gk_idx
         oldkey = (*heap.offset(i as isize)).key;
         if newkey > oldkey {
             while i > 0 as libc::c_int as i64 {
-                j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+                j = i - 1 as i64 >> 1;
                 if !(newkey > (*heap.offset(j as isize)).key) {
                     break;
                 }
@@ -249,13 +249,13 @@ pub unsafe extern "C" fn gk_ipqDelete(mut queue: *mut gk_ipq_t, mut node: gk_idx
         } else {
             nnodes = (*queue).nnodes;
             loop {
-                j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+                j = (i << 1) + 1 as i64;
                 if !(j < nnodes) {
                     break;
                 }
                 if (*heap.offset(j as isize)).key > newkey {
-                    if (j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if (j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > (*heap.offset(j as isize)).key
                     {
                         j += 1;
@@ -265,8 +265,8 @@ pub unsafe extern "C" fn gk_ipqDelete(mut queue: *mut gk_ipq_t, mut node: gk_idx
                     *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                     i = j;
                 } else {
-                    if !((j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if !((j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > newkey)
                     {
                         break;
@@ -301,7 +301,7 @@ pub unsafe extern "C" fn gk_ipqUpdate(
     i = *locator.offset(node as isize);
     if newkey > oldkey {
         while i > 0 as libc::c_int as i64 {
-            j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+            j = i - 1 as i64 >> 1;
             if !(newkey > (*heap.offset(j as isize)).key) {
                 break;
             }
@@ -312,13 +312,13 @@ pub unsafe extern "C" fn gk_ipqUpdate(
     } else {
         nnodes = (*queue).nnodes;
         loop {
-            j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+            j = (i << 1) + 1 as i64;
             if !(j < nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > newkey {
-                if (j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
                     j += 1;
@@ -328,8 +328,8 @@ pub unsafe extern "C" fn gk_ipqUpdate(
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                if !((j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                 {
                     break;
                 }
@@ -381,41 +381,41 @@ pub unsafe extern "C" fn gk_ipqGetTop(mut queue: *mut gk_ipq_t) -> gk_idx_t {
     let mut node: gk_idx_t = 0;
     let mut key: libc::c_int = 0;
     if (*queue).nnodes == 0 as libc::c_int as i64 {
-        return -(1 as libc::c_int) as gk_idx_t;
+        return -(1) as gk_idx_t;
     }
     (*queue).nnodes -= 1;
     (*queue).nnodes;
     heap = (*queue).heap;
     locator = (*queue).locator;
     vtx = (*heap.offset(0 as libc::c_int as isize)).val;
-    *locator.offset(vtx as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(vtx as isize) = -(1) as gk_idx_t;
     i = (*queue).nnodes;
     if i > 0 as libc::c_int as i64 {
         key = (*heap.offset(i as isize)).key;
         node = (*heap.offset(i as isize)).val;
         i = 0 as libc::c_int as gk_idx_t;
         loop {
-            j = 2 as libc::c_int as i64 * i + 1 as libc::c_int as i64;
+            j = 2 as libc::c_int as i64 * i + 1 as i64;
             if !(j < (*queue).nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > key {
-                if (j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
-                    j = j + 1 as libc::c_int as i64;
+                    j = j + 1 as i64;
                 }
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > key)
+                if !((j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > key)
                 {
                     break;
                 }
-                j = j + 1 as libc::c_int as i64;
+                j = j + 1 as i64;
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
@@ -430,7 +430,7 @@ pub unsafe extern "C" fn gk_ipqGetTop(mut queue: *mut gk_ipq_t) -> gk_idx_t {
 #[no_mangle]
 pub unsafe extern "C" fn gk_ipqSeeTopVal(mut queue: *mut gk_ipq_t) -> gk_idx_t {
     return if (*queue).nnodes == 0 as libc::c_int as i64 {
-        -(1 as libc::c_int) as i64
+        -(1) as i64
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).val
     };
@@ -440,9 +440,9 @@ pub unsafe extern "C" fn gk_i32pqReset(mut queue: *mut gk_i32pq_t) {
     let mut i: gk_idx_t = 0;
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_i32kv_t = (*queue).heap;
-    i = (*queue).nnodes - 1 as libc::c_int as i64;
+    i = (*queue).nnodes - 1 as i64;
     while i >= 0 as libc::c_int as i64 {
-        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1 as libc::c_int) as gk_idx_t;
+        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1) as gk_idx_t;
         i -= 1;
         i;
     }
@@ -458,7 +458,7 @@ pub unsafe extern "C" fn gk_i32pqInit(mut queue: *mut gk_i32pq_t, mut maxnodes: 
     );
     (*queue).locator = gk_idxsmalloc(
         maxnodes,
-        -(1 as libc::c_int) as gk_idx_t,
+        -(1) as gk_idx_t,
         b"gk_PQInit: locator\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
 }
@@ -473,14 +473,14 @@ pub unsafe extern "C" fn gk_i32pqCheckHeap(mut queue: *mut gk_i32pq_t) -> libc::
     locator = (*queue).locator;
     nnodes = (*queue).nnodes as size_t;
     if nnodes == 0 as libc::c_int as u64 {
-        return 1 as libc::c_int;
+        return 1;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
@@ -488,14 +488,14 @@ pub unsafe extern "C" fn gk_i32pqCheckHeap(mut queue: *mut gk_i32pq_t) -> libc::
     i = 0 as libc::c_int as gk_idx_t;
     j = i;
     while i < (*queue).maxnodes {
-        if *locator.offset(i as isize) != -(1 as libc::c_int) as i64 {
+        if *locator.offset(i as isize) != -(1) as i64 {
             j += 1;
             j;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_i32pqFree(mut queue: *mut gk_i32pq_t) {
@@ -538,7 +538,7 @@ pub unsafe extern "C" fn gk_i32pqInsert(
     (*queue).nnodes = (*queue).nnodes + 1;
     i = fresh1;
     while i > 0 as libc::c_int as i64 {
-        j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+        j = i - 1 as i64 >> 1;
         if !(key > (*heap.offset(j as isize)).key) {
             break;
         }
@@ -564,7 +564,7 @@ pub unsafe extern "C" fn gk_i32pqDelete(
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_i32kv_t = (*queue).heap;
     i = *locator.offset(node as isize);
-    *locator.offset(node as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(node as isize) = -(1) as gk_idx_t;
     (*queue).nnodes -= 1;
     if (*queue).nnodes > 0 as libc::c_int as i64
         && (*heap.offset((*queue).nnodes as isize)).val != node
@@ -574,7 +574,7 @@ pub unsafe extern "C" fn gk_i32pqDelete(
         oldkey = (*heap.offset(i as isize)).key;
         if newkey > oldkey {
             while i > 0 as libc::c_int as i64 {
-                j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+                j = i - 1 as i64 >> 1;
                 if !(newkey > (*heap.offset(j as isize)).key) {
                     break;
                 }
@@ -585,13 +585,13 @@ pub unsafe extern "C" fn gk_i32pqDelete(
         } else {
             nnodes = (*queue).nnodes;
             loop {
-                j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+                j = (i << 1) + 1 as i64;
                 if !(j < nnodes) {
                     break;
                 }
                 if (*heap.offset(j as isize)).key > newkey {
-                    if (j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if (j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > (*heap.offset(j as isize)).key
                     {
                         j += 1;
@@ -601,8 +601,8 @@ pub unsafe extern "C" fn gk_i32pqDelete(
                     *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                     i = j;
                 } else {
-                    if !((j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if !((j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > newkey)
                     {
                         break;
@@ -637,7 +637,7 @@ pub unsafe extern "C" fn gk_i32pqUpdate(
     i = *locator.offset(node as isize);
     if newkey > oldkey {
         while i > 0 as libc::c_int as i64 {
-            j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+            j = i - 1 as i64 >> 1;
             if !(newkey > (*heap.offset(j as isize)).key) {
                 break;
             }
@@ -648,13 +648,13 @@ pub unsafe extern "C" fn gk_i32pqUpdate(
     } else {
         nnodes = (*queue).nnodes;
         loop {
-            j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+            j = (i << 1) + 1 as i64;
             if !(j < nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > newkey {
-                if (j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
                     j += 1;
@@ -664,8 +664,8 @@ pub unsafe extern "C" fn gk_i32pqUpdate(
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                if !((j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                 {
                     break;
                 }
@@ -710,7 +710,7 @@ pub unsafe extern "C" fn gk_i32pqSeeTopKey(mut queue: *mut gk_i32pq_t) -> int32_
 #[no_mangle]
 pub unsafe extern "C" fn gk_i32pqSeeTopVal(mut queue: *mut gk_i32pq_t) -> gk_idx_t {
     return if (*queue).nnodes == 0 as libc::c_int as i64 {
-        -(1 as libc::c_int) as i64
+        -(1) as i64
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).val
     };
@@ -725,41 +725,41 @@ pub unsafe extern "C" fn gk_i32pqGetTop(mut queue: *mut gk_i32pq_t) -> gk_idx_t 
     let mut node: gk_idx_t = 0;
     let mut key: int32_t = 0;
     if (*queue).nnodes == 0 as libc::c_int as i64 {
-        return -(1 as libc::c_int) as gk_idx_t;
+        return -(1) as gk_idx_t;
     }
     (*queue).nnodes -= 1;
     (*queue).nnodes;
     heap = (*queue).heap;
     locator = (*queue).locator;
     vtx = (*heap.offset(0 as libc::c_int as isize)).val;
-    *locator.offset(vtx as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(vtx as isize) = -(1) as gk_idx_t;
     i = (*queue).nnodes;
     if i > 0 as libc::c_int as i64 {
         key = (*heap.offset(i as isize)).key;
         node = (*heap.offset(i as isize)).val;
         i = 0 as libc::c_int as gk_idx_t;
         loop {
-            j = 2 as libc::c_int as i64 * i + 1 as libc::c_int as i64;
+            j = 2 as libc::c_int as i64 * i + 1 as i64;
             if !(j < (*queue).nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > key {
-                if (j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
-                    j = j + 1 as libc::c_int as i64;
+                    j = j + 1 as i64;
                 }
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > key)
+                if !((j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > key)
                 {
                     break;
                 }
-                j = j + 1 as libc::c_int as i64;
+                j = j + 1 as i64;
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
@@ -782,14 +782,14 @@ pub unsafe extern "C" fn gk_i64pqCheckHeap(mut queue: *mut gk_i64pq_t) -> libc::
     locator = (*queue).locator;
     nnodes = (*queue).nnodes as size_t;
     if nnodes == 0 as libc::c_int as u64 {
-        return 1 as libc::c_int;
+        return 1;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
@@ -797,14 +797,14 @@ pub unsafe extern "C" fn gk_i64pqCheckHeap(mut queue: *mut gk_i64pq_t) -> libc::
     i = 0 as libc::c_int as gk_idx_t;
     j = i;
     while i < (*queue).maxnodes {
-        if *locator.offset(i as isize) != -(1 as libc::c_int) as i64 {
+        if *locator.offset(i as isize) != -(1) as i64 {
             j += 1;
             j;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_i64pqInit(mut queue: *mut gk_i64pq_t, mut maxnodes: size_t) {
@@ -816,7 +816,7 @@ pub unsafe extern "C" fn gk_i64pqInit(mut queue: *mut gk_i64pq_t, mut maxnodes: 
     );
     (*queue).locator = gk_idxsmalloc(
         maxnodes,
-        -(1 as libc::c_int) as gk_idx_t,
+        -(1) as gk_idx_t,
         b"gk_PQInit: locator\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
 }
@@ -825,9 +825,9 @@ pub unsafe extern "C" fn gk_i64pqReset(mut queue: *mut gk_i64pq_t) {
     let mut i: gk_idx_t = 0;
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_i64kv_t = (*queue).heap;
-    i = (*queue).nnodes - 1 as libc::c_int as i64;
+    i = (*queue).nnodes - 1 as i64;
     while i >= 0 as libc::c_int as i64 {
-        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1 as libc::c_int) as gk_idx_t;
+        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1) as gk_idx_t;
         i -= 1;
         i;
     }
@@ -874,7 +874,7 @@ pub unsafe extern "C" fn gk_i64pqInsert(
     (*queue).nnodes = (*queue).nnodes + 1;
     i = fresh2;
     while i > 0 as libc::c_int as i64 {
-        j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+        j = i - 1 as i64 >> 1;
         if !(key > (*heap.offset(j as isize)).key) {
             break;
         }
@@ -900,7 +900,7 @@ pub unsafe extern "C" fn gk_i64pqDelete(
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_i64kv_t = (*queue).heap;
     i = *locator.offset(node as isize);
-    *locator.offset(node as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(node as isize) = -(1) as gk_idx_t;
     (*queue).nnodes -= 1;
     if (*queue).nnodes > 0 as libc::c_int as i64
         && (*heap.offset((*queue).nnodes as isize)).val != node
@@ -910,7 +910,7 @@ pub unsafe extern "C" fn gk_i64pqDelete(
         oldkey = (*heap.offset(i as isize)).key;
         if newkey > oldkey {
             while i > 0 as libc::c_int as i64 {
-                j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+                j = i - 1 as i64 >> 1;
                 if !(newkey > (*heap.offset(j as isize)).key) {
                     break;
                 }
@@ -921,13 +921,13 @@ pub unsafe extern "C" fn gk_i64pqDelete(
         } else {
             nnodes = (*queue).nnodes;
             loop {
-                j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+                j = (i << 1) + 1 as i64;
                 if !(j < nnodes) {
                     break;
                 }
                 if (*heap.offset(j as isize)).key > newkey {
-                    if (j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if (j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > (*heap.offset(j as isize)).key
                     {
                         j += 1;
@@ -937,8 +937,8 @@ pub unsafe extern "C" fn gk_i64pqDelete(
                     *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                     i = j;
                 } else {
-                    if !((j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if !((j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > newkey)
                     {
                         break;
@@ -973,7 +973,7 @@ pub unsafe extern "C" fn gk_i64pqUpdate(
     i = *locator.offset(node as isize);
     if newkey > oldkey {
         while i > 0 as libc::c_int as i64 {
-            j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+            j = i - 1 as i64 >> 1;
             if !(newkey > (*heap.offset(j as isize)).key) {
                 break;
             }
@@ -984,13 +984,13 @@ pub unsafe extern "C" fn gk_i64pqUpdate(
     } else {
         nnodes = (*queue).nnodes;
         loop {
-            j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+            j = (i << 1) + 1 as i64;
             if !(j < nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > newkey {
-                if (j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
                     j += 1;
@@ -1000,8 +1000,8 @@ pub unsafe extern "C" fn gk_i64pqUpdate(
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                if !((j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                 {
                     break;
                 }
@@ -1046,7 +1046,7 @@ pub unsafe extern "C" fn gk_i64pqSeeTopKey(mut queue: *mut gk_i64pq_t) -> int64_
 #[no_mangle]
 pub unsafe extern "C" fn gk_i64pqSeeTopVal(mut queue: *mut gk_i64pq_t) -> gk_idx_t {
     return if (*queue).nnodes == 0 as libc::c_int as i64 {
-        -(1 as libc::c_int) as i64
+        -(1) as i64
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).val
     };
@@ -1061,41 +1061,41 @@ pub unsafe extern "C" fn gk_i64pqGetTop(mut queue: *mut gk_i64pq_t) -> gk_idx_t 
     let mut node: gk_idx_t = 0;
     let mut key: int64_t = 0;
     if (*queue).nnodes == 0 as libc::c_int as i64 {
-        return -(1 as libc::c_int) as gk_idx_t;
+        return -(1) as gk_idx_t;
     }
     (*queue).nnodes -= 1;
     (*queue).nnodes;
     heap = (*queue).heap;
     locator = (*queue).locator;
     vtx = (*heap.offset(0 as libc::c_int as isize)).val;
-    *locator.offset(vtx as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(vtx as isize) = -(1) as gk_idx_t;
     i = (*queue).nnodes;
     if i > 0 as libc::c_int as i64 {
         key = (*heap.offset(i as isize)).key;
         node = (*heap.offset(i as isize)).val;
         i = 0 as libc::c_int as gk_idx_t;
         loop {
-            j = 2 as libc::c_int as i64 * i + 1 as libc::c_int as i64;
+            j = 2 as libc::c_int as i64 * i + 1 as i64;
             if !(j < (*queue).nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > key {
-                if (j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
-                    j = j + 1 as libc::c_int as i64;
+                    j = j + 1 as i64;
                 }
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > key)
+                if !((j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > key)
                 {
                     break;
                 }
-                j = j + 1 as libc::c_int as i64;
+                j = j + 1 as i64;
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
@@ -1117,7 +1117,7 @@ pub unsafe extern "C" fn gk_fpqInit(mut queue: *mut gk_fpq_t, mut maxnodes: size
     );
     (*queue).locator = gk_idxsmalloc(
         maxnodes,
-        -(1 as libc::c_int) as gk_idx_t,
+        -(1) as gk_idx_t,
         b"gk_PQInit: locator\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
 }
@@ -1126,9 +1126,9 @@ pub unsafe extern "C" fn gk_fpqReset(mut queue: *mut gk_fpq_t) {
     let mut i: gk_idx_t = 0;
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_fkv_t = (*queue).heap;
-    i = (*queue).nnodes - 1 as libc::c_int as i64;
+    i = (*queue).nnodes - 1 as i64;
     while i >= 0 as libc::c_int as i64 {
-        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1 as libc::c_int) as gk_idx_t;
+        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1) as gk_idx_t;
         i -= 1;
         i;
     }
@@ -1145,14 +1145,14 @@ pub unsafe extern "C" fn gk_fpqCheckHeap(mut queue: *mut gk_fpq_t) -> libc::c_in
     locator = (*queue).locator;
     nnodes = (*queue).nnodes as size_t;
     if nnodes == 0 as libc::c_int as u64 {
-        return 1 as libc::c_int;
+        return 1;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
@@ -1160,14 +1160,14 @@ pub unsafe extern "C" fn gk_fpqCheckHeap(mut queue: *mut gk_fpq_t) -> libc::c_in
     i = 0 as libc::c_int as gk_idx_t;
     j = i;
     while i < (*queue).maxnodes {
-        if *locator.offset(i as isize) != -(1 as libc::c_int) as i64 {
+        if *locator.offset(i as isize) != -(1) as i64 {
             j += 1;
             j;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_fpqFree(mut queue: *mut gk_fpq_t) {
@@ -1210,7 +1210,7 @@ pub unsafe extern "C" fn gk_fpqInsert(
     (*queue).nnodes = (*queue).nnodes + 1;
     i = fresh3;
     while i > 0 as libc::c_int as i64 {
-        j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+        j = i - 1 as i64 >> 1;
         if !(key > (*heap.offset(j as isize)).key) {
             break;
         }
@@ -1233,7 +1233,7 @@ pub unsafe extern "C" fn gk_fpqDelete(mut queue: *mut gk_fpq_t, mut node: gk_idx
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_fkv_t = (*queue).heap;
     i = *locator.offset(node as isize);
-    *locator.offset(node as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(node as isize) = -(1) as gk_idx_t;
     (*queue).nnodes -= 1;
     if (*queue).nnodes > 0 as libc::c_int as i64
         && (*heap.offset((*queue).nnodes as isize)).val != node
@@ -1243,7 +1243,7 @@ pub unsafe extern "C" fn gk_fpqDelete(mut queue: *mut gk_fpq_t, mut node: gk_idx
         oldkey = (*heap.offset(i as isize)).key;
         if newkey > oldkey {
             while i > 0 as libc::c_int as i64 {
-                j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+                j = i - 1 as i64 >> 1;
                 if !(newkey > (*heap.offset(j as isize)).key) {
                     break;
                 }
@@ -1254,13 +1254,13 @@ pub unsafe extern "C" fn gk_fpqDelete(mut queue: *mut gk_fpq_t, mut node: gk_idx
         } else {
             nnodes = (*queue).nnodes;
             loop {
-                j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+                j = (i << 1) + 1 as i64;
                 if !(j < nnodes) {
                     break;
                 }
                 if (*heap.offset(j as isize)).key > newkey {
-                    if (j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if (j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > (*heap.offset(j as isize)).key
                     {
                         j += 1;
@@ -1270,8 +1270,8 @@ pub unsafe extern "C" fn gk_fpqDelete(mut queue: *mut gk_fpq_t, mut node: gk_idx
                     *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                     i = j;
                 } else {
-                    if !((j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if !((j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > newkey)
                     {
                         break;
@@ -1306,7 +1306,7 @@ pub unsafe extern "C" fn gk_fpqUpdate(
     i = *locator.offset(node as isize);
     if newkey > oldkey {
         while i > 0 as libc::c_int as i64 {
-            j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+            j = i - 1 as i64 >> 1;
             if !(newkey > (*heap.offset(j as isize)).key) {
                 break;
             }
@@ -1317,13 +1317,13 @@ pub unsafe extern "C" fn gk_fpqUpdate(
     } else {
         nnodes = (*queue).nnodes;
         loop {
-            j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+            j = (i << 1) + 1 as i64;
             if !(j < nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > newkey {
-                if (j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
                     j += 1;
@@ -1333,8 +1333,8 @@ pub unsafe extern "C" fn gk_fpqUpdate(
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                if !((j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                 {
                     break;
                 }
@@ -1389,41 +1389,41 @@ pub unsafe extern "C" fn gk_fpqGetTop(mut queue: *mut gk_fpq_t) -> gk_idx_t {
     let mut node: gk_idx_t = 0;
     let mut key: libc::c_float = 0.;
     if (*queue).nnodes == 0 as libc::c_int as i64 {
-        return -(1 as libc::c_int) as gk_idx_t;
+        return -(1) as gk_idx_t;
     }
     (*queue).nnodes -= 1;
     (*queue).nnodes;
     heap = (*queue).heap;
     locator = (*queue).locator;
     vtx = (*heap.offset(0 as libc::c_int as isize)).val;
-    *locator.offset(vtx as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(vtx as isize) = -(1) as gk_idx_t;
     i = (*queue).nnodes;
     if i > 0 as libc::c_int as i64 {
         key = (*heap.offset(i as isize)).key;
         node = (*heap.offset(i as isize)).val;
         i = 0 as libc::c_int as gk_idx_t;
         loop {
-            j = 2 as libc::c_int as i64 * i + 1 as libc::c_int as i64;
+            j = 2 as libc::c_int as i64 * i + 1 as i64;
             if !(j < (*queue).nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > key {
-                if (j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
-                    j = j + 1 as libc::c_int as i64;
+                    j = j + 1 as i64;
                 }
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > key)
+                if !((j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > key)
                 {
                     break;
                 }
-                j = j + 1 as libc::c_int as i64;
+                j = j + 1 as i64;
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
@@ -1438,7 +1438,7 @@ pub unsafe extern "C" fn gk_fpqGetTop(mut queue: *mut gk_fpq_t) -> gk_idx_t {
 #[no_mangle]
 pub unsafe extern "C" fn gk_fpqSeeTopVal(mut queue: *mut gk_fpq_t) -> gk_idx_t {
     return if (*queue).nnodes == 0 as libc::c_int as i64 {
-        -(1 as libc::c_int) as i64
+        -(1) as i64
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).val
     };
@@ -1471,7 +1471,7 @@ pub unsafe extern "C" fn gk_dpqUpdate(
     i = *locator.offset(node as isize);
     if newkey > oldkey {
         while i > 0 as libc::c_int as i64 {
-            j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+            j = i - 1 as i64 >> 1;
             if !(newkey > (*heap.offset(j as isize)).key) {
                 break;
             }
@@ -1482,13 +1482,13 @@ pub unsafe extern "C" fn gk_dpqUpdate(
     } else {
         nnodes = (*queue).nnodes;
         loop {
-            j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+            j = (i << 1) + 1 as i64;
             if !(j < nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > newkey {
-                if (j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
                     j += 1;
@@ -1498,8 +1498,8 @@ pub unsafe extern "C" fn gk_dpqUpdate(
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                if !((j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                 {
                     break;
                 }
@@ -1525,7 +1525,7 @@ pub unsafe extern "C" fn gk_dpqInit(mut queue: *mut gk_dpq_t, mut maxnodes: size
     );
     (*queue).locator = gk_idxsmalloc(
         maxnodes,
-        -(1 as libc::c_int) as gk_idx_t,
+        -(1) as gk_idx_t,
         b"gk_PQInit: locator\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
 }
@@ -1534,9 +1534,9 @@ pub unsafe extern "C" fn gk_dpqReset(mut queue: *mut gk_dpq_t) {
     let mut i: gk_idx_t = 0;
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_dkv_t = (*queue).heap;
-    i = (*queue).nnodes - 1 as libc::c_int as i64;
+    i = (*queue).nnodes - 1 as i64;
     while i >= 0 as libc::c_int as i64 {
-        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1 as libc::c_int) as gk_idx_t;
+        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1) as gk_idx_t;
         i -= 1;
         i;
     }
@@ -1553,14 +1553,14 @@ pub unsafe extern "C" fn gk_dpqCheckHeap(mut queue: *mut gk_dpq_t) -> libc::c_in
     locator = (*queue).locator;
     nnodes = (*queue).nnodes as size_t;
     if nnodes == 0 as libc::c_int as u64 {
-        return 1 as libc::c_int;
+        return 1;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
@@ -1568,14 +1568,14 @@ pub unsafe extern "C" fn gk_dpqCheckHeap(mut queue: *mut gk_dpq_t) -> libc::c_in
     i = 0 as libc::c_int as gk_idx_t;
     j = i;
     while i < (*queue).maxnodes {
-        if *locator.offset(i as isize) != -(1 as libc::c_int) as i64 {
+        if *locator.offset(i as isize) != -(1) as i64 {
             j += 1;
             j;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_dpqDestroy(mut queue: *mut gk_dpq_t) {
@@ -1606,7 +1606,7 @@ pub unsafe extern "C" fn gk_dpqInsert(
     (*queue).nnodes = (*queue).nnodes + 1;
     i = fresh4;
     while i > 0 as libc::c_int as i64 {
-        j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+        j = i - 1 as i64 >> 1;
         if !(key > (*heap.offset(j as isize)).key) {
             break;
         }
@@ -1629,7 +1629,7 @@ pub unsafe extern "C" fn gk_dpqDelete(mut queue: *mut gk_dpq_t, mut node: gk_idx
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_dkv_t = (*queue).heap;
     i = *locator.offset(node as isize);
-    *locator.offset(node as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(node as isize) = -(1) as gk_idx_t;
     (*queue).nnodes -= 1;
     if (*queue).nnodes > 0 as libc::c_int as i64
         && (*heap.offset((*queue).nnodes as isize)).val != node
@@ -1639,7 +1639,7 @@ pub unsafe extern "C" fn gk_dpqDelete(mut queue: *mut gk_dpq_t, mut node: gk_idx
         oldkey = (*heap.offset(i as isize)).key;
         if newkey > oldkey {
             while i > 0 as libc::c_int as i64 {
-                j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+                j = i - 1 as i64 >> 1;
                 if !(newkey > (*heap.offset(j as isize)).key) {
                     break;
                 }
@@ -1650,13 +1650,13 @@ pub unsafe extern "C" fn gk_dpqDelete(mut queue: *mut gk_dpq_t, mut node: gk_idx
         } else {
             nnodes = (*queue).nnodes;
             loop {
-                j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+                j = (i << 1) + 1 as i64;
                 if !(j < nnodes) {
                     break;
                 }
                 if (*heap.offset(j as isize)).key > newkey {
-                    if (j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if (j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > (*heap.offset(j as isize)).key
                     {
                         j += 1;
@@ -1666,8 +1666,8 @@ pub unsafe extern "C" fn gk_dpqDelete(mut queue: *mut gk_dpq_t, mut node: gk_idx
                     *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                     i = j;
                 } else {
-                    if !((j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if !((j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > newkey)
                     {
                         break;
@@ -1725,41 +1725,41 @@ pub unsafe extern "C" fn gk_dpqGetTop(mut queue: *mut gk_dpq_t) -> gk_idx_t {
     let mut node: gk_idx_t = 0;
     let mut key: libc::c_double = 0.;
     if (*queue).nnodes == 0 as libc::c_int as i64 {
-        return -(1 as libc::c_int) as gk_idx_t;
+        return -(1) as gk_idx_t;
     }
     (*queue).nnodes -= 1;
     (*queue).nnodes;
     heap = (*queue).heap;
     locator = (*queue).locator;
     vtx = (*heap.offset(0 as libc::c_int as isize)).val;
-    *locator.offset(vtx as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(vtx as isize) = -(1) as gk_idx_t;
     i = (*queue).nnodes;
     if i > 0 as libc::c_int as i64 {
         key = (*heap.offset(i as isize)).key;
         node = (*heap.offset(i as isize)).val;
         i = 0 as libc::c_int as gk_idx_t;
         loop {
-            j = 2 as libc::c_int as i64 * i + 1 as libc::c_int as i64;
+            j = 2 as libc::c_int as i64 * i + 1 as i64;
             if !(j < (*queue).nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > key {
-                if (j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
-                    j = j + 1 as libc::c_int as i64;
+                    j = j + 1 as i64;
                 }
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > key)
+                if !((j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > key)
                 {
                     break;
                 }
-                j = j + 1 as libc::c_int as i64;
+                j = j + 1 as i64;
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
@@ -1774,7 +1774,7 @@ pub unsafe extern "C" fn gk_dpqGetTop(mut queue: *mut gk_dpq_t) -> gk_idx_t {
 #[no_mangle]
 pub unsafe extern "C" fn gk_dpqSeeTopVal(mut queue: *mut gk_dpq_t) -> gk_idx_t {
     return if (*queue).nnodes == 0 as libc::c_int as i64 {
-        -(1 as libc::c_int) as i64
+        -(1) as i64
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).val
     };
@@ -1790,14 +1790,14 @@ pub unsafe extern "C" fn gk_idxpqCheckHeap(mut queue: *mut gk_idxpq_t) -> libc::
     locator = (*queue).locator;
     nnodes = (*queue).nnodes as size_t;
     if nnodes == 0 as libc::c_int as u64 {
-        return 1 as libc::c_int;
+        return 1;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
@@ -1805,14 +1805,14 @@ pub unsafe extern "C" fn gk_idxpqCheckHeap(mut queue: *mut gk_idxpq_t) -> libc::
     i = 0 as libc::c_int as gk_idx_t;
     j = i;
     while i < (*queue).maxnodes {
-        if *locator.offset(i as isize) != -(1 as libc::c_int) as i64 {
+        if *locator.offset(i as isize) != -(1) as i64 {
             j += 1;
             j;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_idxpqInit(mut queue: *mut gk_idxpq_t, mut maxnodes: size_t) {
@@ -1824,7 +1824,7 @@ pub unsafe extern "C" fn gk_idxpqInit(mut queue: *mut gk_idxpq_t, mut maxnodes: 
     );
     (*queue).locator = gk_idxsmalloc(
         maxnodes,
-        -(1 as libc::c_int) as gk_idx_t,
+        -(1) as gk_idx_t,
         b"gk_PQInit: locator\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
 }
@@ -1833,9 +1833,9 @@ pub unsafe extern "C" fn gk_idxpqReset(mut queue: *mut gk_idxpq_t) {
     let mut i: gk_idx_t = 0;
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_idxkv_t = (*queue).heap;
-    i = (*queue).nnodes - 1 as libc::c_int as i64;
+    i = (*queue).nnodes - 1 as i64;
     while i >= 0 as libc::c_int as i64 {
-        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1 as libc::c_int) as gk_idx_t;
+        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1) as gk_idx_t;
         i -= 1;
         i;
     }
@@ -1882,7 +1882,7 @@ pub unsafe extern "C" fn gk_idxpqInsert(
     (*queue).nnodes = (*queue).nnodes + 1;
     i = fresh5;
     while i > 0 as libc::c_int as i64 {
-        j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+        j = i - 1 as i64 >> 1;
         if !(key > (*heap.offset(j as isize)).key) {
             break;
         }
@@ -1908,7 +1908,7 @@ pub unsafe extern "C" fn gk_idxpqDelete(
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut gk_idxkv_t = (*queue).heap;
     i = *locator.offset(node as isize);
-    *locator.offset(node as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(node as isize) = -(1) as gk_idx_t;
     (*queue).nnodes -= 1;
     if (*queue).nnodes > 0 as libc::c_int as i64
         && (*heap.offset((*queue).nnodes as isize)).val != node
@@ -1918,7 +1918,7 @@ pub unsafe extern "C" fn gk_idxpqDelete(
         oldkey = (*heap.offset(i as isize)).key;
         if newkey > oldkey {
             while i > 0 as libc::c_int as i64 {
-                j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+                j = i - 1 as i64 >> 1;
                 if !(newkey > (*heap.offset(j as isize)).key) {
                     break;
                 }
@@ -1929,13 +1929,13 @@ pub unsafe extern "C" fn gk_idxpqDelete(
         } else {
             nnodes = (*queue).nnodes;
             loop {
-                j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+                j = (i << 1) + 1 as i64;
                 if !(j < nnodes) {
                     break;
                 }
                 if (*heap.offset(j as isize)).key > newkey {
-                    if (j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if (j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > (*heap.offset(j as isize)).key
                     {
                         j += 1;
@@ -1945,8 +1945,8 @@ pub unsafe extern "C" fn gk_idxpqDelete(
                     *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                     i = j;
                 } else {
-                    if !((j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if !((j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > newkey)
                     {
                         break;
@@ -1981,7 +1981,7 @@ pub unsafe extern "C" fn gk_idxpqUpdate(
     i = *locator.offset(node as isize);
     if newkey > oldkey {
         while i > 0 as libc::c_int as i64 {
-            j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+            j = i - 1 as i64 >> 1;
             if !(newkey > (*heap.offset(j as isize)).key) {
                 break;
             }
@@ -1992,13 +1992,13 @@ pub unsafe extern "C" fn gk_idxpqUpdate(
     } else {
         nnodes = (*queue).nnodes;
         loop {
-            j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+            j = (i << 1) + 1 as i64;
             if !(j < nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > newkey {
-                if (j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
                     j += 1;
@@ -2008,8 +2008,8 @@ pub unsafe extern "C" fn gk_idxpqUpdate(
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                if !((j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                 {
                     break;
                 }
@@ -2049,7 +2049,7 @@ pub unsafe extern "C" fn gk_idxpqSeeKey(
 #[no_mangle]
 pub unsafe extern "C" fn gk_idxpqSeeTopKey(mut queue: *mut gk_idxpq_t) -> gk_idx_t {
     return (if (*queue).nnodes == 0 as libc::c_int as i64 {
-        (0xFFFFFFFFFFFFFFFF as u64 >> 1 as libc::c_int).wrapping_sub(2 as libc::c_int as u64)
+        (0xFFFFFFFFFFFFFFFF as u64 >> 1).wrapping_sub(2 as libc::c_int as u64)
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).key as u64
     }) as gk_idx_t;
@@ -2064,41 +2064,41 @@ pub unsafe extern "C" fn gk_idxpqGetTop(mut queue: *mut gk_idxpq_t) -> gk_idx_t 
     let mut node: gk_idx_t = 0;
     let mut key: gk_idx_t = 0;
     if (*queue).nnodes == 0 as libc::c_int as i64 {
-        return -(1 as libc::c_int) as gk_idx_t;
+        return -(1) as gk_idx_t;
     }
     (*queue).nnodes -= 1;
     (*queue).nnodes;
     heap = (*queue).heap;
     locator = (*queue).locator;
     vtx = (*heap.offset(0 as libc::c_int as isize)).val;
-    *locator.offset(vtx as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(vtx as isize) = -(1) as gk_idx_t;
     i = (*queue).nnodes;
     if i > 0 as libc::c_int as i64 {
         key = (*heap.offset(i as isize)).key;
         node = (*heap.offset(i as isize)).val;
         i = 0 as libc::c_int as gk_idx_t;
         loop {
-            j = 2 as libc::c_int as i64 * i + 1 as libc::c_int as i64;
+            j = 2 as libc::c_int as i64 * i + 1 as i64;
             if !(j < (*queue).nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > key {
-                if (j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
-                    j = j + 1 as libc::c_int as i64;
+                    j = j + 1 as i64;
                 }
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > key)
+                if !((j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > key)
                 {
                     break;
                 }
-                j = j + 1 as libc::c_int as i64;
+                j = j + 1 as i64;
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
@@ -2113,7 +2113,7 @@ pub unsafe extern "C" fn gk_idxpqGetTop(mut queue: *mut gk_idxpq_t) -> gk_idx_t 
 #[no_mangle]
 pub unsafe extern "C" fn gk_idxpqSeeTopVal(mut queue: *mut gk_idxpq_t) -> gk_idx_t {
     return if (*queue).nnodes == 0 as libc::c_int as i64 {
-        -(1 as libc::c_int) as i64
+        -(1) as i64
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).val
     };

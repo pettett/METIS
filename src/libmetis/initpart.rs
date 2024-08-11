@@ -42,7 +42,7 @@ pub unsafe extern "C" fn libmetis__Init2WayPartition(
     }
     match (*ctrl).iptype as libc::c_uint {
         1 => {
-            if (*graph).ncon == 1 as libc::c_int {
+            if (*graph).ncon == 1 {
                 libmetis__RandomBisection(ctrl, graph, ntpwgts, niparts);
             } else {
                 libmetis__McRandomBisection(ctrl, graph, ntpwgts, niparts);
@@ -50,12 +50,12 @@ pub unsafe extern "C" fn libmetis__Init2WayPartition(
         }
         0 => {
             if (*graph).nedges == 0 as libc::c_int {
-                if (*graph).ncon == 1 as libc::c_int {
+                if (*graph).ncon == 1 {
                     libmetis__RandomBisection(ctrl, graph, ntpwgts, niparts);
                 } else {
                     libmetis__McRandomBisection(ctrl, graph, ntpwgts, niparts);
                 }
-            } else if (*graph).ncon == 1 as libc::c_int {
+            } else if (*graph).ncon == 1 {
                 libmetis__GrowBisection(ctrl, graph, ntpwgts, niparts);
             } else {
                 libmetis__McGrowBisection(ctrl, graph, ntpwgts, niparts);
@@ -158,7 +158,7 @@ pub unsafe extern "C" fn libmetis__RandomBisection(
     let mut icut: idx_t = 0;
     let mut mincut: idx_t = 0;
     let mut inbfs: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -167,7 +167,7 @@ pub unsafe extern "C" fn libmetis__RandomBisection(
     let mut bestwhere: *mut idx_t = 0 as *mut idx_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -180,19 +180,19 @@ pub unsafe extern "C" fn libmetis__RandomBisection(
         * *ntpwgts.offset(0 as libc::c_int as isize)) as idx_t;
     inbfs = 0 as libc::c_int;
     while inbfs < niparts {
-        libmetis__iset(nvtxs as size_t, 1 as libc::c_int, where_0);
+        libmetis__iset(nvtxs as size_t, 1, where_0);
         if inbfs > 0 as libc::c_int {
-            libmetis__irandArrayPermute(nvtxs, perm, nvtxs / 2 as libc::c_int, 1 as libc::c_int);
-            pwgts[1 as libc::c_int as usize] = *((*graph).tvwgt).offset(0 as libc::c_int as isize);
-            pwgts[0 as libc::c_int as usize] = 0 as libc::c_int;
+            libmetis__irandArrayPermute(nvtxs, perm, nvtxs / 2 as libc::c_int, 1);
+            pwgts[1] = *((*graph).tvwgt).offset(0 as libc::c_int as isize);
+            pwgts[0] = 0 as libc::c_int;
             ii = 0 as libc::c_int;
             while ii < nvtxs {
                 i = *perm.offset(ii as isize);
-                if pwgts[0 as libc::c_int as usize] + *vwgt.offset(i as isize) < zeromaxpwgt {
+                if pwgts[0] + *vwgt.offset(i as isize) < zeromaxpwgt {
                     *where_0.offset(i as isize) = 0 as libc::c_int;
-                    pwgts[0 as libc::c_int as usize] += *vwgt.offset(i as isize);
-                    pwgts[1 as libc::c_int as usize] -= *vwgt.offset(i as isize);
-                    if pwgts[0 as libc::c_int as usize] > zeromaxpwgt {
+                    pwgts[0] += *vwgt.offset(i as isize);
+                    pwgts[1] -= *vwgt.offset(i as isize);
+                    if pwgts[0] > zeromaxpwgt {
                         break;
                     }
                 }
@@ -241,7 +241,7 @@ pub unsafe extern "C" fn libmetis__GrowBisection(
     let mut icut: idx_t = 0;
     let mut mincut: idx_t = 0;
     let mut inbfs: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -252,7 +252,7 @@ pub unsafe extern "C" fn libmetis__GrowBisection(
     let mut bestwhere: *mut idx_t = 0 as *mut idx_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -263,21 +263,21 @@ pub unsafe extern "C" fn libmetis__GrowBisection(
     touched = libmetis__iwspacemalloc(ctrl, nvtxs);
     onemaxpwgt = (*((*ctrl).ubfactors).offset(0 as libc::c_int as isize)
         * *((*graph).tvwgt).offset(0 as libc::c_int as isize) as libc::c_float
-        * *ntpwgts.offset(1 as libc::c_int as isize)) as idx_t;
+        * *ntpwgts.offset(1 as isize)) as idx_t;
     oneminpwgt = (1.0f64 / *((*ctrl).ubfactors).offset(0 as libc::c_int as isize) as libc::c_double
         * *((*graph).tvwgt).offset(0 as libc::c_int as isize) as libc::c_double
-        * *ntpwgts.offset(1 as libc::c_int as isize) as libc::c_double) as idx_t;
+        * *ntpwgts.offset(1 as isize) as libc::c_double) as idx_t;
     inbfs = 0 as libc::c_int;
     while inbfs < niparts {
-        libmetis__iset(nvtxs as size_t, 1 as libc::c_int, where_0);
+        libmetis__iset(nvtxs as size_t, 1, where_0);
         libmetis__iset(nvtxs as size_t, 0 as libc::c_int, touched);
-        pwgts[1 as libc::c_int as usize] = *((*graph).tvwgt).offset(0 as libc::c_int as isize);
-        pwgts[0 as libc::c_int as usize] = 0 as libc::c_int;
+        pwgts[1] = *((*graph).tvwgt).offset(0 as libc::c_int as isize);
+        pwgts[0] = 0 as libc::c_int;
         *queue.offset(0 as libc::c_int as isize) = libmetis__irandInRange(nvtxs);
-        *touched.offset(*queue.offset(0 as libc::c_int as isize) as isize) = 1 as libc::c_int;
+        *touched.offset(*queue.offset(0 as libc::c_int as isize) as isize) = 1;
         first = 0 as libc::c_int;
-        last = 1 as libc::c_int;
-        nleft = nvtxs - 1 as libc::c_int;
+        last = 1;
+        nleft = nvtxs - 1;
         drain = 0 as libc::c_int;
         loop {
             if first == last {
@@ -298,35 +298,33 @@ pub unsafe extern "C" fn libmetis__GrowBisection(
                     i;
                 }
                 *queue.offset(0 as libc::c_int as isize) = i;
-                *touched.offset(i as isize) = 1 as libc::c_int;
+                *touched.offset(i as isize) = 1;
                 first = 0 as libc::c_int;
-                last = 1 as libc::c_int;
+                last = 1;
                 nleft -= 1;
                 nleft;
             }
             let fresh0 = first;
             first = first + 1;
             i = *queue.offset(fresh0 as isize);
-            if pwgts[0 as libc::c_int as usize] > 0 as libc::c_int
-                && pwgts[1 as libc::c_int as usize] - *vwgt.offset(i as isize) < oneminpwgt
-            {
-                drain = 1 as libc::c_int;
+            if pwgts[0] > 0 as libc::c_int && pwgts[1] - *vwgt.offset(i as isize) < oneminpwgt {
+                drain = 1;
             } else {
                 *where_0.offset(i as isize) = 0 as libc::c_int;
-                pwgts[0 as libc::c_int as usize] += *vwgt.offset(i as isize);
-                pwgts[1 as libc::c_int as usize] -= *vwgt.offset(i as isize);
-                if pwgts[1 as libc::c_int as usize] <= onemaxpwgt {
+                pwgts[0] += *vwgt.offset(i as isize);
+                pwgts[1] -= *vwgt.offset(i as isize);
+                if pwgts[1] <= onemaxpwgt {
                     break;
                 }
                 drain = 0 as libc::c_int;
-                j = *xadj.offset(i as isize);
-                while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                j = xadj[i as usize];
+                while j < xadj[(i + 1) as usize] {
                     k = *adjncy.offset(j as isize);
                     if *touched.offset(k as isize) == 0 as libc::c_int {
                         let fresh1 = last;
                         last = last + 1;
                         *queue.offset(fresh1 as isize) = k;
-                        *touched.offset(k as isize) = 1 as libc::c_int;
+                        *touched.offset(k as isize) = 1;
                         nleft -= 1;
                         nleft;
                     }
@@ -335,10 +333,10 @@ pub unsafe extern "C" fn libmetis__GrowBisection(
                 }
             }
         }
-        if pwgts[1 as libc::c_int as usize] == 0 as libc::c_int {
-            *where_0.offset(libmetis__irandInRange(nvtxs) as isize) = 1 as libc::c_int;
+        if pwgts[1] == 0 as libc::c_int {
+            *where_0.offset(libmetis__irandInRange(nvtxs) as isize) = 1;
         }
-        if pwgts[0 as libc::c_int as usize] == 0 as libc::c_int {
+        if pwgts[0] == 0 as libc::c_int {
             *where_0.offset(libmetis__irandInRange(nvtxs) as isize) = 0 as libc::c_int;
         }
         libmetis__Compute2WayPartitionParams(ctrl, graph);
@@ -392,7 +390,7 @@ pub unsafe extern "C" fn libmetis__McRandomBisection(
     counts = libmetis__iwspacemalloc(ctrl, ncon);
     inbfs = 0 as libc::c_int;
     while inbfs < 2 as libc::c_int * niparts {
-        libmetis__irandArrayPermute(nvtxs, perm, nvtxs / 2 as libc::c_int, 1 as libc::c_int);
+        libmetis__irandArrayPermute(nvtxs, perm, nvtxs / 2 as libc::c_int, 1);
         libmetis__iset(ncon as size_t, 0 as libc::c_int, counts);
         ii = 0 as libc::c_int;
         while ii < nvtxs {
@@ -450,7 +448,7 @@ pub unsafe extern "C" fn libmetis__McGrowBisection(
     bestwhere = libmetis__iwspacemalloc(ctrl, nvtxs);
     inbfs = 0 as libc::c_int;
     while inbfs < 2 as libc::c_int * niparts {
-        libmetis__iset(nvtxs as size_t, 1 as libc::c_int, where_0);
+        libmetis__iset(nvtxs as size_t, 1, where_0);
         *where_0.offset(libmetis__irandInRange(nvtxs) as isize) = 0 as libc::c_int;
         libmetis__Compute2WayPartitionParams(ctrl, graph);
         libmetis__Balance2Way(ctrl, graph, ntpwgts);
@@ -495,7 +493,7 @@ pub unsafe extern "C" fn libmetis__GrowBisectionNode(
     let mut icut: idx_t = 0;
     let mut mincut: idx_t = 0;
     let mut inbfs: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -507,7 +505,7 @@ pub unsafe extern "C" fn libmetis__GrowBisectionNode(
     let mut bestwhere: *mut idx_t = 0 as *mut idx_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -553,15 +551,15 @@ pub unsafe extern "C" fn libmetis__GrowBisectionNode(
     bndind = (*graph).bndind;
     inbfs = 0 as libc::c_int;
     while inbfs < niparts {
-        libmetis__iset(nvtxs as size_t, 1 as libc::c_int, where_0);
+        libmetis__iset(nvtxs as size_t, 1, where_0);
         libmetis__iset(nvtxs as size_t, 0 as libc::c_int, touched);
-        pwgts[1 as libc::c_int as usize] = *((*graph).tvwgt).offset(0 as libc::c_int as isize);
-        pwgts[0 as libc::c_int as usize] = 0 as libc::c_int;
+        pwgts[1] = *((*graph).tvwgt).offset(0 as libc::c_int as isize);
+        pwgts[0] = 0 as libc::c_int;
         *queue.offset(0 as libc::c_int as isize) = libmetis__irandInRange(nvtxs);
-        *touched.offset(*queue.offset(0 as libc::c_int as isize) as isize) = 1 as libc::c_int;
+        *touched.offset(*queue.offset(0 as libc::c_int as isize) as isize) = 1;
         first = 0 as libc::c_int;
-        last = 1 as libc::c_int;
-        nleft = nvtxs - 1 as libc::c_int;
+        last = 1;
+        nleft = nvtxs - 1;
         drain = 0 as libc::c_int;
         loop {
             if first == last {
@@ -582,33 +580,33 @@ pub unsafe extern "C" fn libmetis__GrowBisectionNode(
                     i;
                 }
                 *queue.offset(0 as libc::c_int as isize) = i;
-                *touched.offset(i as isize) = 1 as libc::c_int;
+                *touched.offset(i as isize) = 1;
                 first = 0 as libc::c_int;
-                last = 1 as libc::c_int;
+                last = 1;
                 nleft -= 1;
                 nleft;
             }
             let fresh4 = first;
             first = first + 1;
             i = *queue.offset(fresh4 as isize);
-            if pwgts[1 as libc::c_int as usize] - *vwgt.offset(i as isize) < oneminpwgt {
-                drain = 1 as libc::c_int;
+            if pwgts[1] - *vwgt.offset(i as isize) < oneminpwgt {
+                drain = 1;
             } else {
                 *where_0.offset(i as isize) = 0 as libc::c_int;
-                pwgts[0 as libc::c_int as usize] += *vwgt.offset(i as isize);
-                pwgts[1 as libc::c_int as usize] -= *vwgt.offset(i as isize);
-                if pwgts[1 as libc::c_int as usize] <= onemaxpwgt {
+                pwgts[0] += *vwgt.offset(i as isize);
+                pwgts[1] -= *vwgt.offset(i as isize);
+                if pwgts[1] <= onemaxpwgt {
                     break;
                 }
                 drain = 0 as libc::c_int;
-                j = *xadj.offset(i as isize);
-                while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                j = xadj[i as usize];
+                while j < xadj[(i + 1) as usize] {
                     k = *adjncy.offset(j as isize);
                     if *touched.offset(k as isize) == 0 as libc::c_int {
                         let fresh5 = last;
                         last = last + 1;
                         *queue.offset(fresh5 as isize) = k;
-                        *touched.offset(k as isize) = 1 as libc::c_int;
+                        *touched.offset(k as isize) = 1;
                         nleft -= 1;
                         nleft;
                     }
@@ -623,16 +621,14 @@ pub unsafe extern "C" fn libmetis__GrowBisectionNode(
         i = 0 as libc::c_int;
         while i < (*graph).nbnd {
             j = *bndind.offset(i as isize);
-            if *xadj.offset((j + 1 as libc::c_int) as isize) - *xadj.offset(j as isize)
-                > 0 as libc::c_int
-            {
+            if xadj[((j + 1) as usize)] - xadj[(j as usize)] > 0 as libc::c_int {
                 *where_0.offset(j as isize) = 2 as libc::c_int;
             }
             i += 1;
             i;
         }
         libmetis__Compute2WayNodePartitionParams(ctrl, graph);
-        libmetis__FM_2WayNodeRefine2Sided(ctrl, graph, 1 as libc::c_int);
+        libmetis__FM_2WayNodeRefine2Sided(ctrl, graph, 1);
         libmetis__FM_2WayNodeRefine1Sided(ctrl, graph, 4 as libc::c_int);
         if inbfs == 0 as libc::c_int || bestcut > (*graph).mincut {
             bestcut = (*graph).mincut;
@@ -659,13 +655,13 @@ pub unsafe extern "C" fn GrowBisectionNode2(
     let mut bestcut: idx_t = 0 as libc::c_int;
     let mut mincut: idx_t = 0;
     let mut inbfs: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
     let mut bndind: *mut idx_t = 0 as *mut idx_t;
     let mut bestwhere: *mut idx_t = 0 as *mut idx_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     (*graph).pwgts = libmetis__imalloc(
         3 as libc::c_int as size_t,
         b"GrowBisectionNode: pwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -699,7 +695,7 @@ pub unsafe extern "C" fn GrowBisectionNode2(
     bndind = (*graph).bndind;
     inbfs = 0 as libc::c_int;
     while inbfs < niparts {
-        libmetis__iset(nvtxs as size_t, 1 as libc::c_int, where_0);
+        libmetis__iset(nvtxs as size_t, 1, where_0);
         if inbfs > 0 as libc::c_int {
             *where_0.offset(libmetis__irandInRange(nvtxs) as isize) = 0 as libc::c_int;
         }
@@ -709,9 +705,7 @@ pub unsafe extern "C" fn GrowBisectionNode2(
         i = 0 as libc::c_int;
         while i < (*graph).nbnd {
             j = *bndind.offset(i as isize);
-            if *xadj.offset((j + 1 as libc::c_int) as isize) - *xadj.offset(j as isize)
-                > 0 as libc::c_int
-            {
+            if xadj[((j + 1) as usize)] - xadj[(j as usize)] > 0 as libc::c_int {
                 *where_0.offset(j as isize) = 2 as libc::c_int;
             }
             i += 1;

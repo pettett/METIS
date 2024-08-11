@@ -29,7 +29,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
     let mut nbnd: idx_t = 0;
     let mut nswaps: idx_t = 0;
     let mut nmind: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -60,7 +60,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
     let mut mult: real_t = 0.;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     vwgt = (*graph).vwgt;
     bndind = (*graph).bndind;
@@ -68,24 +68,24 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
     where_0 = (*graph).where_0;
     pwgts = (*graph).pwgts;
     rinfo = (*graph).nrinfo;
-    queues[0 as libc::c_int as usize] = libmetis__rpqCreate(nvtxs as size_t);
-    queues[1 as libc::c_int as usize] = libmetis__rpqCreate(nvtxs as size_t);
+    queues[0] = libmetis__rpqCreate(nvtxs as size_t);
+    queues[1] = libmetis__rpqCreate(nvtxs as size_t);
     moved = libmetis__iwspacemalloc(ctrl, nvtxs);
     swaps = libmetis__iwspacemalloc(ctrl, nvtxs);
-    mptr = libmetis__iwspacemalloc(ctrl, nvtxs + 1 as libc::c_int);
+    mptr = libmetis__iwspacemalloc(ctrl, nvtxs + 1);
     mind = libmetis__iwspacemalloc(ctrl, 2 as libc::c_int * nvtxs);
     mult = (0.5f64 * *((*ctrl).ubfactors).offset(0 as libc::c_int as isize) as libc::c_double)
         as real_t;
     badmaxpwgt = (mult
         * (*pwgts.offset(0 as libc::c_int as isize)
-            + *pwgts.offset(1 as libc::c_int as isize)
+            + *pwgts.offset(1 as isize)
             + *pwgts.offset(2 as libc::c_int as isize)) as libc::c_float) as idx_t;
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         printf(
             b"Partitions-N2: [%6d %6d] Nv-Nb[%6d %6d]. ISep: %6d\n\0" as *const u8
                 as *const libc::c_char,
             *pwgts.offset(0 as libc::c_int as isize),
-            *pwgts.offset(1 as libc::c_int as isize),
+            *pwgts.offset(1 as isize),
             (*graph).nvtxs,
             (*graph).nbnd,
             (*graph).mincut,
@@ -93,29 +93,27 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
     }
     pass = 0 as libc::c_int;
     while pass < niter {
-        libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), moved);
-        libmetis__rpqReset(queues[0 as libc::c_int as usize]);
-        libmetis__rpqReset(queues[1 as libc::c_int as usize]);
-        mincutorder = -(1 as libc::c_int);
+        libmetis__iset(nvtxs as size_t, -(1), moved);
+        libmetis__rpqReset(queues[0]);
+        libmetis__rpqReset(queues[1]);
+        mincutorder = -(1);
         mincut = (*graph).mincut;
         initcut = mincut;
         nbnd = (*graph).nbnd;
-        libmetis__irandArrayPermute(nbnd, swaps, nbnd, 1 as libc::c_int);
+        libmetis__irandArrayPermute(nbnd, swaps, nbnd, 1);
         ii = 0 as libc::c_int;
         while ii < nbnd {
             i = *bndind.offset(*swaps.offset(ii as isize) as isize);
             libmetis__rpqInsert(
-                queues[0 as libc::c_int as usize],
+                queues[0],
                 i,
-                (*vwgt.offset(i as isize)
-                    - (*rinfo.offset(i as isize)).edegrees[1 as libc::c_int as usize])
-                    as real_t,
+                (*vwgt.offset(i as isize) - (*rinfo.offset(i as isize)).edegrees[1]) as real_t,
             );
             libmetis__rpqInsert(
-                queues[1 as libc::c_int as usize],
+                queues[1],
                 i,
                 (*vwgt.offset(i as isize)
-                    - (*rinfo.offset(i as isize)).edegrees[0 as libc::c_int as usize])
+                    - (*rinfo.offset(i as isize)).edegrees[0])
                     as real_t,
             );
             ii += 1;
@@ -135,70 +133,63 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
         nmind = 0 as libc::c_int;
         *mptr.offset(0 as libc::c_int as isize) = nmind;
         mindiff = abs(
-            *pwgts.offset(0 as libc::c_int as isize) - *pwgts.offset(1 as libc::c_int as isize)
+            *pwgts.offset(0 as libc::c_int as isize) - *pwgts.offset(1 as isize)
         );
-        to = if *pwgts.offset(0 as libc::c_int as isize) < *pwgts.offset(1 as libc::c_int as isize)
+        to = if *pwgts.offset(0 as libc::c_int as isize) < *pwgts.offset(1 as isize)
         {
             0 as libc::c_int
         } else {
-            1 as libc::c_int
+            1
         };
         nswaps = 0 as libc::c_int;
         while nswaps < nvtxs {
-            u[0 as libc::c_int as usize] =
-                libmetis__rpqSeeTopVal(queues[0 as libc::c_int as usize]);
-            u[1 as libc::c_int as usize] =
-                libmetis__rpqSeeTopVal(queues[1 as libc::c_int as usize]);
-            if u[0 as libc::c_int as usize] != -(1 as libc::c_int)
-                && u[1 as libc::c_int as usize] != -(1 as libc::c_int)
-            {
-                g[0 as libc::c_int as usize] = *vwgt.offset(u[0 as libc::c_int as usize] as isize)
-                    - (*rinfo.offset(u[0 as libc::c_int as usize] as isize)).edegrees
-                        [1 as libc::c_int as usize];
-                g[1 as libc::c_int as usize] = *vwgt.offset(u[1 as libc::c_int as usize] as isize)
-                    - (*rinfo.offset(u[1 as libc::c_int as usize] as isize)).edegrees
-                        [0 as libc::c_int as usize];
-                to = if g[0 as libc::c_int as usize] > g[1 as libc::c_int as usize] {
+            u[0] =
+                libmetis__rpqSeeTopVal(queues[0]);
+            u[1] = libmetis__rpqSeeTopVal(queues[1]);
+            if u[0] != -(1) && u[1] != -(1) {
+                g[0] = *vwgt.offset(u[0] as isize)
+                    - (*rinfo.offset(u[0] as isize)).edegrees[1];
+                g[1] = *vwgt.offset(u[1] as isize)
+                    - (*rinfo.offset(u[1] as isize)).edegrees[0];
+                to = if g[0] > g[1] {
                     0 as libc::c_int
-                } else if g[0 as libc::c_int as usize] < g[1 as libc::c_int as usize] {
-                    1 as libc::c_int
+                } else if g[0] < g[1] {
+                    1
                 } else {
                     pass % 2 as libc::c_int
                 };
                 if *pwgts.offset(to as isize) + *vwgt.offset(u[to as usize] as isize) > badmaxpwgt {
-                    to = (to + 1 as libc::c_int) % 2 as libc::c_int;
+                    to = (to + 1) % 2 as libc::c_int;
                 }
             } else {
-                if u[0 as libc::c_int as usize] == -(1 as libc::c_int)
-                    && u[1 as libc::c_int as usize] == -(1 as libc::c_int)
+                if u[0] == -(1)
+                    && u[1] == -(1)
                 {
                     break;
                 }
-                if u[0 as libc::c_int as usize] != -(1 as libc::c_int)
+                if u[0] != -(1)
                     && *pwgts.offset(0 as libc::c_int as isize)
-                        + *vwgt.offset(u[0 as libc::c_int as usize] as isize)
+                        + *vwgt.offset(u[0] as isize)
                         <= badmaxpwgt
                 {
                     to = 0 as libc::c_int;
                 } else {
-                    if !(u[1 as libc::c_int as usize] != -(1 as libc::c_int)
-                        && *pwgts.offset(1 as libc::c_int as isize)
-                            + *vwgt.offset(u[1 as libc::c_int as usize] as isize)
+                    if !(u[1] != -(1)
+                        && *pwgts.offset(1 as isize) + *vwgt.offset(u[1] as isize)
                             <= badmaxpwgt)
                     {
                         break;
                     }
-                    to = 1 as libc::c_int;
+                    to = 1;
                 }
             }
-            other = (to + 1 as libc::c_int) % 2 as libc::c_int;
+            other = (to + 1) % 2 as libc::c_int;
             higain = libmetis__rpqGetTop(queues[to as usize]);
-            if *moved.offset(higain as isize) == -(1 as libc::c_int) {
+            if *moved.offset(higain as isize) == -(1) {
                 libmetis__rpqDelete(queues[other as usize], higain);
             }
-            if nmind + *xadj.offset((higain + 1 as libc::c_int) as isize)
-                - *xadj.offset(higain as isize)
-                >= 2 as libc::c_int * nvtxs - 1 as libc::c_int
+            if nmind + xadj[(higain + 1) as usize] - xadj[higain as usize]
+                >= 2 as libc::c_int * nvtxs - 1
             {
                 break;
             }
@@ -229,21 +220,21 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                 *bndind.offset(nbnd as isize);
             *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                 *bndptr.offset(higain as isize);
-            *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+            *bndptr.offset(higain as isize) = -(1);
             let ref mut fresh2 = *pwgts.offset(to as isize);
             *fresh2 += *vwgt.offset(higain as isize);
             *where_0.offset(higain as isize) = to;
             *moved.offset(higain as isize) = nswaps;
             *swaps.offset(nswaps as isize) = higain;
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[higain as usize];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 if *where_0.offset(k as isize) == 2 as libc::c_int {
                     oldgain = *vwgt.offset(k as isize)
                         - (*rinfo.offset(k as isize)).edegrees[to as usize];
                     let ref mut fresh3 = (*rinfo.offset(k as isize)).edegrees[to as usize];
                     *fresh3 += *vwgt.offset(higain as isize);
-                    if *moved.offset(k as isize) == -(1 as libc::c_int)
+                    if *moved.offset(k as isize) == -(1)
                         || *moved.offset(k as isize) == -(2 as libc::c_int + other)
                     {
                         libmetis__rpqUpdate(
@@ -264,11 +255,11 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                     let ref mut fresh6 = *pwgts.offset(other as isize);
                     *fresh6 -= *vwgt.offset(k as isize);
                     edegrees = ((*rinfo.offset(k as isize)).edegrees).as_mut_ptr();
-                    let ref mut fresh7 = *edegrees.offset(1 as libc::c_int as isize);
+                    let ref mut fresh7 = *edegrees.offset(1 as isize);
                     *fresh7 = 0 as libc::c_int;
                     *edegrees.offset(0 as libc::c_int as isize) = *fresh7;
-                    jj = *xadj.offset(k as isize);
-                    while jj < *xadj.offset((k + 1 as libc::c_int) as isize) {
+                    jj = xadj[(k as usize)];
+                    while jj < xadj[((k + 1) as usize)] {
                         kk = *adjncy.offset(jj as isize);
                         if *where_0.offset(kk as isize) != 2 as libc::c_int {
                             let ref mut fresh8 =
@@ -280,7 +271,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                             let ref mut fresh9 =
                                 (*rinfo.offset(kk as isize)).edegrees[other as usize];
                             *fresh9 -= *vwgt.offset(k as isize);
-                            if *moved.offset(kk as isize) == -(1 as libc::c_int)
+                            if *moved.offset(kk as isize) == -(1)
                                 || *moved.offset(kk as isize) == -(2 as libc::c_int + to)
                             {
                                 libmetis__rpqUpdate(
@@ -293,7 +284,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                         jj += 1;
                         jj;
                     }
-                    if *moved.offset(k as isize) == -(1 as libc::c_int) {
+                    if *moved.offset(k as isize) == -(1) {
                         libmetis__rpqInsert(
                             queues[to as usize],
                             k,
@@ -305,7 +296,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                 j += 1;
                 j;
             }
-            *mptr.offset((nswaps + 1 as libc::c_int) as isize) = nmind;
+            *mptr.offset((nswaps + 1) as isize) = nmind;
             if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_MOVEINFO as libc::c_int as libc::c_uint
                 != 0
             {
@@ -319,7 +310,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                     *vwgt.offset(u[to as usize] as isize),
                     *vwgt.offset(u[other as usize] as isize),
                     *pwgts.offset(0 as libc::c_int as isize),
-                    *pwgts.offset(1 as libc::c_int as isize),
+                    *pwgts.offset(1 as isize),
                     *pwgts.offset(2 as libc::c_int as isize),
                 );
             }
@@ -331,7 +322,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
         while nswaps > mincutorder {
             higain = *swaps.offset(nswaps as isize);
             to = *where_0.offset(higain as isize);
-            other = (to + 1 as libc::c_int) % 2 as libc::c_int;
+            other = (to + 1) % 2 as libc::c_int;
             let ref mut fresh10 = *pwgts.offset(2 as libc::c_int as isize);
             *fresh10 += *vwgt.offset(higain as isize);
             let ref mut fresh11 = *pwgts.offset(to as isize);
@@ -342,11 +333,11 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
             nbnd = nbnd + 1;
             *bndptr.offset(higain as isize) = fresh12;
             edegrees = ((*rinfo.offset(higain as isize)).edegrees).as_mut_ptr();
-            let ref mut fresh13 = *edegrees.offset(1 as libc::c_int as isize);
+            let ref mut fresh13 = *edegrees.offset(1 as isize);
             *fresh13 = 0 as libc::c_int;
             *edegrees.offset(0 as libc::c_int as isize) = *fresh13;
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[(higain as usize)];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 if *where_0.offset(k as isize) == 2 as libc::c_int {
                     let ref mut fresh14 = (*rinfo.offset(k as isize)).edegrees[to as usize];
@@ -359,7 +350,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                 j;
             }
             j = *mptr.offset(nswaps as isize);
-            while j < *mptr.offset((nswaps + 1 as libc::c_int) as isize) {
+            while j < *mptr.offset((nswaps + 1) as isize) {
                 k = *mind.offset(j as isize);
                 *where_0.offset(k as isize) = other;
                 let ref mut fresh16 = *pwgts.offset(other as isize);
@@ -369,9 +360,9 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(k as isize) as isize) = *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(k as isize);
-                *bndptr.offset(k as isize) = -(1 as libc::c_int);
-                jj = *xadj.offset(k as isize);
-                while jj < *xadj.offset((k + 1 as libc::c_int) as isize) {
+                *bndptr.offset(k as isize) = -(1);
+                jj = xadj[(k as usize)];
+                while jj < xadj[((k + 1) as usize)] {
                     kk = *adjncy.offset(jj as isize);
                     if *where_0.offset(kk as isize) == 2 as libc::c_int {
                         let ref mut fresh18 = (*rinfo.offset(kk as isize)).edegrees[other as usize];
@@ -393,20 +384,20 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine2Sided(
                 mincut,
                 mincutorder,
                 *pwgts.offset(0 as libc::c_int as isize),
-                *pwgts.offset(1 as libc::c_int as isize),
+                *pwgts.offset(1 as isize),
                 nbnd,
             );
         }
         (*graph).mincut = mincut;
         (*graph).nbnd = nbnd;
-        if mincutorder == -(1 as libc::c_int) || mincut >= initcut {
+        if mincutorder == -(1) || mincut >= initcut {
             break;
         }
         pass += 1;
         pass;
     }
-    libmetis__rpqDestroy(queues[0 as libc::c_int as usize]);
-    libmetis__rpqDestroy(queues[1 as libc::c_int as usize]);
+    libmetis__rpqDestroy(queues[0]);
+    libmetis__rpqDestroy(queues[1]);
     libmetis__wspacepop(ctrl);
 }
 #[no_mangle]
@@ -426,7 +417,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
     let mut nswaps: idx_t = 0;
     let mut nmind: idx_t = 0;
     let mut iend: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -453,7 +444,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
     let mut mult: real_t = 0.;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     vwgt = (*graph).vwgt;
     bndind = (*graph).bndind;
@@ -463,40 +454,40 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
     rinfo = (*graph).nrinfo;
     queue = libmetis__rpqCreate(nvtxs as size_t);
     swaps = libmetis__iwspacemalloc(ctrl, nvtxs);
-    mptr = libmetis__iwspacemalloc(ctrl, nvtxs + 1 as libc::c_int);
+    mptr = libmetis__iwspacemalloc(ctrl, nvtxs + 1);
     mind = libmetis__iwspacemalloc(ctrl, 2 as libc::c_int * nvtxs);
     mult = (0.5f64 * *((*ctrl).ubfactors).offset(0 as libc::c_int as isize) as libc::c_double)
         as real_t;
     badmaxpwgt = (mult
         * (*pwgts.offset(0 as libc::c_int as isize)
-            + *pwgts.offset(1 as libc::c_int as isize)
+            + *pwgts.offset(1 as isize)
             + *pwgts.offset(2 as libc::c_int as isize)) as libc::c_float) as idx_t;
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         printf(
             b"Partitions-N1: [%6d %6d] Nv-Nb[%6d %6d]. ISep: %6d\n\0" as *const u8
                 as *const libc::c_char,
             *pwgts.offset(0 as libc::c_int as isize),
-            *pwgts.offset(1 as libc::c_int as isize),
+            *pwgts.offset(1 as isize),
             (*graph).nvtxs,
             (*graph).nbnd,
             (*graph).mincut,
         );
     }
-    to = if *pwgts.offset(0 as libc::c_int as isize) < *pwgts.offset(1 as libc::c_int as isize) {
-        1 as libc::c_int
+    to = if *pwgts.offset(0 as libc::c_int as isize) < *pwgts.offset(1 as isize) {
+        1
     } else {
         0 as libc::c_int
     };
     pass = 0 as libc::c_int;
     while pass < 2 as libc::c_int * niter {
         other = to;
-        to = (to + 1 as libc::c_int) % 2 as libc::c_int;
+        to = (to + 1) % 2 as libc::c_int;
         libmetis__rpqReset(queue);
-        mincutorder = -(1 as libc::c_int);
+        mincutorder = -(1);
         mincut = (*graph).mincut;
         initcut = mincut;
         nbnd = (*graph).nbnd;
-        libmetis__irandArrayPermute(nbnd, swaps, nbnd, 1 as libc::c_int);
+        libmetis__irandArrayPermute(nbnd, swaps, nbnd, 1);
         ii = 0 as libc::c_int;
         while ii < nbnd {
             i = *bndind.offset(*swaps.offset(ii as isize) as isize);
@@ -526,17 +517,16 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
         nmind = 0 as libc::c_int;
         *mptr.offset(0 as libc::c_int as isize) = nmind;
         mindiff = abs(
-            *pwgts.offset(0 as libc::c_int as isize) - *pwgts.offset(1 as libc::c_int as isize)
+            *pwgts.offset(0 as libc::c_int as isize) - *pwgts.offset(1 as isize)
         );
         nswaps = 0 as libc::c_int;
         while nswaps < nvtxs {
             higain = libmetis__rpqGetTop(queue);
-            if higain == -(1 as libc::c_int) {
+            if higain == -(1) {
                 break;
             }
-            if nmind + *xadj.offset((higain + 1 as libc::c_int) as isize)
-                - *xadj.offset(higain as isize)
-                >= 2 as libc::c_int * nvtxs - 1 as libc::c_int
+            if nmind + xadj[((higain + 1) as usize)] - xadj[(higain as usize)]
+                >= 2 as libc::c_int * nvtxs - 1
             {
                 break;
             }
@@ -570,7 +560,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
                 *bndind.offset(nbnd as isize);
             *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                 *bndptr.offset(higain as isize);
-            *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+            *bndptr.offset(higain as isize) = -(1);
             let ref mut fresh21 = *pwgts.offset(to as isize);
             *fresh21 += *vwgt.offset(higain as isize);
             *where_0.offset(higain as isize) = to;
@@ -578,8 +568,8 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
             if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
                 (*ctrl).Aux1Tmr -= gk_CPUSeconds();
             }
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[(higain as usize)];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 if *where_0.offset(k as isize) == 2 as libc::c_int {
                     let ref mut fresh22 = (*rinfo.offset(k as isize)).edegrees[to as usize];
@@ -596,11 +586,11 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
                     let ref mut fresh25 = *pwgts.offset(other as isize);
                     *fresh25 -= *vwgt.offset(k as isize);
                     edegrees = ((*rinfo.offset(k as isize)).edegrees).as_mut_ptr();
-                    let ref mut fresh26 = *edegrees.offset(1 as libc::c_int as isize);
+                    let ref mut fresh26 = *edegrees.offset(1 as isize);
                     *fresh26 = 0 as libc::c_int;
                     *edegrees.offset(0 as libc::c_int as isize) = *fresh26;
-                    jj = *xadj.offset(k as isize);
-                    iend = *xadj.offset((k + 1 as libc::c_int) as isize);
+                    jj = xadj[(k as usize)];
+                    iend = xadj[((k + 1) as usize)];
                     while jj < iend {
                         kk = *adjncy.offset(jj as isize);
                         if *where_0.offset(kk as isize) != 2 as libc::c_int {
@@ -631,7 +621,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
                 j += 1;
                 j;
             }
-            *mptr.offset((nswaps + 1 as libc::c_int) as isize) = nmind;
+            *mptr.offset((nswaps + 1) as isize) = nmind;
             if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
                 (*ctrl).Aux1Tmr += gk_CPUSeconds();
             }
@@ -647,7 +637,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
                         - (*rinfo.offset(higain as isize)).edegrees[other as usize],
                     *vwgt.offset(higain as isize),
                     *pwgts.offset(0 as libc::c_int as isize),
-                    *pwgts.offset(1 as libc::c_int as isize),
+                    *pwgts.offset(1 as isize),
                     *pwgts.offset(2 as libc::c_int as isize),
                     nswaps,
                     limit,
@@ -676,11 +666,11 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
             nbnd = nbnd + 1;
             *bndptr.offset(higain as isize) = fresh31;
             edegrees = ((*rinfo.offset(higain as isize)).edegrees).as_mut_ptr();
-            let ref mut fresh32 = *edegrees.offset(1 as libc::c_int as isize);
+            let ref mut fresh32 = *edegrees.offset(1 as isize);
             *fresh32 = 0 as libc::c_int;
             *edegrees.offset(0 as libc::c_int as isize) = *fresh32;
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[(higain as usize)];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 if *where_0.offset(k as isize) == 2 as libc::c_int {
                     let ref mut fresh33 = (*rinfo.offset(k as isize)).edegrees[to as usize];
@@ -693,7 +683,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
                 j;
             }
             j = *mptr.offset(nswaps as isize);
-            while j < *mptr.offset((nswaps + 1 as libc::c_int) as isize) {
+            while j < *mptr.offset((nswaps + 1) as isize) {
                 k = *mind.offset(j as isize);
                 *where_0.offset(k as isize) = other;
                 let ref mut fresh35 = *pwgts.offset(other as isize);
@@ -703,9 +693,9 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(k as isize) as isize) = *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(k as isize);
-                *bndptr.offset(k as isize) = -(1 as libc::c_int);
-                jj = *xadj.offset(k as isize);
-                iend = *xadj.offset((k + 1 as libc::c_int) as isize);
+                *bndptr.offset(k as isize) = -(1);
+                jj = xadj[(k as usize)];
+                iend = xadj[((k + 1) as usize)];
                 while jj < iend {
                     kk = *adjncy.offset(jj as isize);
                     if *where_0.offset(kk as isize) == 2 as libc::c_int {
@@ -731,14 +721,14 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeRefine1Sided(
                 mincut,
                 mincutorder,
                 *pwgts.offset(0 as libc::c_int as isize),
-                *pwgts.offset(1 as libc::c_int as isize),
+                *pwgts.offset(1 as isize),
                 nbnd,
             );
         }
         (*graph).mincut = mincut;
         (*graph).nbnd = nbnd;
-        if pass % 2 as libc::c_int == 1 as libc::c_int
-            && (mincutorder == -(1 as libc::c_int) || mincut >= initcut)
+        if pass % 2 as libc::c_int == 1
+            && (mincutorder == -(1) || mincut >= initcut)
         {
             break;
         }
@@ -769,7 +759,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
     let mut pass: idx_t = 0;
     let mut to: idx_t = 0;
     let mut other: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -783,7 +773,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
     let mut rinfo: *mut nrinfo_t = 0 as *mut nrinfo_t;
     let mut mult: real_t = 0.;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     vwgt = (*graph).vwgt;
     bndind = (*graph).bndind;
@@ -794,33 +784,33 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
     mult = (0.5f64 * *((*ctrl).ubfactors).offset(0 as libc::c_int as isize) as libc::c_double)
         as real_t;
     badmaxpwgt = (mult
-        * (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as libc::c_int as isize))
+        * (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as isize))
             as libc::c_float) as idx_t;
-    if (if *pwgts.offset(0 as libc::c_int as isize) >= *pwgts.offset(1 as libc::c_int as isize) {
+    if (if *pwgts.offset(0 as libc::c_int as isize) >= *pwgts.offset(1 as isize) {
         *pwgts.offset(0 as libc::c_int as isize)
     } else {
-        *pwgts.offset(1 as libc::c_int as isize)
+        *pwgts.offset(1 as isize)
     }) < badmaxpwgt
     {
         return;
     }
-    if abs(*pwgts.offset(0 as libc::c_int as isize) - *pwgts.offset(1 as libc::c_int as isize))
+    if abs(*pwgts.offset(0 as libc::c_int as isize) - *pwgts.offset(1 as isize))
         < 3 as libc::c_int * *((*graph).tvwgt).offset(0 as libc::c_int as isize) / nvtxs
     {
         return;
     }
     libmetis__wspacepush(ctrl);
-    to = if *pwgts.offset(0 as libc::c_int as isize) < *pwgts.offset(1 as libc::c_int as isize) {
+    to = if *pwgts.offset(0 as libc::c_int as isize) < *pwgts.offset(1 as isize) {
         0 as libc::c_int
     } else {
-        1 as libc::c_int
+        1
     };
-    other = (to + 1 as libc::c_int) % 2 as libc::c_int;
+    other = (to + 1) % 2 as libc::c_int;
     queue = libmetis__rpqCreate(nvtxs as size_t);
     perm = libmetis__iwspacemalloc(ctrl, nvtxs);
     moved = libmetis__iset(
         nvtxs as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nvtxs),
     );
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
@@ -828,14 +818,14 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
             b"Partitions: [%6d %6d] Nv-Nb[%6d %6d]. ISep: %6d [B]\n\0" as *const u8
                 as *const libc::c_char,
             *pwgts.offset(0 as libc::c_int as isize),
-            *pwgts.offset(1 as libc::c_int as isize),
+            *pwgts.offset(1 as isize),
             (*graph).nvtxs,
             (*graph).nbnd,
             (*graph).mincut,
         );
     }
     nbnd = (*graph).nbnd;
-    libmetis__irandArrayPermute(nbnd, perm, nbnd, 1 as libc::c_int);
+    libmetis__irandArrayPermute(nbnd, perm, nbnd, 1);
     ii = 0 as libc::c_int;
     while ii < nbnd {
         i = *bndind.offset(*perm.offset(ii as isize) as isize);
@@ -851,14 +841,14 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
     nswaps = 0 as libc::c_int;
     while nswaps < nvtxs {
         higain = libmetis__rpqGetTop(queue);
-        if higain == -(1 as libc::c_int) {
+        if higain == -(1) {
             break;
         }
-        *moved.offset(higain as isize) = 1 as libc::c_int;
+        *moved.offset(higain as isize) = 1;
         gain = *vwgt.offset(higain as isize)
             - (*rinfo.offset(higain as isize)).edegrees[other as usize];
         badmaxpwgt = (mult
-            * (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as libc::c_int as isize))
+            * (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as isize))
                 as libc::c_float) as idx_t;
         if *pwgts.offset(to as isize) > *pwgts.offset(other as isize) {
             break;
@@ -874,7 +864,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
                 *bndind.offset(nbnd as isize);
             *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                 *bndptr.offset(higain as isize);
-            *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+            *bndptr.offset(higain as isize) = -(1);
             let ref mut fresh39 = *pwgts.offset(to as isize);
             *fresh39 += *vwgt.offset(higain as isize);
             *where_0.offset(higain as isize) = to;
@@ -889,12 +879,12 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
                     *vwgt.offset(higain as isize)
                         - (*rinfo.offset(higain as isize)).edegrees[other as usize],
                     *pwgts.offset(0 as libc::c_int as isize),
-                    *pwgts.offset(1 as libc::c_int as isize),
+                    *pwgts.offset(1 as isize),
                     *pwgts.offset(2 as libc::c_int as isize),
                 );
             }
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[(higain as usize)];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 if *where_0.offset(k as isize) == 2 as libc::c_int {
                     let ref mut fresh40 = (*rinfo.offset(k as isize)).edegrees[to as usize];
@@ -908,11 +898,11 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
                     let ref mut fresh42 = *pwgts.offset(other as isize);
                     *fresh42 -= *vwgt.offset(k as isize);
                     edegrees = ((*rinfo.offset(k as isize)).edegrees).as_mut_ptr();
-                    let ref mut fresh43 = *edegrees.offset(1 as libc::c_int as isize);
+                    let ref mut fresh43 = *edegrees.offset(1 as isize);
                     *fresh43 = 0 as libc::c_int;
-                    *edegrees.offset(0 as libc::c_int as isize) = *fresh43;
-                    jj = *xadj.offset(k as isize);
-                    while jj < *xadj.offset((k + 1 as libc::c_int) as isize) {
+                    *edegrees.offset(0 as isize) = *fresh43;
+                    jj = xadj[(k as usize)];
+                    while jj < xadj[((k + 1) as usize)] {
                         kk = *adjncy.offset(jj as isize);
                         if *where_0.offset(kk as isize) != 2 as libc::c_int {
                             let ref mut fresh44 =
@@ -924,7 +914,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
                             let ref mut fresh45 =
                                 (*rinfo.offset(kk as isize)).edegrees[other as usize];
                             *fresh45 -= *vwgt.offset(k as isize);
-                            if *moved.offset(kk as isize) == -(1 as libc::c_int) {
+                            if *moved.offset(kk as isize) == -(1) {
                                 libmetis__rpqUpdate(
                                     queue,
                                     kk,
@@ -955,7 +945,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayNodeBalance(
             *pwgts.offset(2 as libc::c_int as isize),
             nswaps,
             *pwgts.offset(0 as libc::c_int as isize),
-            *pwgts.offset(1 as libc::c_int as isize),
+            *pwgts.offset(1 as isize),
             nbnd,
         );
     }

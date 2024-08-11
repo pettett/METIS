@@ -167,13 +167,13 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
         );
         exit(0 as libc::c_int);
     }
-    params.filename = gk_strdup(*argv.offset(1 as libc::c_int as isize));
+    params.filename = gk_strdup(*argv.offset(1 as isize));
     graph = ReadGraph(&mut params);
     if (*graph).nvtxs <= 0 as libc::c_int {
         printf(b"Empty graph. Nothing to do.\n\0" as *const u8 as *const libc::c_char);
         exit(0 as libc::c_int);
     }
-    if (*graph).ncon != 1 as libc::c_int {
+    if (*graph).ncon != 1 {
         printf(
             b"Ordering can only be applied to graphs with one constraint.\n\0" as *const u8
                 as *const libc::c_char,
@@ -210,7 +210,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
     );
     printf(
         b"  Name: %s, #Vertices: %d, #Edges: %d\n\n\0" as *const u8 as *const libc::c_char,
-        *argv.offset(1 as libc::c_int as isize),
+        *argv.offset(1 as isize),
         (*graph).nvtxs,
         (*graph).nedges / 2 as libc::c_int,
     );

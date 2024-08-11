@@ -23,7 +23,7 @@ pub unsafe extern "C" fn libmetis__Balance2Way(
     {
         return;
     }
-    if (*graph).ncon == 1 as libc::c_int {
+    if (*graph).ncon == 1 {
         if abs((*ntpwgts.offset(0 as libc::c_int as isize)
             * *((*graph).tvwgt).offset(0 as libc::c_int as isize) as libc::c_float
             - *((*graph).pwgts).offset(0 as libc::c_int as isize) as libc::c_float)
@@ -61,7 +61,7 @@ pub unsafe extern "C" fn libmetis__Bnd2WayBalance(
     let mut pass: idx_t = 0;
     let mut me: idx_t = 0;
     let mut tmp: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -80,7 +80,7 @@ pub unsafe extern "C" fn libmetis__Bnd2WayBalance(
     let mut tpwgts: [idx_t; 2] = [0; 2];
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -92,35 +92,33 @@ pub unsafe extern "C" fn libmetis__Bnd2WayBalance(
     bndind = (*graph).bndind;
     moved = libmetis__iwspacemalloc(ctrl, nvtxs);
     perm = libmetis__iwspacemalloc(ctrl, nvtxs);
-    tpwgts[0 as libc::c_int as usize] =
-        (*((*graph).tvwgt).offset(0 as libc::c_int as isize) as libc::c_float
-            * *ntpwgts.offset(0 as libc::c_int as isize)) as idx_t;
-    tpwgts[1 as libc::c_int as usize] =
-        *((*graph).tvwgt).offset(0 as libc::c_int as isize) - tpwgts[0 as libc::c_int as usize];
-    mindiff = abs(tpwgts[0 as libc::c_int as usize] - *pwgts.offset(0 as libc::c_int as isize));
-    from = if *pwgts.offset(0 as libc::c_int as isize) < tpwgts[0 as libc::c_int as usize] {
-        1 as libc::c_int
+    tpwgts[0] = (*((*graph).tvwgt).offset(0 as libc::c_int as isize) as libc::c_float
+        * *ntpwgts.offset(0 as libc::c_int as isize)) as idx_t;
+    tpwgts[1] = *((*graph).tvwgt).offset(0 as libc::c_int as isize) - tpwgts[0];
+    mindiff = abs(tpwgts[0] - *pwgts.offset(0 as libc::c_int as isize));
+    from = if *pwgts.offset(0 as libc::c_int as isize) < tpwgts[0] {
+        1
     } else {
         0 as libc::c_int
     };
-    to = (from + 1 as libc::c_int) % 2 as libc::c_int;
+    to = (from + 1) % 2 as libc::c_int;
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         printf(
             b"Partitions: [%6d %6d] T[%6d %6d], Nv-Nb[%6d %6d]. ICut: %6d [B]\n\0" as *const u8
                 as *const libc::c_char,
             *pwgts.offset(0 as libc::c_int as isize),
-            *pwgts.offset(1 as libc::c_int as isize),
-            tpwgts[0 as libc::c_int as usize],
-            tpwgts[1 as libc::c_int as usize],
+            *pwgts.offset(1 as isize),
+            tpwgts[0],
+            tpwgts[1],
             (*graph).nvtxs,
             (*graph).nbnd,
             (*graph).mincut,
         );
     }
     queue = libmetis__rpqCreate(nvtxs as size_t);
-    libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), moved);
+    libmetis__iset(nvtxs as size_t, -(1), moved);
     nbnd = (*graph).nbnd;
-    libmetis__irandArrayPermute(nbnd, perm, nbnd / 5 as libc::c_int, 1 as libc::c_int);
+    libmetis__irandArrayPermute(nbnd, perm, nbnd / 5 as libc::c_int, 1);
     ii = 0 as libc::c_int;
     while ii < nbnd {
         i = *perm.offset(ii as isize);
@@ -141,7 +139,7 @@ pub unsafe extern "C" fn libmetis__Bnd2WayBalance(
     nswaps = 0 as libc::c_int;
     while nswaps < nvtxs {
         higain = libmetis__rpqGetTop(queue);
-        if higain == -(1 as libc::c_int) {
+        if higain == -(1) {
             break;
         }
         if *pwgts.offset(to as isize) + *vwgt.offset(higain as isize) > tpwgts[to as usize] {
@@ -164,24 +162,24 @@ pub unsafe extern "C" fn libmetis__Bnd2WayBalance(
                 *vwgt.offset(higain as isize),
                 mincut,
                 *pwgts.offset(0 as libc::c_int as isize),
-                *pwgts.offset(1 as libc::c_int as isize),
+                *pwgts.offset(1 as isize),
             );
         }
         tmp = *id.offset(higain as isize);
         *id.offset(higain as isize) = *ed.offset(higain as isize);
         *ed.offset(higain as isize) = tmp;
         if *ed.offset(higain as isize) == 0 as libc::c_int
-            && *xadj.offset(higain as isize) < *xadj.offset((higain + 1 as libc::c_int) as isize)
+            && xadj[higain as usize] < xadj[(higain + 1) as usize]
         {
             nbnd -= 1;
             *bndind.offset(*bndptr.offset(higain as isize) as isize) =
                 *bndind.offset(nbnd as isize);
             *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                 *bndptr.offset(higain as isize);
-            *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+            *bndptr.offset(higain as isize) = -(1);
         }
-        j = *xadj.offset(higain as isize);
-        while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+        j = xadj[higain as usize];
+        while j < xadj[(higain + 1) as usize] {
             k = *adjncy.offset(j as isize);
             kwgt = if to == *where_0.offset(k as isize) {
                 *adjwgt.offset(j as isize)
@@ -192,21 +190,21 @@ pub unsafe extern "C" fn libmetis__Bnd2WayBalance(
             *fresh2 += kwgt;
             let ref mut fresh3 = *ed.offset(k as isize);
             *fresh3 -= kwgt;
-            if *bndptr.offset(k as isize) != -(1 as libc::c_int) {
+            if *bndptr.offset(k as isize) != -(1) {
                 if *ed.offset(k as isize) == 0 as libc::c_int {
                     nbnd -= 1;
                     *bndind.offset(*bndptr.offset(k as isize) as isize) =
                         *bndind.offset(nbnd as isize);
                     *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                         *bndptr.offset(k as isize);
-                    *bndptr.offset(k as isize) = -(1 as libc::c_int);
-                    if *moved.offset(k as isize) == -(1 as libc::c_int)
+                    *bndptr.offset(k as isize) = -(1);
+                    if *moved.offset(k as isize) == -(1)
                         && *where_0.offset(k as isize) == from
                         && *vwgt.offset(k as isize) <= mindiff
                     {
                         libmetis__rpqDelete(queue, k);
                     }
-                } else if *moved.offset(k as isize) == -(1 as libc::c_int)
+                } else if *moved.offset(k as isize) == -(1)
                     && *where_0.offset(k as isize) == from
                     && *vwgt.offset(k as isize) <= mindiff
                 {
@@ -221,7 +219,7 @@ pub unsafe extern "C" fn libmetis__Bnd2WayBalance(
                 let fresh4 = nbnd;
                 nbnd = nbnd + 1;
                 *bndptr.offset(k as isize) = fresh4;
-                if *moved.offset(k as isize) == -(1 as libc::c_int)
+                if *moved.offset(k as isize) == -(1)
                     && *where_0.offset(k as isize) == from
                     && *vwgt.offset(k as isize) <= mindiff
                 {
@@ -244,7 +242,7 @@ pub unsafe extern "C" fn libmetis__Bnd2WayBalance(
                 as *const libc::c_char,
             mincut,
             *pwgts.offset(0 as libc::c_int as isize),
-            *pwgts.offset(1 as libc::c_int as isize),
+            *pwgts.offset(1 as isize),
             nbnd,
         );
     }
@@ -272,7 +270,7 @@ pub unsafe extern "C" fn libmetis__General2WayBalance(
     let mut pass: idx_t = 0;
     let mut me: idx_t = 0;
     let mut tmp: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -291,7 +289,7 @@ pub unsafe extern "C" fn libmetis__General2WayBalance(
     let mut tpwgts: [idx_t; 2] = [0; 2];
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -303,34 +301,32 @@ pub unsafe extern "C" fn libmetis__General2WayBalance(
     bndind = (*graph).bndind;
     moved = libmetis__iwspacemalloc(ctrl, nvtxs);
     perm = libmetis__iwspacemalloc(ctrl, nvtxs);
-    tpwgts[0 as libc::c_int as usize] =
-        (*((*graph).tvwgt).offset(0 as libc::c_int as isize) as libc::c_float
-            * *ntpwgts.offset(0 as libc::c_int as isize)) as idx_t;
-    tpwgts[1 as libc::c_int as usize] =
-        *((*graph).tvwgt).offset(0 as libc::c_int as isize) - tpwgts[0 as libc::c_int as usize];
-    mindiff = abs(tpwgts[0 as libc::c_int as usize] - *pwgts.offset(0 as libc::c_int as isize));
-    from = if *pwgts.offset(0 as libc::c_int as isize) < tpwgts[0 as libc::c_int as usize] {
-        1 as libc::c_int
+    tpwgts[0] = (*((*graph).tvwgt).offset(0 as libc::c_int as isize) as libc::c_float
+        * *ntpwgts.offset(0 as libc::c_int as isize)) as idx_t;
+    tpwgts[1] = *((*graph).tvwgt).offset(0 as libc::c_int as isize) - tpwgts[0];
+    mindiff = abs(tpwgts[0] - *pwgts.offset(0 as libc::c_int as isize));
+    from = if *pwgts.offset(0 as libc::c_int as isize) < tpwgts[0] {
+        1
     } else {
         0 as libc::c_int
     };
-    to = (from + 1 as libc::c_int) % 2 as libc::c_int;
+    to = (from + 1) % 2 as libc::c_int;
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         printf(
             b"Partitions: [%6d %6d] T[%6d %6d], Nv-Nb[%6d %6d]. ICut: %6d [B]\n\0" as *const u8
                 as *const libc::c_char,
             *pwgts.offset(0 as libc::c_int as isize),
-            *pwgts.offset(1 as libc::c_int as isize),
-            tpwgts[0 as libc::c_int as usize],
-            tpwgts[1 as libc::c_int as usize],
+            *pwgts.offset(1 as isize),
+            tpwgts[0],
+            tpwgts[1],
             (*graph).nvtxs,
             (*graph).nbnd,
             (*graph).mincut,
         );
     }
     queue = libmetis__rpqCreate(nvtxs as size_t);
-    libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), moved);
-    libmetis__irandArrayPermute(nvtxs, perm, nvtxs / 5 as libc::c_int, 1 as libc::c_int);
+    libmetis__iset(nvtxs as size_t, -(1), moved);
+    libmetis__irandArrayPermute(nvtxs, perm, nvtxs / 5 as libc::c_int, 1);
     ii = 0 as libc::c_int;
     while ii < nvtxs {
         i = *perm.offset(ii as isize);
@@ -349,7 +345,7 @@ pub unsafe extern "C" fn libmetis__General2WayBalance(
     nswaps = 0 as libc::c_int;
     while nswaps < nvtxs {
         higain = libmetis__rpqGetTop(queue);
-        if higain == -(1 as libc::c_int) {
+        if higain == -(1) {
             break;
         }
         if *pwgts.offset(to as isize) + *vwgt.offset(higain as isize) > tpwgts[to as usize] {
@@ -372,33 +368,33 @@ pub unsafe extern "C" fn libmetis__General2WayBalance(
                 *vwgt.offset(higain as isize),
                 mincut,
                 *pwgts.offset(0 as libc::c_int as isize),
-                *pwgts.offset(1 as libc::c_int as isize),
+                *pwgts.offset(1 as isize),
             );
         }
         tmp = *id.offset(higain as isize);
         *id.offset(higain as isize) = *ed.offset(higain as isize);
         *ed.offset(higain as isize) = tmp;
         if *ed.offset(higain as isize) == 0 as libc::c_int
-            && *bndptr.offset(higain as isize) != -(1 as libc::c_int)
-            && *xadj.offset(higain as isize) < *xadj.offset((higain + 1 as libc::c_int) as isize)
+            && *bndptr.offset(higain as isize) != -(1)
+            && xadj[higain as usize] < xadj[(higain + 1) as usize]
         {
             nbnd -= 1;
             *bndind.offset(*bndptr.offset(higain as isize) as isize) =
                 *bndind.offset(nbnd as isize);
             *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                 *bndptr.offset(higain as isize);
-            *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+            *bndptr.offset(higain as isize) = -(1);
         }
         if *ed.offset(higain as isize) > 0 as libc::c_int
-            && *bndptr.offset(higain as isize) == -(1 as libc::c_int)
+            && *bndptr.offset(higain as isize) == -(1)
         {
             *bndind.offset(nbnd as isize) = higain;
             let fresh7 = nbnd;
             nbnd = nbnd + 1;
             *bndptr.offset(higain as isize) = fresh7;
         }
-        j = *xadj.offset(higain as isize);
-        while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+        j = xadj[higain as usize];
+        while j < xadj[(higain + 1) as usize] {
             k = *adjncy.offset(j as isize);
             kwgt = if to == *where_0.offset(k as isize) {
                 *adjwgt.offset(j as isize)
@@ -409,7 +405,7 @@ pub unsafe extern "C" fn libmetis__General2WayBalance(
             *fresh8 += kwgt;
             let ref mut fresh9 = *ed.offset(k as isize);
             *fresh9 -= kwgt;
-            if *moved.offset(k as isize) == -(1 as libc::c_int)
+            if *moved.offset(k as isize) == -(1)
                 && *where_0.offset(k as isize) == from
                 && *vwgt.offset(k as isize) <= mindiff
             {
@@ -420,14 +416,14 @@ pub unsafe extern "C" fn libmetis__General2WayBalance(
                 );
             }
             if *ed.offset(k as isize) == 0 as libc::c_int
-                && *bndptr.offset(k as isize) != -(1 as libc::c_int)
+                && *bndptr.offset(k as isize) != -(1)
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(k as isize) as isize) = *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(k as isize);
-                *bndptr.offset(k as isize) = -(1 as libc::c_int);
+                *bndptr.offset(k as isize) = -(1);
             } else if *ed.offset(k as isize) > 0 as libc::c_int
-                && *bndptr.offset(k as isize) == -(1 as libc::c_int)
+                && *bndptr.offset(k as isize) == -(1)
             {
                 *bndind.offset(nbnd as isize) = k;
                 let fresh10 = nbnd;
@@ -446,7 +442,7 @@ pub unsafe extern "C" fn libmetis__General2WayBalance(
                 as *const libc::c_char,
             mincut,
             *pwgts.offset(0 as libc::c_int as isize),
-            *pwgts.offset(1 as libc::c_int as isize),
+            *pwgts.offset(1 as isize),
             nbnd,
         );
     }
@@ -478,7 +474,7 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
     let mut limit: idx_t = 0;
     let mut tmp: idx_t = 0;
     let mut cnum: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -506,7 +502,7 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -617,7 +613,7 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
     );
     mincut = (*graph).mincut;
     newcut = mincut;
-    mincutorder = -(1 as libc::c_int);
+    mincutorder = -(1);
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         printf(b"Parts: [\0" as *const u8 as *const libc::c_char);
         l = 0 as libc::c_int;
@@ -640,9 +636,9 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
             minbal as libc::c_double,
         );
     }
-    libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), moved);
+    libmetis__iset(nvtxs as size_t, -(1), moved);
     nbnd = (*graph).nbnd;
-    libmetis__irandArrayPermute(nvtxs, perm, nvtxs / 10 as libc::c_int, 1 as libc::c_int);
+    libmetis__irandArrayPermute(nvtxs, perm, nvtxs / 10 as libc::c_int, 1);
     ii = 0 as libc::c_int;
     while ii < nvtxs {
         i = *perm.offset(ii as isize);
@@ -670,29 +666,29 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
             &mut from,
             &mut cnum,
         );
-        to = (from + 1 as libc::c_int) % 2 as libc::c_int;
-        if from == -(1 as libc::c_int) || {
+        to = (from + 1) % 2 as libc::c_int;
+        if from == -(1) || {
             higain = libmetis__rpqGetTop(*queues.offset((2 as libc::c_int * cnum + from) as isize));
-            higain == -(1 as libc::c_int)
+            higain == -(1)
         } {
             break;
         }
         newcut -= *ed.offset(higain as isize) - *id.offset(higain as isize);
         libmetis__iaxpy(
             ncon as size_t,
-            1 as libc::c_int,
+            1,
             vwgt.offset((higain * ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
             pwgts.offset((to * ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
         );
         libmetis__iaxpy(
             ncon as size_t,
-            -(1 as libc::c_int),
+            -(1),
             vwgt.offset((higain * ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
             pwgts.offset((from * ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
         );
         newbal = libmetis__ComputeLoadImbalanceDiffVec(
             graph,
@@ -714,19 +710,19 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
             newcut += *ed.offset(higain as isize) - *id.offset(higain as isize);
             libmetis__iaxpy(
                 ncon as size_t,
-                1 as libc::c_int,
+                1,
                 vwgt.offset((higain * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
                 pwgts.offset((from * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
             );
             libmetis__iaxpy(
                 ncon as size_t,
-                -(1 as libc::c_int),
+                -(1),
                 vwgt.offset((higain * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
                 pwgts.offset((to * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
             );
             break;
         }
@@ -763,26 +759,26 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
         *id.offset(higain as isize) = *ed.offset(higain as isize);
         *ed.offset(higain as isize) = tmp;
         if *ed.offset(higain as isize) == 0 as libc::c_int
-            && *bndptr.offset(higain as isize) != -(1 as libc::c_int)
-            && *xadj.offset(higain as isize) < *xadj.offset((higain + 1 as libc::c_int) as isize)
+            && *bndptr.offset(higain as isize) != -(1)
+            && xadj[higain as usize] < xadj[(higain + 1) as usize]
         {
             nbnd -= 1;
             *bndind.offset(*bndptr.offset(higain as isize) as isize) =
                 *bndind.offset(nbnd as isize);
             *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                 *bndptr.offset(higain as isize);
-            *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+            *bndptr.offset(higain as isize) = -(1);
         }
         if *ed.offset(higain as isize) > 0 as libc::c_int
-            && *bndptr.offset(higain as isize) == -(1 as libc::c_int)
+            && *bndptr.offset(higain as isize) == -(1)
         {
             *bndind.offset(nbnd as isize) = higain;
             let fresh15 = nbnd;
             nbnd = nbnd + 1;
             *bndptr.offset(higain as isize) = fresh15;
         }
-        j = *xadj.offset(higain as isize);
-        while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+        j = xadj[higain as usize];
+        while j < xadj[(higain + 1) as usize] {
             k = *adjncy.offset(j as isize);
             kwgt = if to == *where_0.offset(k as isize) {
                 *adjwgt.offset(j as isize)
@@ -793,7 +789,7 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
             *fresh16 += kwgt;
             let ref mut fresh17 = *ed.offset(k as isize);
             *fresh17 -= kwgt;
-            if *moved.offset(k as isize) == -(1 as libc::c_int) {
+            if *moved.offset(k as isize) == -(1) {
                 libmetis__rpqUpdate(
                     *queues.offset(
                         (2 as libc::c_int * *qnum.offset(k as isize) + *where_0.offset(k as isize))
@@ -804,14 +800,14 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
                 );
             }
             if *ed.offset(k as isize) == 0 as libc::c_int
-                && *bndptr.offset(k as isize) != -(1 as libc::c_int)
+                && *bndptr.offset(k as isize) != -(1)
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(k as isize) as isize) = *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(k as isize);
-                *bndptr.offset(k as isize) = -(1 as libc::c_int);
+                *bndptr.offset(k as isize) = -(1);
             } else if *ed.offset(k as isize) > 0 as libc::c_int
-                && *bndptr.offset(k as isize) == -(1 as libc::c_int)
+                && *bndptr.offset(k as isize) == -(1)
             {
                 *bndind.offset(nbnd as isize) = k;
                 let fresh18 = nbnd;
@@ -829,23 +825,23 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
     while nswaps > mincutorder {
         higain = *swaps.offset(nswaps as isize);
         let ref mut fresh19 = *where_0.offset(higain as isize);
-        *fresh19 = (*where_0.offset(higain as isize) + 1 as libc::c_int) % 2 as libc::c_int;
+        *fresh19 = (*where_0.offset(higain as isize) + 1) % 2 as libc::c_int;
         to = *fresh19;
         tmp = *id.offset(higain as isize);
         *id.offset(higain as isize) = *ed.offset(higain as isize);
         *ed.offset(higain as isize) = tmp;
         if *ed.offset(higain as isize) == 0 as libc::c_int
-            && *bndptr.offset(higain as isize) != -(1 as libc::c_int)
-            && *xadj.offset(higain as isize) < *xadj.offset((higain + 1 as libc::c_int) as isize)
+            && *bndptr.offset(higain as isize) != -(1)
+            && xadj[higain as usize] < xadj[(higain + 1) as usize]
         {
             nbnd -= 1;
             *bndind.offset(*bndptr.offset(higain as isize) as isize) =
                 *bndind.offset(nbnd as isize);
             *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                 *bndptr.offset(higain as isize);
-            *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+            *bndptr.offset(higain as isize) = -(1);
         } else if *ed.offset(higain as isize) > 0 as libc::c_int
-            && *bndptr.offset(higain as isize) == -(1 as libc::c_int)
+            && *bndptr.offset(higain as isize) == -(1)
         {
             *bndind.offset(nbnd as isize) = higain;
             let fresh20 = nbnd;
@@ -854,22 +850,22 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
         }
         libmetis__iaxpy(
             ncon as size_t,
-            1 as libc::c_int,
+            1,
             vwgt.offset((higain * ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
             pwgts.offset((to * ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
         );
         libmetis__iaxpy(
             ncon as size_t,
-            -(1 as libc::c_int),
+            -(1),
             vwgt.offset((higain * ncon) as isize),
-            1 as libc::c_int as size_t,
-            pwgts.offset(((to + 1 as libc::c_int) % 2 as libc::c_int * ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
+            pwgts.offset(((to + 1) % 2 as libc::c_int * ncon) as isize),
+            1 as size_t,
         );
-        j = *xadj.offset(higain as isize);
-        while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+        j = xadj[higain as usize];
+        while j < xadj[(higain + 1) as usize] {
             k = *adjncy.offset(j as isize);
             kwgt = if to == *where_0.offset(k as isize) {
                 *adjwgt.offset(j as isize)
@@ -880,15 +876,15 @@ pub unsafe extern "C" fn libmetis__McGeneral2WayBalance(
             *fresh21 += kwgt;
             let ref mut fresh22 = *ed.offset(k as isize);
             *fresh22 -= kwgt;
-            if *bndptr.offset(k as isize) != -(1 as libc::c_int)
+            if *bndptr.offset(k as isize) != -(1)
                 && *ed.offset(k as isize) == 0 as libc::c_int
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(k as isize) as isize) = *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(k as isize);
-                *bndptr.offset(k as isize) = -(1 as libc::c_int);
+                *bndptr.offset(k as isize) = -(1);
             }
-            if *bndptr.offset(k as isize) == -(1 as libc::c_int)
+            if *bndptr.offset(k as isize) == -(1)
                 && *ed.offset(k as isize) > 0 as libc::c_int
             {
                 *bndind.offset(nbnd as isize) = k;

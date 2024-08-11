@@ -220,12 +220,12 @@ pub unsafe extern "C" fn gk_strstr_replace(
         c2rust_padding: [0; 7],
     };
     let mut matches: [regmatch_t; 10] = [regmatch_t { rm_so: 0, rm_eo: 0 }; 10];
-    flags = 1 as libc::c_int;
+    flags = 1;
     if !(strchr(options, 'i' as i32)).is_null() {
-        flags = flags | (1 as libc::c_int) << 1 as libc::c_int;
+        flags = flags | (1) << 1;
     }
     global = if !(strchr(options, 'g' as i32)).is_null() {
-        1 as libc::c_int
+        1
     } else {
         0 as libc::c_int
     };
@@ -249,7 +249,7 @@ pub unsafe extern "C" fn gk_strstr_replace(
     nlen = (2 as libc::c_int as u64).wrapping_mul(len);
     noffset = 0 as libc::c_int as size_t;
     *new_str = gk_cmalloc(
-        nlen.wrapping_add(1 as libc::c_int as u64),
+        nlen.wrapping_add(1 as u64),
         b"gk_strstr_replace: new_str\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     rlen = strlen(replacement);
@@ -282,7 +282,7 @@ pub unsafe extern "C" fn gk_strstr_replace(
                 ) as size_t as size_t;
                 *new_str = gk_realloc(
                     *new_str as *mut libc::c_void,
-                    nlen.wrapping_add(1 as libc::c_int as u64)
+                    nlen.wrapping_add(1 as u64)
                         .wrapping_mul(::core::mem::size_of::<libc::c_char>() as u64),
                     b"gk_strstr_replace: new_str\0" as *const u8 as *const libc::c_char
                         as *mut libc::c_char,
@@ -297,15 +297,14 @@ pub unsafe extern "C" fn gk_strstr_replace(
         } else {
             nmatches += 1;
             nmatches;
-            if matches[0 as libc::c_int as usize].rm_so > 0 as libc::c_int {
-                if nlen.wrapping_sub(noffset) < matches[0 as libc::c_int as usize].rm_so as u64 {
+            if matches[0].rm_so > 0 as libc::c_int {
+                if nlen.wrapping_sub(noffset) < matches[0].rm_so as u64 {
                     nlen = (nlen as u64).wrapping_add(
-                        (matches[0 as libc::c_int as usize].rm_so as u64)
-                            .wrapping_sub(nlen.wrapping_sub(noffset)),
+                        (matches[0].rm_so as u64).wrapping_sub(nlen.wrapping_sub(noffset)),
                     ) as size_t as size_t;
                     *new_str = gk_realloc(
                         *new_str as *mut libc::c_void,
-                        nlen.wrapping_add(1 as libc::c_int as u64)
+                        nlen.wrapping_add(1 as u64)
                             .wrapping_mul(::core::mem::size_of::<libc::c_char>() as u64),
                         b"gk_strstr_replace: new_str\0" as *const u8 as *const libc::c_char
                             as *mut libc::c_char,
@@ -314,25 +313,23 @@ pub unsafe extern "C" fn gk_strstr_replace(
                 strncpy(
                     (*new_str).offset(noffset as isize),
                     str.offset(offset as isize),
-                    matches[0 as libc::c_int as usize].rm_so as u64,
+                    matches[0].rm_so as u64,
                 );
-                noffset = (noffset as u64)
-                    .wrapping_add(matches[0 as libc::c_int as usize].rm_so as u64)
-                    as size_t as size_t;
+                noffset =
+                    (noffset as u64).wrapping_add(matches[0].rm_so as u64) as size_t as size_t;
             }
             i = 0 as libc::c_int as gk_idx_t;
             while (i as u64) < rlen {
                 match *replacement.offset(i as isize) as libc::c_int {
                     92 => {
-                        if ((i + 1 as libc::c_int as i64) as u64) < rlen {
-                            if nlen.wrapping_sub(noffset) < 1 as libc::c_int as u64 {
-                                nlen = (nlen as u64)
-                                    .wrapping_add(nlen.wrapping_add(1 as libc::c_int as u64))
+                        if ((i + 1 as i64) as u64) < rlen {
+                            if nlen.wrapping_sub(noffset) < 1 as u64 {
+                                nlen = (nlen as u64).wrapping_add(nlen.wrapping_add(1 as u64))
                                     as size_t as size_t;
                                 *new_str =
                                     gk_realloc(
                                         *new_str as *mut libc::c_void,
-                                        nlen.wrapping_add(1 as libc::c_int as u64).wrapping_mul(
+                                        nlen.wrapping_add(1 as u64).wrapping_mul(
                                             ::core::mem::size_of::<libc::c_char>() as u64,
                                         ),
                                         b"gk_strstr_replace: new_str\0" as *const u8
@@ -360,7 +357,7 @@ pub unsafe extern "C" fn gk_strstr_replace(
                         }
                     }
                     36 => {
-                        if ((i + 1 as libc::c_int as i64) as u64) < rlen {
+                        if ((i + 1 as i64) as u64) < rlen {
                             i += 1;
                             j = *replacement.offset(i as isize) as libc::c_int - '0' as i32;
                             if j < 0 as libc::c_int || j > 9 as libc::c_int {
@@ -385,7 +382,7 @@ pub unsafe extern "C" fn gk_strstr_replace(
                                 *new_str =
                                     gk_realloc(
                                         *new_str as *mut libc::c_void,
-                                        nlen.wrapping_add(1 as libc::c_int as u64).wrapping_mul(
+                                        nlen.wrapping_add(1 as u64).wrapping_mul(
                                             ::core::mem::size_of::<libc::c_char>() as u64,
                                         ),
                                         b"gk_strstr_replace: new_str\0" as *const u8
@@ -416,13 +413,12 @@ pub unsafe extern "C" fn gk_strstr_replace(
                         }
                     }
                     _ => {
-                        if nlen.wrapping_sub(noffset) < 1 as libc::c_int as u64 {
-                            nlen = (nlen as u64)
-                                .wrapping_add(nlen.wrapping_add(1 as libc::c_int as u64))
-                                as size_t as size_t;
+                        if nlen.wrapping_sub(noffset) < 1 as u64 {
+                            nlen = (nlen as u64).wrapping_add(nlen.wrapping_add(1 as u64)) as size_t
+                                as size_t;
                             *new_str = gk_realloc(
                                 *new_str as *mut libc::c_void,
-                                nlen.wrapping_add(1 as libc::c_int as u64)
+                                nlen.wrapping_add(1 as u64)
                                     .wrapping_mul(::core::mem::size_of::<libc::c_char>() as u64),
                                 b"gk_strstr_replace: new_str\0" as *const u8 as *const libc::c_char
                                     as *mut libc::c_char,
@@ -436,8 +432,7 @@ pub unsafe extern "C" fn gk_strstr_replace(
                 i += 1;
                 i;
             }
-            offset = (offset as u64).wrapping_add(matches[0 as libc::c_int as usize].rm_eo as u64)
-                as size_t as size_t;
+            offset = (offset as u64).wrapping_add(matches[0].rm_eo as u64) as size_t as size_t;
             if global == 0 {
                 if nlen.wrapping_sub(noffset) < len.wrapping_sub(offset) {
                     nlen = (nlen as u64).wrapping_add(
@@ -446,7 +441,7 @@ pub unsafe extern "C" fn gk_strstr_replace(
                     ) as size_t as size_t;
                     *new_str = gk_realloc(
                         *new_str as *mut libc::c_void,
-                        nlen.wrapping_add(1 as libc::c_int as u64)
+                        nlen.wrapping_add(1 as u64)
                             .wrapping_mul(::core::mem::size_of::<libc::c_char>() as u64),
                         b"gk_strstr_replace: new_str\0" as *const u8 as *const libc::c_char
                             as *mut libc::c_char,
@@ -466,7 +461,7 @@ pub unsafe extern "C" fn gk_strstr_replace(
     }
     *(*new_str).offset(noffset as isize) = '\0' as i32 as libc::c_char;
     regfree(&mut re);
-    return nmatches + 1 as libc::c_int;
+    return nmatches + 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_strtprune(
@@ -477,7 +472,7 @@ pub unsafe extern "C" fn gk_strtprune(
     let mut j: gk_idx_t = 0;
     let mut len: size_t = 0;
     len = strlen(rmlist);
-    i = (strlen(str)).wrapping_sub(1 as libc::c_int as u64) as gk_idx_t;
+    i = (strlen(str)).wrapping_sub(1 as u64) as gk_idx_t;
     while i >= 0 as libc::c_int as i64 {
         j = 0 as libc::c_int as gk_idx_t;
         while (j as u64) < len {
@@ -493,7 +488,7 @@ pub unsafe extern "C" fn gk_strtprune(
         i -= 1;
         i;
     }
-    *str.offset((i + 1 as libc::c_int as i64) as isize) = '\0' as i32 as libc::c_char;
+    *str.offset((i + 1 as i64) as isize) = '\0' as i32 as libc::c_char;
     return str;
 }
 #[no_mangle]
@@ -541,7 +536,7 @@ pub unsafe extern "C" fn gk_strtoupper(mut str: *mut libc::c_char) -> *mut libc:
     while *str.offset(i as isize) as libc::c_int != '\0' as i32 {
         *str.offset(i as isize) = ({
             let mut __res: libc::c_int = 0;
-            if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as libc::c_int as u64 {
+            if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as u64 {
                 if 0 != 0 {
                     let mut __c: libc::c_int = *str.offset(i as isize) as libc::c_int;
                     __res = if __c < -(128 as libc::c_int) || __c > 255 as libc::c_int {
@@ -570,7 +565,7 @@ pub unsafe extern "C" fn gk_strtolower(mut str: *mut libc::c_char) -> *mut libc:
     while *str.offset(i as isize) as libc::c_int != '\0' as i32 {
         *str.offset(i as isize) = ({
             let mut __res: libc::c_int = 0;
-            if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as libc::c_int as u64 {
+            if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as u64 {
                 if 0 != 0 {
                     let mut __c: libc::c_int = *str.offset(i as isize) as libc::c_int;
                     __res = if __c < -(128 as libc::c_int) || __c > 255 as libc::c_int {
@@ -597,7 +592,7 @@ pub unsafe extern "C" fn gk_strdup(mut orgstr: *mut libc::c_char) -> *mut libc::
     let mut len: libc::c_int = 0;
     let mut str: *mut libc::c_char = 0 as *mut libc::c_char;
     if !orgstr.is_null() {
-        len = (strlen(orgstr)).wrapping_add(1 as libc::c_int as u64) as libc::c_int;
+        len = (strlen(orgstr)).wrapping_add(1 as u64) as libc::c_int;
         str = gk_malloc(
             (len as u64).wrapping_mul(::core::mem::size_of::<libc::c_char>() as u64),
             b"gk_strdup: str\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -618,7 +613,7 @@ pub unsafe extern "C" fn gk_strcasecmp(
     while *s1.offset(i as isize) as libc::c_int != '\0' as i32 {
         if ({
             let mut __res: libc::c_int = 0;
-            if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as libc::c_int as u64 {
+            if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as u64 {
                 if 0 != 0 {
                     let mut __c: libc::c_int = *s1.offset(i as isize) as libc::c_int;
                     __res = if __c < -(128 as libc::c_int) || __c > 255 as libc::c_int {
@@ -636,7 +631,7 @@ pub unsafe extern "C" fn gk_strcasecmp(
             __res
         }) != ({
             let mut __res: libc::c_int = 0;
-            if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as libc::c_int as u64 {
+            if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as u64 {
                 if 0 != 0 {
                     let mut __c: libc::c_int = *s2.offset(i as isize) as libc::c_int;
                     __res = if __c < -(128 as libc::c_int) || __c > 255 as libc::c_int {
@@ -658,15 +653,15 @@ pub unsafe extern "C" fn gk_strcasecmp(
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_strrcmp(
     mut s1: *mut libc::c_char,
     mut s2: *mut libc::c_char,
 ) -> libc::c_int {
-    let mut i1: libc::c_int = (strlen(s1)).wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
-    let mut i2: libc::c_int = (strlen(s2)).wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
+    let mut i1: libc::c_int = (strlen(s1)).wrapping_sub(1 as u64) as libc::c_int;
+    let mut i2: libc::c_int = (strlen(s2)).wrapping_sub(1 as u64) as libc::c_int;
     while i1 >= 0 as libc::c_int && i2 >= 0 as libc::c_int {
         if *s1.offset(i1 as isize) as libc::c_int != *s2.offset(i2 as isize) as libc::c_int {
             return *s1.offset(i1 as isize) as libc::c_int - *s2.offset(i2 as isize) as libc::c_int;
@@ -677,10 +672,10 @@ pub unsafe extern "C" fn gk_strrcmp(
         i2;
     }
     if i1 < i2 {
-        return -(1 as libc::c_int);
+        return -(1);
     }
     if i1 > i2 {
-        return 1 as libc::c_int;
+        return 1;
     }
     return 0 as libc::c_int;
 }
@@ -729,7 +724,7 @@ pub unsafe extern "C" fn gk_str2time(mut str: *mut libc::c_char) -> time_t {
     ))
     .is_null()
     {
-        return -(1 as libc::c_int) as time_t;
+        return -(1) as time_t;
     }
     rtime = mktime(&mut time);
     return if rtime < 0 as libc::c_int as i64 {
@@ -752,5 +747,5 @@ pub unsafe extern "C" fn gk_GetStringID(
         i += 1;
         i;
     }
-    return -(1 as libc::c_int);
+    return -(1);
 }

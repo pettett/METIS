@@ -10,8 +10,8 @@ pub const METIS_ERROR_INPUT: C2RustUnnamed = -2;
 pub const METIS_OK: C2RustUnnamed = 1;
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__InitRandom(mut seed: idx_t) {
-    libmetis__isrand(if seed == -(1 as libc::c_int) {
-        4321 as libc::c_int
+    libmetis__isrand(if seed == -(1) {
+        4321
     } else {
         seed
     });
@@ -24,7 +24,7 @@ pub unsafe extern "C" fn libmetis__iargmax_nrm(
 ) -> idx_t {
     let mut i: idx_t = 0;
     let mut max: idx_t = 0 as libc::c_int;
-    i = 1 as libc::c_int;
+    i = 1;
     while (i as u64) < n {
         max = if *x.offset(i as isize) as libc::c_float * *y.offset(i as isize)
             > *x.offset(max as isize) as libc::c_float * *y.offset(max as isize)
@@ -63,11 +63,11 @@ pub unsafe extern "C" fn libmetis__rargmax2(mut n: size_t, mut x: *mut real_t) -
     let mut i: size_t = 0;
     let mut max1: size_t = 0;
     let mut max2: size_t = 0;
-    if *x.offset(0 as libc::c_int as isize) > *x.offset(1 as libc::c_int as isize) {
+    if *x.offset(0 as libc::c_int as isize) > *x.offset(1 as isize) {
         max1 = 0 as libc::c_int as size_t;
-        max2 = 1 as libc::c_int as size_t;
+        max2 = 1 as size_t;
     } else {
-        max1 = 1 as libc::c_int as size_t;
+        max1 = 1 as size_t;
         max2 = 0 as libc::c_int as size_t;
     }
     i = 2 as libc::c_int as size_t;
@@ -93,13 +93,13 @@ pub unsafe extern "C" fn libmetis__iargmax2_nrm(
     let mut max1: size_t = 0;
     let mut max2: size_t = 0;
     if *x.offset(0 as libc::c_int as isize) as libc::c_float * *y.offset(0 as libc::c_int as isize)
-        > *x.offset(1 as libc::c_int as isize) as libc::c_float
-            * *y.offset(1 as libc::c_int as isize)
+        > *x.offset(1 as isize) as libc::c_float
+            * *y.offset(1 as isize)
     {
         max1 = 0 as libc::c_int as size_t;
-        max2 = 1 as libc::c_int as size_t;
+        max2 = 1 as size_t;
     } else {
-        max1 = 1 as libc::c_int as size_t;
+        max1 = 1 as size_t;
         max2 = 0 as libc::c_int as size_t;
     }
     i = 2 as libc::c_int as size_t;

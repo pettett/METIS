@@ -43,7 +43,7 @@ pub unsafe extern "C" fn ComputePartitionInfo(
     let mut ncon: idx_t = 0;
     let mut nparts: idx_t = 0;
     let mut tvwgt: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -65,7 +65,7 @@ pub unsafe extern "C" fn ComputePartitionInfo(
     let mut cpwgts: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     vwgt = (*graph).vwgt;
     adjwgt = (*graph).adjwgt;
@@ -99,7 +99,7 @@ pub unsafe extern "C" fn ComputePartitionInfo(
         unbalance = (1.0f64 * *kpwgts.offset((k * ncon + j) as isize) as libc::c_double
             / (*tpwgts.offset((k * ncon + j) as isize) * tvwgt as libc::c_float) as libc::c_double)
             as real_t;
-        i = 1 as libc::c_int;
+        i = 1;
         while i < nparts {
             if (unbalance as libc::c_double)
                 < 1.0f64 * *kpwgts.offset((i * ncon + j) as isize) as libc::c_double
@@ -130,12 +130,12 @@ pub unsafe extern "C" fn ComputePartitionInfo(
         j += 1;
     }
     printf(b"\n\0" as *const u8 as *const libc::c_char);
-    if ncon == 1 as libc::c_int {
-        tvwgt = libmetis__isum(nparts as size_t, kpwgts, 1 as libc::c_int as size_t);
+    if ncon == 1 {
+        tvwgt = libmetis__isum(nparts as size_t, kpwgts, 1 as size_t);
         k = 0 as libc::c_int;
         unbalance = *kpwgts.offset(k as isize) as libc::c_float
             / (*tpwgts.offset(k as isize) * tvwgt as libc::c_float);
-        i = 1 as libc::c_int;
+        i = 1;
         while i < nparts {
             if unbalance
                 < *kpwgts.offset(i as isize) as libc::c_float
@@ -162,7 +162,7 @@ pub unsafe extern "C" fn ComputePartitionInfo(
         0 as *mut *mut libc::c_void,
     );
     pptr = libmetis__imalloc(
-        (nparts + 1 as libc::c_int) as size_t,
+        (nparts + 1) as size_t,
         b"ComputePartitionInfo: pptr\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     pind = libmetis__imalloc(
@@ -174,17 +174,17 @@ pub unsafe extern "C" fn ComputePartitionInfo(
         b"ComputePartitionInfo: pdom\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     libmetis__iarray2csr(nvtxs, nparts, where_0, pptr, pind);
-    maxndom = nparts + 1 as libc::c_int;
+    maxndom = nparts + 1;
     minndom = 0 as libc::c_int;
     tndom = 0 as libc::c_int;
     pid = 0 as libc::c_int;
     while pid < nparts {
         libmetis__iset(nparts as size_t, 0 as libc::c_int, pdom);
         ii = *pptr.offset(pid as isize);
-        while ii < *pptr.offset((pid + 1 as libc::c_int) as isize) {
+        while ii < *pptr.offset((pid + 1) as isize) {
             i = *pind.offset(ii as isize);
-            j = *xadj.offset(i as isize);
-            while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+            j = xadj[i as usize];
+            while j < xadj[(i + 1) as usize] {
                 let ref mut fresh1 =
                     *pdom.offset(*where_0.offset(*adjncy.offset(j as isize) as isize) as isize);
                 *fresh1 += *adjwgt.offset(j as isize);
@@ -197,7 +197,7 @@ pub unsafe extern "C" fn ComputePartitionInfo(
         i = 0 as libc::c_int;
         while i < nparts {
             ndom += if *pdom.offset(i as isize) > 0 as libc::c_int {
-                1 as libc::c_int
+                1
             } else {
                 0 as libc::c_int
             };
@@ -226,7 +226,7 @@ pub unsafe extern "C" fn ComputePartitionInfo(
         0 as *mut *mut libc::c_void,
     );
     cptr = libmetis__imalloc(
-        (nvtxs + 1 as libc::c_int) as size_t,
+        (nvtxs + 1) as size_t,
         b"ComputePartitionInfo: cptr\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     cind = libmetis__imalloc(

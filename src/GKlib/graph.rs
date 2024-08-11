@@ -3,33 +3,17 @@ extern "C" {
     pub type _IO_wide_data;
     pub type _IO_codecvt;
     pub type _IO_marker;
-    fn strtol(
-        _: *const libc::c_char,
-        _: *mut *mut libc::c_char,
-        _: libc::c_int,
-    ) -> i64;
+    fn strtol(_: *const libc::c_char, _: *mut *mut libc::c_char, _: libc::c_int) -> i64;
     fn strtof(_: *const libc::c_char, _: *mut *mut libc::c_char) -> libc::c_float;
     static mut stdout: *mut FILE;
     fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
     fn sprintf(_: *mut libc::c_char, _: *const libc::c_char, _: ...) -> libc::c_int;
     fn sscanf(_: *const libc::c_char, _: *const libc::c_char, _: ...) -> libc::c_int;
-    fn memset(
-        _: *mut libc::c_void,
-        _: libc::c_int,
-        _: u64,
-    ) -> *mut libc::c_void;
+    fn memset(_: *mut libc::c_void, _: libc::c_int, _: u64) -> *mut libc::c_void;
     fn gk_i32incset(n: size_t, baseval: int32_t, x: *mut int32_t) -> *mut int32_t;
-    fn gk_fopen(
-        _: *mut libc::c_char,
-        _: *mut libc::c_char,
-        _: *const libc::c_char,
-    ) -> *mut FILE;
+    fn gk_fopen(_: *mut libc::c_char, _: *mut libc::c_char, _: *const libc::c_char) -> *mut FILE;
     fn gk_fclose(_: *mut FILE);
-    fn gk_getline(
-        lineptr: *mut *mut libc::c_char,
-        n: *mut size_t,
-        stream: *mut FILE,
-    ) -> gk_idx_t;
+    fn gk_getline(lineptr: *mut *mut libc::c_char, n: *mut size_t, stream: *mut FILE) -> gk_idx_t;
     fn gk_fexists(_: *mut libc::c_char) -> libc::c_int;
     fn gk_i32malloc(n: size_t, msg: *mut libc::c_char) -> *mut int32_t;
     fn gk_i32smalloc(n: size_t, ival: int32_t, msg: *mut libc::c_char) -> *mut int32_t;
@@ -37,35 +21,19 @@ extern "C" {
     fn gk_zmalloc(n: size_t, msg: *mut libc::c_char) -> *mut ssize_t;
     fn gk_zcopy(n: size_t, a: *mut ssize_t, b: *mut ssize_t) -> *mut ssize_t;
     fn gk_fmalloc(n: size_t, msg: *mut libc::c_char) -> *mut libc::c_float;
-    fn gk_fsmalloc(
-        n: size_t,
-        ival: libc::c_float,
-        msg: *mut libc::c_char,
-    ) -> *mut libc::c_float;
-    fn gk_fcopy(
-        n: size_t,
-        a: *mut libc::c_float,
-        b: *mut libc::c_float,
-    ) -> *mut libc::c_float;
+    fn gk_fsmalloc(n: size_t, ival: libc::c_float, msg: *mut libc::c_char) -> *mut libc::c_float;
+    fn gk_fcopy(n: size_t, a: *mut libc::c_float, b: *mut libc::c_float) -> *mut libc::c_float;
     fn gk_malloc(nbytes: size_t, msg: *mut libc::c_char) -> *mut libc::c_void;
     fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
     fn gk_errexit(signum: libc::c_int, _: *mut libc::c_char, _: ...);
     fn gk_i32pqCreate(maxnodes: size_t) -> *mut gk_i32pq_t;
     fn gk_i32pqDestroy(queue: *mut gk_i32pq_t);
-    fn gk_i32pqInsert(
-        queue: *mut gk_i32pq_t,
-        node: gk_idx_t,
-        key: int32_t,
-    ) -> libc::c_int;
+    fn gk_i32pqInsert(queue: *mut gk_i32pq_t, node: gk_idx_t, key: int32_t) -> libc::c_int;
     fn gk_i32pqUpdate(queue: *mut gk_i32pq_t, node: gk_idx_t, newkey: int32_t);
     fn gk_i32pqGetTop(queue: *mut gk_i32pq_t) -> gk_idx_t;
     fn gk_fpqCreate(maxnodes: size_t) -> *mut gk_fpq_t;
     fn gk_fpqDestroy(queue: *mut gk_fpq_t);
-    fn gk_fpqInsert(
-        queue: *mut gk_fpq_t,
-        node: gk_idx_t,
-        key: libc::c_float,
-    ) -> libc::c_int;
+    fn gk_fpqInsert(queue: *mut gk_fpq_t, node: gk_idx_t, key: libc::c_float) -> libc::c_int;
     fn gk_fpqUpdate(queue: *mut gk_fpq_t, node: gk_idx_t, newkey: libc::c_float);
     fn gk_fpqGetTop(queue: *mut gk_fpq_t) -> gk_idx_t;
 }
@@ -159,8 +127,7 @@ pub unsafe extern "C" fn gk_graph_Create() -> *mut gk_graph_t {
     let mut graph: *mut gk_graph_t = 0 as *mut gk_graph_t;
     graph = gk_malloc(
         ::core::mem::size_of::<gk_graph_t>() as u64,
-        b"gk_graph_Create: graph\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_graph_Create: graph\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut gk_graph_t;
     gk_graph_Init(graph);
     return graph;
@@ -185,8 +152,7 @@ pub unsafe extern "C" fn gk_graph_Free(mut graph: *mut *mut gk_graph_t) {
 #[no_mangle]
 pub unsafe extern "C" fn gk_graph_FreeContents(mut graph: *mut gk_graph_t) {
     gk_free(
-        &mut (*graph).xadj as *mut *mut ssize_t as *mut libc::c_void
-            as *mut *mut libc::c_void,
+        &mut (*graph).xadj as *mut *mut ssize_t as *mut libc::c_void as *mut *mut libc::c_void,
         &mut (*graph).adjncy as *mut *mut int32_t,
         &mut (*graph).iadjwgt as *mut *mut int32_t,
         &mut (*graph).fadjwgt as *mut *mut libc::c_float,
@@ -230,8 +196,7 @@ pub unsafe extern "C" fn gk_graph_Read(
     if gk_fexists(filename) == 0 {
         gk_errexit(
             15 as libc::c_int,
-            b"File %s does not exist!\n\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"File %s does not exist!\n\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             filename,
         );
     }
@@ -242,13 +207,11 @@ pub unsafe extern "C" fn gk_graph_Read(
             b"gk_graph_Read: fpin\0" as *const u8 as *const libc::c_char,
         );
         loop {
-            if gk_getline(&mut line, &mut lnlen, fpin)
-                <= 0 as libc::c_int as i64
-            {
+            if gk_getline(&mut line, &mut lnlen, fpin) <= 0 as libc::c_int as i64 {
                 gk_errexit(
                     15 as libc::c_int,
-                    b"Premature end of input file: file:%s\n\0" as *const u8
-                        as *const libc::c_char as *mut libc::c_char,
+                    b"Premature end of input file: file:%s\n\0" as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                     filename,
                 );
             }
@@ -269,12 +232,11 @@ pub unsafe extern "C" fn gk_graph_Read(
         if nfields < 2 as libc::c_int as u64 {
             gk_errexit(
                 15 as libc::c_int,
-                b"Header line must contain at least 2 integers (#vtxs and #edges).\n\0"
-                    as *const u8 as *const libc::c_char as *mut libc::c_char,
+                b"Header line must contain at least 2 integers (#vtxs and #edges).\n\0" as *const u8
+                    as *const libc::c_char as *mut libc::c_char,
             );
         }
-        nedges = (nedges as u64)
-            .wrapping_mul(2 as libc::c_int as u64) as size_t as size_t;
+        nedges = (nedges as u64).wrapping_mul(2 as libc::c_int as u64) as size_t as size_t;
         if fmt > 111 as libc::c_int as u64 {
             gk_errexit(
                 15 as libc::c_int,
@@ -288,12 +250,9 @@ pub unsafe extern "C" fn gk_graph_Read(
             b"%03zu\0" as *const u8 as *const libc::c_char,
             fmt.wrapping_rem(1000 as libc::c_int as u64),
         );
-        readsizes = (fmtstr[0 as libc::c_int as usize] as libc::c_int == '1' as i32)
-            as libc::c_int;
-        readwgts = (fmtstr[1 as libc::c_int as usize] as libc::c_int == '1' as i32)
-            as libc::c_int;
-        readvals = (fmtstr[2 as libc::c_int as usize] as libc::c_int == '1' as i32)
-            as libc::c_int;
+        readsizes = (fmtstr[0 as libc::c_int as usize] as libc::c_int == '1' as i32) as libc::c_int;
+        readwgts = (fmtstr[1 as libc::c_int as usize] as libc::c_int == '1' as i32) as libc::c_int;
+        readvals = (fmtstr[2 as libc::c_int as usize] as libc::c_int == '1' as i32) as libc::c_int;
         numbering = 1 as libc::c_int;
         ncon = if ncon == 0 as libc::c_int as u64 {
             1 as libc::c_int as u64
@@ -303,35 +262,29 @@ pub unsafe extern "C" fn gk_graph_Read(
     } else {
         gk_errexit(
             15 as libc::c_int,
-            b"Unrecognized format: %d\n\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"Unrecognized format: %d\n\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             format,
         );
     }
     graph = gk_graph_Create();
     (*graph).nvtxs = nvtxs as int32_t;
-    (*graph)
-        .xadj = gk_zmalloc(
+    (*graph).xadj = gk_zmalloc(
         nvtxs.wrapping_add(1 as libc::c_int as u64),
         b"gk_graph_Read: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*graph)
-        .adjncy = gk_i32malloc(
+    (*graph).adjncy = gk_i32malloc(
         nedges,
-        b"gk_graph_Read: adjncy\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_graph_Read: adjncy\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     if readvals != 0 {
         if isfewgts != 0 {
-            (*graph)
-                .fadjwgt = gk_fmalloc(
+            (*graph).fadjwgt = gk_fmalloc(
                 nedges,
                 b"gk_graph_Read: fadjwgt\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
             );
         } else {
-            (*graph)
-                .iadjwgt = gk_i32malloc(
+            (*graph).iadjwgt = gk_i32malloc(
                 nedges,
                 b"gk_graph_Read: iadjwgt\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
@@ -340,15 +293,13 @@ pub unsafe extern "C" fn gk_graph_Read(
     }
     if readsizes != 0 {
         if isfvsizes != 0 {
-            (*graph)
-                .fvsizes = gk_fmalloc(
+            (*graph).fvsizes = gk_fmalloc(
                 nvtxs,
                 b"gk_graph_Read: fvsizes\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
             );
         } else {
-            (*graph)
-                .ivsizes = gk_i32malloc(
+            (*graph).ivsizes = gk_i32malloc(
                 nvtxs,
                 b"gk_graph_Read: ivsizes\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
@@ -357,34 +308,32 @@ pub unsafe extern "C" fn gk_graph_Read(
     }
     if readwgts != 0 {
         if isfvwgts != 0 {
-            (*graph)
-                .fvwgts = gk_fmalloc(
+            (*graph).fvwgts = gk_fmalloc(
                 nvtxs.wrapping_mul(ncon),
-                b"gk_graph_Read: fvwgts\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Read: fvwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             );
         } else {
-            (*graph)
-                .ivwgts = gk_i32malloc(
+            (*graph).ivwgts = gk_i32malloc(
                 nvtxs.wrapping_mul(ncon),
-                b"gk_graph_Read: ivwgts\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Read: ivwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             );
         }
     }
-    numbering = if numbering != 0 { -(1 as libc::c_int) } else { 0 as libc::c_int };
+    numbering = if numbering != 0 {
+        -(1 as libc::c_int)
+    } else {
+        0 as libc::c_int
+    };
     *((*graph).xadj).offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
     k = 0 as libc::c_int as ssize_t;
     i = 0 as libc::c_int as ssize_t;
     while (i as u64) < nvtxs {
         loop {
-            if gk_getline(&mut line, &mut lnlen, fpin)
-                == -(1 as libc::c_int) as i64
-            {
+            if gk_getline(&mut line, &mut lnlen, fpin) == -(1 as libc::c_int) as i64 {
                 gk_errexit(
                     15 as libc::c_int,
-                    b"Pregraphure end of input file: file while reading row %d\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                    b"Pregraphure end of input file: file while reading row %d\n\0" as *const u8
+                        as *const libc::c_char as *mut libc::c_char,
                     i,
                 );
             }
@@ -400,14 +349,12 @@ pub unsafe extern "C" fn gk_graph_Read(
                 if tail == head {
                     gk_errexit(
                         15 as libc::c_int,
-                        b"The line for vertex %zd does not have size information\n\0"
-                            as *const u8 as *const libc::c_char as *mut libc::c_char,
+                        b"The line for vertex %zd does not have size information\n\0" as *const u8
+                            as *const libc::c_char as *mut libc::c_char,
                         i + 1 as libc::c_int as i64,
                     );
                 }
-                if *((*graph).fvsizes).offset(i as isize)
-                    < 0 as libc::c_int as libc::c_float
-                {
+                if *((*graph).fvsizes).offset(i as isize) < 0 as libc::c_int as libc::c_float {
                     gk_errexit(
                         15 as libc::c_int,
                         b"The size for vertex %zd must be >= 0\n\0" as *const u8
@@ -416,15 +363,13 @@ pub unsafe extern "C" fn gk_graph_Read(
                     );
                 }
             } else {
-                *((*graph).ivsizes)
-                    .offset(
-                        i as isize,
-                    ) = strtol(head, &mut tail, 0 as libc::c_int) as int32_t;
+                *((*graph).ivsizes).offset(i as isize) =
+                    strtol(head, &mut tail, 0 as libc::c_int) as int32_t;
                 if tail == head {
                     gk_errexit(
                         15 as libc::c_int,
-                        b"The line for vertex %zd does not have size information\n\0"
-                            as *const u8 as *const libc::c_char as *mut libc::c_char,
+                        b"The line for vertex %zd does not have size information\n\0" as *const u8
+                            as *const libc::c_char as *mut libc::c_char,
                         i + 1 as libc::c_int as i64,
                     );
                 }
@@ -444,11 +389,8 @@ pub unsafe extern "C" fn gk_graph_Read(
             while (l as u64) < ncon {
                 if isfvwgts != 0 {
                     *((*graph).fvwgts)
-                        .offset(
-                            (i as u64)
-                                .wrapping_mul(ncon)
-                                .wrapping_add(l as u64) as isize,
-                        ) = strtof(head, &mut tail);
+                        .offset((i as u64).wrapping_mul(ncon).wrapping_add(l as u64) as isize) =
+                        strtof(head, &mut tail);
                     if tail == head {
                         gk_errexit(
                             15 as libc::c_int,
@@ -459,27 +401,22 @@ pub unsafe extern "C" fn gk_graph_Read(
                         );
                     }
                     if *((*graph).fvwgts)
-                        .offset(
-                            (i as u64)
-                                .wrapping_mul(ncon)
-                                .wrapping_add(l as u64) as isize,
-                        ) < 0 as libc::c_int as libc::c_float
+                        .offset((i as u64).wrapping_mul(ncon).wrapping_add(l as u64) as isize)
+                        < 0 as libc::c_int as libc::c_float
                     {
                         gk_errexit(
                             15 as libc::c_int,
                             b"The weight vertex %zd and constraint %zd must be >= 0\n\0"
-                                as *const u8 as *const libc::c_char as *mut libc::c_char,
+                                as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             i + 1 as libc::c_int as i64,
                             l,
                         );
                     }
                 } else {
                     *((*graph).ivwgts)
-                        .offset(
-                            (i as u64)
-                                .wrapping_mul(ncon)
-                                .wrapping_add(l as u64) as isize,
-                        ) = strtol(head, &mut tail, 0 as libc::c_int) as int32_t;
+                        .offset((i as u64).wrapping_mul(ncon).wrapping_add(l as u64) as isize) =
+                        strtol(head, &mut tail, 0 as libc::c_int) as int32_t;
                     if tail == head {
                         gk_errexit(
                             15 as libc::c_int,
@@ -490,16 +427,14 @@ pub unsafe extern "C" fn gk_graph_Read(
                         );
                     }
                     if *((*graph).ivwgts)
-                        .offset(
-                            (i as u64)
-                                .wrapping_mul(ncon)
-                                .wrapping_add(l as u64) as isize,
-                        ) < 0 as libc::c_int
+                        .offset((i as u64).wrapping_mul(ncon).wrapping_add(l as u64) as isize)
+                        < 0 as libc::c_int
                     {
                         gk_errexit(
                             15 as libc::c_int,
                             b"The weight vertex %zd and constraint %zd must be >= 0\n\0"
-                                as *const u8 as *const libc::c_char as *mut libc::c_char,
+                                as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             i + 1 as libc::c_int as i64,
                             l,
                         );
@@ -534,7 +469,8 @@ pub unsafe extern "C" fn gk_graph_Read(
                         gk_errexit(
                             15 as libc::c_int,
                             b"Value could not be found for edge! Vertex:%zd, NNZ:%zd\n\0"
-                                as *const u8 as *const libc::c_char as *mut libc::c_char,
+                                as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             i,
                             k,
                         );
@@ -546,7 +482,8 @@ pub unsafe extern "C" fn gk_graph_Read(
                         gk_errexit(
                             15 as libc::c_int,
                             b"Value could not be found for edge! Vertex:%zd, NNZ:%zd\n\0"
-                                as *const u8 as *const libc::c_char as *mut libc::c_char,
+                                as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             i,
                             k,
                         );
@@ -593,8 +530,7 @@ pub unsafe extern "C" fn gk_graph_Write(
     if format != 1 as libc::c_int {
         gk_errexit(
             15 as libc::c_int,
-            b"Unknown file format. %d\n\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"Unknown file format. %d\n\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             format,
         );
     }
@@ -607,18 +543,14 @@ pub unsafe extern "C" fn gk_graph_Write(
     } else {
         fpout = stdout;
     }
-    hasewgts = (!((*graph).iadjwgt).is_null() || !((*graph).fadjwgt).is_null())
-        as libc::c_int;
-    hasvwgts = (!((*graph).ivwgts).is_null() || !((*graph).fvwgts).is_null())
-        as libc::c_int;
-    hasvsizes = (!((*graph).ivsizes).is_null() || !((*graph).fvsizes).is_null())
-        as libc::c_int;
+    hasewgts = (!((*graph).iadjwgt).is_null() || !((*graph).fadjwgt).is_null()) as libc::c_int;
+    hasvwgts = (!((*graph).ivwgts).is_null() || !((*graph).fvwgts).is_null()) as libc::c_int;
+    hasvsizes = (!((*graph).ivsizes).is_null() || !((*graph).fvsizes).is_null()) as libc::c_int;
     fprintf(
         fpout,
         b"%d %zd\0" as *const u8 as *const libc::c_char,
         (*graph).nvtxs,
-        *((*graph).xadj).offset((*graph).nvtxs as isize)
-            / 2 as libc::c_int as i64,
+        *((*graph).xadj).offset((*graph).nvtxs as isize) / 2 as libc::c_int as i64,
     );
     if hasvwgts != 0 || hasvsizes != 0 || hasewgts != 0 {
         fprintf(
@@ -663,9 +595,7 @@ pub unsafe extern "C" fn gk_graph_Write(
             }
         }
         j = *((*graph).xadj).offset(i as isize);
-        while j
-            < *((*graph).xadj).offset((i + 1 as libc::c_int as i64) as isize)
-        {
+        while j < *((*graph).xadj).offset((i + 1 as libc::c_int as i64) as isize) {
             fprintf(
                 fpout,
                 b" %d\0" as *const u8 as *const libc::c_char,
@@ -703,44 +633,37 @@ pub unsafe extern "C" fn gk_graph_Dup(mut graph: *mut gk_graph_t) -> *mut gk_gra
     ngraph = gk_graph_Create();
     (*ngraph).nvtxs = (*graph).nvtxs;
     if !((*graph).xadj).is_null() {
-        (*ngraph)
-            .xadj = gk_zcopy(
+        (*ngraph).xadj = gk_zcopy(
             ((*graph).nvtxs + 1 as libc::c_int) as size_t,
             (*graph).xadj,
             gk_zmalloc(
                 ((*graph).nvtxs + 1 as libc::c_int) as size_t,
-                b"gk_graph_Dup: xadj\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Dup: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).ivwgts).is_null() {
-        (*ngraph)
-            .ivwgts = gk_i32copy(
+        (*ngraph).ivwgts = gk_i32copy(
             (*graph).nvtxs as size_t,
             (*graph).ivwgts,
             gk_i32malloc(
                 (*graph).nvtxs as size_t,
-                b"gk_graph_Dup: ivwgts\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Dup: ivwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).ivsizes).is_null() {
-        (*ngraph)
-            .ivsizes = gk_i32copy(
+        (*ngraph).ivsizes = gk_i32copy(
             (*graph).nvtxs as size_t,
             (*graph).ivsizes,
             gk_i32malloc(
                 (*graph).nvtxs as size_t,
-                b"gk_graph_Dup: ivsizes\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Dup: ivsizes\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).vlabels).is_null() {
-        (*ngraph)
-            .vlabels = gk_i32copy(
+        (*ngraph).vlabels = gk_i32copy(
             (*graph).nvtxs as size_t,
             (*graph).vlabels,
             gk_i32malloc(
@@ -751,62 +674,52 @@ pub unsafe extern "C" fn gk_graph_Dup(mut graph: *mut gk_graph_t) -> *mut gk_gra
         );
     }
     if !((*graph).fvwgts).is_null() {
-        (*ngraph)
-            .fvwgts = gk_fcopy(
+        (*ngraph).fvwgts = gk_fcopy(
             (*graph).nvtxs as size_t,
             (*graph).fvwgts,
             gk_fmalloc(
                 (*graph).nvtxs as size_t,
-                b"gk_graph_Dup: fvwgts\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Dup: fvwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).fvsizes).is_null() {
-        (*ngraph)
-            .fvsizes = gk_fcopy(
+        (*ngraph).fvsizes = gk_fcopy(
             (*graph).nvtxs as size_t,
             (*graph).fvsizes,
             gk_fmalloc(
                 (*graph).nvtxs as size_t,
-                b"gk_graph_Dup: fvsizes\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Dup: fvsizes\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).adjncy).is_null() {
-        (*ngraph)
-            .adjncy = gk_i32copy(
+        (*ngraph).adjncy = gk_i32copy(
             *((*graph).xadj).offset((*graph).nvtxs as isize) as size_t,
             (*graph).adjncy,
             gk_i32malloc(
                 *((*graph).xadj).offset((*graph).nvtxs as isize) as size_t,
-                b"gk_graph_Dup: adjncy\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Dup: adjncy\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).iadjwgt).is_null() {
-        (*ngraph)
-            .iadjwgt = gk_i32copy(
+        (*ngraph).iadjwgt = gk_i32copy(
             *((*graph).xadj).offset((*graph).nvtxs as isize) as size_t,
             (*graph).iadjwgt,
             gk_i32malloc(
                 *((*graph).xadj).offset((*graph).nvtxs as isize) as size_t,
-                b"gk_graph_Dup: iadjwgt\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Dup: iadjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).fadjwgt).is_null() {
-        (*ngraph)
-            .fadjwgt = gk_fcopy(
+        (*ngraph).fadjwgt = gk_fcopy(
             *((*graph).xadj).offset((*graph).nvtxs as isize) as size_t,
             (*graph).fadjwgt,
             gk_fmalloc(
                 *((*graph).xadj).offset((*graph).nvtxs as isize) as size_t,
-                b"gk_graph_Dup: fadjwgt\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"gk_graph_Dup: fadjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             ),
         );
     }
@@ -826,8 +739,7 @@ pub unsafe extern "C" fn gk_graph_ExtractSubgraph(
     ngraph = gk_graph_Create();
     (*ngraph).nvtxs = nvtxs;
     if !((*graph).xadj).is_null() {
-        (*ngraph)
-            .xadj = gk_zcopy(
+        (*ngraph).xadj = gk_zcopy(
             (nvtxs + 1 as libc::c_int) as size_t,
             ((*graph).xadj).offset(vstart as isize),
             gk_zmalloc(
@@ -845,8 +757,7 @@ pub unsafe extern "C" fn gk_graph_ExtractSubgraph(
         i;
     }
     if !((*graph).ivwgts).is_null() {
-        (*ngraph)
-            .ivwgts = gk_i32copy(
+        (*ngraph).ivwgts = gk_i32copy(
             nvtxs as size_t,
             ((*graph).ivwgts).offset(vstart as isize),
             gk_i32malloc(
@@ -857,32 +768,29 @@ pub unsafe extern "C" fn gk_graph_ExtractSubgraph(
         );
     }
     if !((*graph).ivsizes).is_null() {
-        (*ngraph)
-            .ivsizes = gk_i32copy(
+        (*ngraph).ivsizes = gk_i32copy(
             nvtxs as size_t,
             ((*graph).ivsizes).offset(vstart as isize),
             gk_i32malloc(
                 nvtxs as size_t,
-                b"gk_graph_ExtractSubgraph: ivsizes\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"gk_graph_ExtractSubgraph: ivsizes\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).vlabels).is_null() {
-        (*ngraph)
-            .vlabels = gk_i32copy(
+        (*ngraph).vlabels = gk_i32copy(
             nvtxs as size_t,
             ((*graph).vlabels).offset(vstart as isize),
             gk_i32malloc(
                 nvtxs as size_t,
-                b"gk_graph_ExtractSubgraph: vlabels\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"gk_graph_ExtractSubgraph: vlabels\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).fvwgts).is_null() {
-        (*ngraph)
-            .fvwgts = gk_fcopy(
+        (*ngraph).fvwgts = gk_fcopy(
             nvtxs as size_t,
             ((*graph).fvwgts).offset(vstart as isize),
             gk_fmalloc(
@@ -893,20 +801,18 @@ pub unsafe extern "C" fn gk_graph_ExtractSubgraph(
         );
     }
     if !((*graph).fvsizes).is_null() {
-        (*ngraph)
-            .fvsizes = gk_fcopy(
+        (*ngraph).fvsizes = gk_fcopy(
             nvtxs as size_t,
             ((*graph).fvsizes).offset(vstart as isize),
             gk_fmalloc(
                 nvtxs as size_t,
-                b"gk_graph_ExtractSubgraph: fvsizes\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"gk_graph_ExtractSubgraph: fvsizes\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).adjncy).is_null() {
-        (*ngraph)
-            .adjncy = gk_i32copy(
+        (*ngraph).adjncy = gk_i32copy(
             (*((*graph).xadj).offset((vstart + nvtxs) as isize)
                 - *((*graph).xadj).offset(vstart as isize)) as size_t,
             ((*graph).adjncy).offset(*((*graph).xadj).offset(vstart as isize) as isize),
@@ -919,30 +825,28 @@ pub unsafe extern "C" fn gk_graph_ExtractSubgraph(
         );
     }
     if !((*graph).iadjwgt).is_null() {
-        (*ngraph)
-            .iadjwgt = gk_i32copy(
+        (*ngraph).iadjwgt = gk_i32copy(
             (*((*graph).xadj).offset((vstart + nvtxs) as isize)
                 - *((*graph).xadj).offset(vstart as isize)) as size_t,
             ((*graph).iadjwgt).offset(*((*graph).xadj).offset(vstart as isize) as isize),
             gk_i32malloc(
                 (*((*graph).xadj).offset((vstart + nvtxs) as isize)
                     - *((*graph).xadj).offset(vstart as isize)) as size_t,
-                b"gk_graph_ExtractSubgraph: iadjwgt\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"gk_graph_ExtractSubgraph: iadjwgt\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             ),
         );
     }
     if !((*graph).fadjwgt).is_null() {
-        (*ngraph)
-            .fadjwgt = gk_fcopy(
+        (*ngraph).fadjwgt = gk_fcopy(
             (*((*graph).xadj).offset((vstart + nvtxs) as isize)
                 - *((*graph).xadj).offset(vstart as isize)) as size_t,
             ((*graph).fadjwgt).offset(*((*graph).xadj).offset(vstart as isize) as isize),
             gk_fmalloc(
                 (*((*graph).xadj).offset((vstart + nvtxs) as isize)
                     - *((*graph).xadj).offset(vstart as isize)) as size_t,
-                b"gk_graph_ExtractSubgraph: fadjwgt\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"gk_graph_ExtractSubgraph: fadjwgt\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             ),
         );
     }
@@ -975,83 +879,65 @@ pub unsafe extern "C" fn gk_graph_Reorder(
     xadj = (*graph).xadj;
     adjncy = (*graph).adjncy;
     if !((*graph).xadj).is_null() {
-        (*ngraph)
-            .xadj = gk_zmalloc(
+        (*ngraph).xadj = gk_zmalloc(
             (nvtxs + 1 as libc::c_int) as size_t,
-            b"gk_graph_Reorder: xadj\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     if !((*graph).ivwgts).is_null() {
-        (*ngraph)
-            .ivwgts = gk_i32malloc(
+        (*ngraph).ivwgts = gk_i32malloc(
             nvtxs as size_t,
-            b"gk_graph_Reorder: ivwgts\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: ivwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     if !((*graph).ivsizes).is_null() {
-        (*ngraph)
-            .ivsizes = gk_i32malloc(
+        (*ngraph).ivsizes = gk_i32malloc(
             nvtxs as size_t,
-            b"gk_graph_Reorder: ivsizes\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: ivsizes\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     if !((*graph).vlabels).is_null() {
-        (*ngraph)
-            .vlabels = gk_i32malloc(
+        (*ngraph).vlabels = gk_i32malloc(
             nvtxs as size_t,
             b"gk_graph_Reorder: ivlabels\0" as *const u8 as *const libc::c_char
                 as *mut libc::c_char,
         );
     }
     if !((*graph).fvwgts).is_null() {
-        (*ngraph)
-            .fvwgts = gk_fmalloc(
+        (*ngraph).fvwgts = gk_fmalloc(
             nvtxs as size_t,
-            b"gk_graph_Reorder: fvwgts\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: fvwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     if !((*graph).fvsizes).is_null() {
-        (*ngraph)
-            .fvsizes = gk_fmalloc(
+        (*ngraph).fvsizes = gk_fmalloc(
             nvtxs as size_t,
-            b"gk_graph_Reorder: fvsizes\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: fvsizes\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     if !((*graph).adjncy).is_null() {
-        (*ngraph)
-            .adjncy = gk_i32malloc(
+        (*ngraph).adjncy = gk_i32malloc(
             *((*graph).xadj).offset(nvtxs as isize) as size_t,
-            b"gk_graph_Reorder: adjncy\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: adjncy\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     if !((*graph).iadjwgt).is_null() {
-        (*ngraph)
-            .iadjwgt = gk_i32malloc(
+        (*ngraph).iadjwgt = gk_i32malloc(
             *((*graph).xadj).offset(nvtxs as isize) as size_t,
-            b"gk_graph_Reorder: iadjwgt\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: iadjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     if !((*graph).fadjwgt).is_null() {
-        (*ngraph)
-            .fadjwgt = gk_fmalloc(
+        (*ngraph).fadjwgt = gk_fmalloc(
             *((*graph).xadj).offset(nvtxs as isize) as size_t,
-            b"gk_graph_Reorder: fadjwgt\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: fadjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     if perm.is_null() {
         freeperm = 1 as libc::c_int;
         perm = gk_i32malloc(
             nvtxs as size_t,
-            b"gk_graph_Reorder: perm\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: perm\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         i = 0 as libc::c_int;
         while i < nvtxs {
@@ -1064,8 +950,7 @@ pub unsafe extern "C" fn gk_graph_Reorder(
         freeiperm = 1 as libc::c_int;
         iperm = gk_i32malloc(
             nvtxs as size_t,
-            b"gk_graph_Reorder: iperm\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_graph_Reorder: iperm\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         i = 0 as libc::c_int;
         while i < nvtxs {
@@ -1081,15 +966,13 @@ pub unsafe extern "C" fn gk_graph_Reorder(
         u = *iperm.offset(v as isize);
         j = *xadj.offset(u as isize);
         while j < *xadj.offset((u + 1 as libc::c_int) as isize) {
-            *((*ngraph).adjncy)
-                .offset(jj as isize) = *perm.offset(*adjncy.offset(j as isize) as isize);
+            *((*ngraph).adjncy).offset(jj as isize) =
+                *perm.offset(*adjncy.offset(j as isize) as isize);
             if !((*graph).iadjwgt).is_null() {
-                *((*ngraph).iadjwgt)
-                    .offset(jj as isize) = *((*graph).iadjwgt).offset(j as isize);
+                *((*ngraph).iadjwgt).offset(jj as isize) = *((*graph).iadjwgt).offset(j as isize);
             }
             if !((*graph).fadjwgt).is_null() {
-                *((*ngraph).fadjwgt)
-                    .offset(jj as isize) = *((*graph).fadjwgt).offset(j as isize);
+                *((*ngraph).fadjwgt).offset(jj as isize) = *((*graph).fadjwgt).offset(j as isize);
             }
             j += 1;
             j;
@@ -1097,24 +980,19 @@ pub unsafe extern "C" fn gk_graph_Reorder(
             jj;
         }
         if !((*graph).ivwgts).is_null() {
-            *((*ngraph).ivwgts)
-                .offset(v as isize) = *((*graph).ivwgts).offset(u as isize);
+            *((*ngraph).ivwgts).offset(v as isize) = *((*graph).ivwgts).offset(u as isize);
         }
         if !((*graph).fvwgts).is_null() {
-            *((*ngraph).fvwgts)
-                .offset(v as isize) = *((*graph).fvwgts).offset(u as isize);
+            *((*ngraph).fvwgts).offset(v as isize) = *((*graph).fvwgts).offset(u as isize);
         }
         if !((*graph).ivsizes).is_null() {
-            *((*ngraph).ivsizes)
-                .offset(v as isize) = *((*graph).ivsizes).offset(u as isize);
+            *((*ngraph).ivsizes).offset(v as isize) = *((*graph).ivsizes).offset(u as isize);
         }
         if !((*graph).fvsizes).is_null() {
-            *((*ngraph).fvsizes)
-                .offset(v as isize) = *((*graph).fvsizes).offset(u as isize);
+            *((*ngraph).fvsizes).offset(v as isize) = *((*graph).fvsizes).offset(u as isize);
         }
         if !((*graph).vlabels).is_null() {
-            *((*ngraph).vlabels)
-                .offset(v as isize) = *((*graph).vlabels).offset(u as isize);
+            *((*ngraph).vlabels).offset(v as isize) = *((*graph).vlabels).offset(u as isize);
         }
         *((*ngraph).xadj).offset((v + 1 as libc::c_int) as isize) = jj;
         v += 1;
@@ -1305,14 +1183,8 @@ pub unsafe extern "C" fn gk_graph_ComputeBFSOrdering(
         while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
             k = *adjncy.offset(j as isize);
             if *pos.offset(k as isize) != -(1 as libc::c_int) {
-                *cot
-                    .offset(
-                        *pos.offset(k as isize) as isize,
-                    ) = *cot.offset(last as isize);
-                *pos
-                    .offset(
-                        *cot.offset(last as isize) as isize,
-                    ) = *pos.offset(k as isize);
+                *cot.offset(*pos.offset(k as isize) as isize) = *cot.offset(last as isize);
+                *pos.offset(*cot.offset(last as isize) as isize) = *pos.offset(k as isize);
                 let fresh9 = last;
                 last = last + 1;
                 *cot.offset(fresh9 as isize) = k;
@@ -1415,8 +1287,8 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering0(
         if *perm.offset(v as isize) != -(1 as libc::c_int) {
             gk_errexit(
                 15 as libc::c_int,
-                b"The perm[%d] has already been set.\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"The perm[%d] has already been set.\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 v,
             );
         }
@@ -1428,10 +1300,7 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering0(
                 let ref mut fresh10 = *degrees.offset(u as isize);
                 *fresh10 += 1;
                 *fresh10;
-                *minIDs
-                    .offset(
-                        u as isize,
-                    ) = if i < *minIDs.offset(u as isize) {
+                *minIDs.offset(u as isize) = if i < *minIDs.offset(u as isize) {
                     i
                 } else {
                     *minIDs.offset(u as isize)
@@ -1441,11 +1310,7 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering0(
                         gk_i32pqUpdate(queue, u as gk_idx_t, 1 as libc::c_int);
                     }
                     2 => {
-                        gk_i32pqUpdate(
-                            queue,
-                            u as gk_idx_t,
-                            *degrees.offset(u as isize),
-                        );
+                        gk_i32pqUpdate(queue, u as gk_idx_t, *degrees.offset(u as isize));
                     }
                     3 => {
                         k = 0 as libc::c_int;
@@ -1620,8 +1485,8 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering(
         if *perm.offset(v as isize) != -(1 as libc::c_int) {
             gk_errexit(
                 15 as libc::c_int,
-                b"The perm[%d] has already been set.\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"The perm[%d] has already been set.\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 v,
             );
         }
@@ -1629,8 +1494,8 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering(
         if *ot.offset(*pos.offset(v as isize) as isize) != v {
             gk_errexit(
                 15 as libc::c_int,
-                b"Something went wrong [ot[pos[%d]]!=%d.\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Something went wrong [ot[pos[%d]]!=%d.\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 v,
                 v,
             );
@@ -1638,30 +1503,22 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering(
         if *pos.offset(v as isize) >= nopen {
             gk_errexit(
                 15 as libc::c_int,
-                b"The position of v is not in open list. pos[%d]=%d is >=%d.\n\0"
-                    as *const u8 as *const libc::c_char as *mut libc::c_char,
+                b"The position of v is not in open list. pos[%d]=%d is >=%d.\n\0" as *const u8
+                    as *const libc::c_char as *mut libc::c_char,
                 v,
                 *pos.offset(v as isize),
                 nopen,
             );
         }
-        *ot
-            .offset(
-                *pos.offset(v as isize) as isize,
-            ) = *ot.offset((nopen - 1 as libc::c_int) as isize);
-        *pos
-            .offset(
-                *ot.offset((nopen - 1 as libc::c_int) as isize) as isize,
-            ) = *pos.offset(v as isize);
+        *ot.offset(*pos.offset(v as isize) as isize) =
+            *ot.offset((nopen - 1 as libc::c_int) as isize);
+        *pos.offset(*ot.offset((nopen - 1 as libc::c_int) as isize) as isize) =
+            *pos.offset(v as isize);
         if ntodo > nopen {
-            *ot
-                .offset(
-                    (nopen - 1 as libc::c_int) as isize,
-                ) = *ot.offset((ntodo - 1 as libc::c_int) as isize);
-            *pos
-                .offset(
-                    *ot.offset((ntodo - 1 as libc::c_int) as isize) as isize,
-                ) = nopen - 1 as libc::c_int;
+            *ot.offset((nopen - 1 as libc::c_int) as isize) =
+                *ot.offset((ntodo - 1 as libc::c_int) as isize);
+            *pos.offset(*ot.offset((ntodo - 1 as libc::c_int) as isize) as isize) =
+                nopen - 1 as libc::c_int;
         }
         nopen -= 1;
         nopen;
@@ -1672,22 +1529,13 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering(
             u = *adjncy.offset(j as isize);
             if *perm.offset(u as isize) == -(1 as libc::c_int) {
                 if *degrees.offset(u as isize) == 0 as libc::c_int {
-                    *ot
-                        .offset(
-                            *pos.offset(u as isize) as isize,
-                        ) = *ot.offset(nopen as isize);
-                    *pos
-                        .offset(
-                            *ot.offset(nopen as isize) as isize,
-                        ) = *pos.offset(u as isize);
+                    *ot.offset(*pos.offset(u as isize) as isize) = *ot.offset(nopen as isize);
+                    *pos.offset(*ot.offset(nopen as isize) as isize) = *pos.offset(u as isize);
                     *ot.offset(nopen as isize) = u;
                     *pos.offset(u as isize) = nopen;
                     nopen += 1;
                     nopen;
-                    *level
-                        .offset(
-                            u as isize,
-                        ) = *level.offset(v as isize) + 1 as libc::c_int;
+                    *level.offset(u as isize) = *level.offset(v as isize) + 1 as libc::c_int;
                     gk_i32pqInsert(queue, u as gk_idx_t, 0 as libc::c_int);
                 }
                 let ref mut fresh13 = *degrees.offset(u as isize);
@@ -1703,20 +1551,12 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering(
                         );
                     }
                     2 => {
-                        gk_i32pqUpdate(
-                            queue,
-                            u as gk_idx_t,
-                            *degrees.offset(u as isize),
-                        );
+                        gk_i32pqUpdate(queue, u as gk_idx_t, *degrees.offset(u as isize));
                     }
                     3 => {
                         let ref mut fresh14 = *wdegrees.offset(u as isize);
                         *fresh14 += i;
-                        gk_i32pqUpdate(
-                            queue,
-                            u as gk_idx_t,
-                            *wdegrees.offset(u as isize),
-                        );
+                        gk_i32pqUpdate(queue, u as gk_idx_t, *wdegrees.offset(u as isize));
                     }
                     5 => {
                         gk_i32pqUpdate(
@@ -1814,8 +1654,8 @@ pub unsafe extern "C" fn gk_graph_SingleSourceShortestPaths(
     inqueue = gk_i32smalloc(
         nvtxs as size_t,
         0 as libc::c_int,
-        b"gk_graph_SingleSourceShortestPaths: inqueue\0" as *const u8
-            as *const libc::c_char as *mut libc::c_char,
+        b"gk_graph_SingleSourceShortestPaths: inqueue\0" as *const u8 as *const libc::c_char
+            as *mut libc::c_char,
     );
     if !((*graph).iadjwgt).is_null() {
         let mut queue: *mut gk_i32pq_t = 0 as *mut gk_i32pq_t;
@@ -1828,8 +1668,8 @@ pub unsafe extern "C" fn gk_graph_SingleSourceShortestPaths(
         sps = gk_i32smalloc(
             nvtxs as size_t,
             -(1 as libc::c_int),
-            b"gk_graph_SingleSourceShortestPaths: sps\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"gk_graph_SingleSourceShortestPaths: sps\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         );
         *sps.offset(v as isize) = 0 as libc::c_int;
         loop {
@@ -1846,22 +1686,12 @@ pub unsafe extern "C" fn gk_graph_SingleSourceShortestPaths(
                         || *sps.offset(v as isize) + *adjwgt.offset(i as isize)
                             < *sps.offset(u as isize)
                     {
-                        *sps
-                            .offset(
-                                u as isize,
-                            ) = *sps.offset(v as isize) + *adjwgt.offset(i as isize);
+                        *sps.offset(u as isize) =
+                            *sps.offset(v as isize) + *adjwgt.offset(i as isize);
                         if *inqueue.offset(u as isize) != 0 {
-                            gk_i32pqUpdate(
-                                queue,
-                                u as gk_idx_t,
-                                -*sps.offset(u as isize),
-                            );
+                            gk_i32pqUpdate(queue, u as gk_idx_t, -*sps.offset(u as isize));
                         } else {
-                            gk_i32pqInsert(
-                                queue,
-                                u as gk_idx_t,
-                                -*sps.offset(u as isize),
-                            );
+                            gk_i32pqInsert(queue, u as gk_idx_t, -*sps.offset(u as isize));
                             *inqueue.offset(u as isize) = 1 as libc::c_int;
                         }
                     }
@@ -1883,8 +1713,8 @@ pub unsafe extern "C" fn gk_graph_SingleSourceShortestPaths(
         sps_0 = gk_fsmalloc(
             nvtxs as size_t,
             -(1 as libc::c_int) as libc::c_float,
-            b"gk_graph_SingleSourceShortestPaths: sps\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"gk_graph_SingleSourceShortestPaths: sps\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         );
         *sps_0.offset(v as isize) = 0 as libc::c_int as libc::c_float;
         loop {
@@ -1901,22 +1731,12 @@ pub unsafe extern "C" fn gk_graph_SingleSourceShortestPaths(
                         || *sps_0.offset(v as isize) + *adjwgt_0.offset(i as isize)
                             < *sps_0.offset(u as isize)
                     {
-                        *sps_0
-                            .offset(
-                                u as isize,
-                            ) = *sps_0.offset(v as isize) + *adjwgt_0.offset(i as isize);
+                        *sps_0.offset(u as isize) =
+                            *sps_0.offset(v as isize) + *adjwgt_0.offset(i as isize);
                         if *inqueue.offset(u as isize) != 0 {
-                            gk_fpqUpdate(
-                                queue_0,
-                                u as gk_idx_t,
-                                -*sps_0.offset(u as isize),
-                            );
+                            gk_fpqUpdate(queue_0, u as gk_idx_t, -*sps_0.offset(u as isize));
                         } else {
-                            gk_fpqInsert(
-                                queue_0,
-                                u as gk_idx_t,
-                                -*sps_0.offset(u as isize),
-                            );
+                            gk_fpqInsert(queue_0, u as gk_idx_t, -*sps_0.offset(u as isize));
                             *inqueue.offset(u as isize) = 1 as libc::c_int;
                         }
                     }

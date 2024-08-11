@@ -88,7 +88,7 @@ pub type jmp_buf = [__jmp_buf_tag; 1];
 pub type gksighandler_t = Option<unsafe extern "C" fn(libc::c_int) -> ()>;
 
 #[thread_local]
-pub static mut GK_CUR_JBUFS: libc::c_int = -(1 as libc::c_int);
+pub static mut GK_CUR_JBUFS: libc::c_int = -(1);
 
 #[thread_local]
 pub static mut gk_jbufs: [jmp_buf; 128] = [[__jmp_buf_tag {
@@ -112,7 +112,7 @@ static mut old_SIGERR_handler: gksighandler_t = None;
 static mut old_SIGMEM_handlers: [gksighandler_t; 128] = [None; 128];
 #[thread_local]
 static mut old_SIGERR_handlers: [gksighandler_t; 128] = [None; 128];
-static mut gk_exit_on_error: libc::c_int = 1 as libc::c_int;
+static mut gk_exit_on_error: libc::c_int = 1;
 #[no_mangle]
 pub unsafe extern "C" fn gk_set_exit_on_error(mut value: libc::c_int) {
     gk_exit_on_error = value;
@@ -123,8 +123,7 @@ pub unsafe extern "C" fn errexit(mut f_str: *mut libc::c_char, mut args: ...) {
     argp = args.clone();
     vfprintf(stderr, f_str, argp.as_va_list());
     if strlen(f_str) == 0 as libc::c_int as u64
-        || *f_str.offset((strlen(f_str)).wrapping_sub(1 as libc::c_int as u64) as isize)
-            as libc::c_int
+        || *f_str.offset((strlen(f_str)).wrapping_sub(1 as u64) as isize) as libc::c_int
             != '\n' as i32
     {
         fprintf(stderr, b"\n\0" as *const u8 as *const libc::c_char);
@@ -151,7 +150,7 @@ pub unsafe extern "C" fn gk_errexit(
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_sigtrap() -> libc::c_int {
-    if GK_CUR_JBUFS + 1 as libc::c_int >= 128 as libc::c_int {
+    if GK_CUR_JBUFS + 1 >= 128 as libc::c_int {
         return 0 as libc::c_int;
     }
     GK_CUR_JBUFS += 1;
@@ -164,11 +163,11 @@ pub unsafe extern "C" fn gk_sigtrap() -> libc::c_int {
         15 as libc::c_int,
         Some(gk_sigthrow as unsafe extern "C" fn(libc::c_int) -> ()),
     );
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_siguntrap() -> libc::c_int {
-    if GK_CUR_JBUFS == -(1 as libc::c_int) {
+    if GK_CUR_JBUFS == -(1) {
         return 0 as libc::c_int;
     }
     signal(6 as libc::c_int, old_SIGMEM_handlers[GK_CUR_JBUFS as usize]);
@@ -178,7 +177,7 @@ pub unsafe extern "C" fn gk_siguntrap() -> libc::c_int {
     );
     GK_CUR_JBUFS -= 1;
     GK_CUR_JBUFS;
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_sigthrow(mut signum: libc::c_int) {

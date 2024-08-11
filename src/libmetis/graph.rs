@@ -16,7 +16,7 @@ pub unsafe extern "C" fn libmetis__SetupGraph(
     mut ctrl: *mut ctrl_t,
     mut nvtxs: idx_t,
     mut ncon: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut vwgt: *mut idx_t,
     mut vsize: *mut idx_t,
@@ -30,9 +30,9 @@ pub unsafe extern "C" fn libmetis__SetupGraph(
     let mut graph: *mut graph_t = 0 as *mut graph_t;
     graph = libmetis__CreateGraph();
     (*graph).nvtxs = nvtxs;
-    (*graph).nedges = *xadj.offset(nvtxs as isize);
+    (*graph).nedges = xadj[nvtxs as usize];
     (*graph).ncon = ncon;
-    (*graph).xadj = xadj;
+    (*graph).xadj = xadj.clone();
     (*graph).free_xadj = 0 as libc::c_int;
     (*graph).adjncy = adjncy;
     (*graph).free_adjncy = 0 as libc::c_int;
@@ -42,7 +42,7 @@ pub unsafe extern "C" fn libmetis__SetupGraph(
     } else {
         (*graph).vwgt = libmetis__ismalloc(
             (ncon * nvtxs) as size_t,
-            1 as libc::c_int,
+            1,
             b"SetupGraph: vwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         vwgt = (*graph).vwgt;
@@ -63,7 +63,7 @@ pub unsafe extern "C" fn libmetis__SetupGraph(
             / (if *((*graph).tvwgt).offset(i as isize) > 0 as libc::c_int {
                 *((*graph).tvwgt).offset(i as isize)
             } else {
-                1 as libc::c_int
+                1
             }) as libc::c_double) as real_t;
         i += 1;
         i;
@@ -75,7 +75,7 @@ pub unsafe extern "C" fn libmetis__SetupGraph(
         } else {
             (*graph).vsize = libmetis__ismalloc(
                 nvtxs as size_t,
-                1 as libc::c_int,
+                1,
                 b"SetupGraph: vsize\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             );
             vsize = (*graph).vsize;
@@ -87,9 +87,9 @@ pub unsafe extern "C" fn libmetis__SetupGraph(
         adjwgt = (*graph).adjwgt;
         i = 0 as libc::c_int;
         while i < nvtxs {
-            j = *xadj.offset(i as isize);
-            while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
-                *adjwgt.offset(j as isize) = 1 as libc::c_int
+            j = xadj[i as usize];
+            while j < xadj[(i + 1) as usize] {
+                *adjwgt.offset(j as isize) = 1
                     + *vsize.offset(i as isize)
                     + *vsize.offset(*adjncy.offset(j as isize) as isize);
                 j += 1;
@@ -104,7 +104,7 @@ pub unsafe extern "C" fn libmetis__SetupGraph(
     } else {
         (*graph).adjwgt = libmetis__ismalloc(
             (*graph).nedges as size_t,
-            1 as libc::c_int,
+            1,
             b"SetupGraph: adjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         adjwgt = (*graph).adjwgt;
@@ -144,7 +144,7 @@ pub unsafe extern "C" fn libmetis__SetupGraph_tvwgt(mut graph: *mut graph_t) {
             / (if *((*graph).tvwgt).offset(i as isize) > 0 as libc::c_int {
                 *((*graph).tvwgt).offset(i as isize)
             } else {
-                1 as libc::c_int
+                1
             }) as libc::c_double) as real_t;
         i += 1;
         i;
@@ -177,10 +177,8 @@ pub unsafe extern "C" fn libmetis__SetupSplitGraph(
     (*sgraph).nvtxs = snvtxs;
     (*sgraph).nedges = snedges;
     (*sgraph).ncon = (*graph).ncon;
-    (*sgraph).xadj = libmetis__imalloc(
-        (snvtxs + 1 as libc::c_int) as size_t,
-        b"SetupSplitGraph: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-    );
+    (*sgraph).xadj = vec![0; (snvtxs + 1) as usize];
+
     (*sgraph).vwgt = libmetis__imalloc(
         ((*sgraph).ncon * snvtxs) as size_t,
         b"SetupSplitGraph: vwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -230,13 +228,13 @@ pub unsafe extern "C" fn libmetis__InitGraph(mut graph: *mut graph_t) {
         0 as libc::c_int,
         ::core::mem::size_of::<graph_t>() as u64,
     );
-    (*graph).nvtxs = -(1 as libc::c_int);
-    (*graph).nedges = -(1 as libc::c_int);
-    (*graph).ncon = -(1 as libc::c_int);
-    (*graph).mincut = -(1 as libc::c_int);
-    (*graph).minvol = -(1 as libc::c_int);
-    (*graph).nbnd = -(1 as libc::c_int);
-    (*graph).xadj = 0 as *mut idx_t;
+    (*graph).nvtxs = -(1);
+    (*graph).nedges = -(1);
+    (*graph).ncon = -(1);
+    (*graph).mincut = -(1);
+    (*graph).minvol = -(1);
+    (*graph).nbnd = -(1);
+    (*graph).xadj = Vec::new();
     (*graph).vwgt = 0 as *mut idx_t;
     (*graph).vsize = 0 as *mut idx_t;
     (*graph).adjncy = 0 as *mut idx_t;
@@ -245,11 +243,11 @@ pub unsafe extern "C" fn libmetis__InitGraph(mut graph: *mut graph_t) {
     (*graph).cmap = 0 as *mut idx_t;
     (*graph).tvwgt = 0 as *mut idx_t;
     (*graph).invtvwgt = 0 as *mut real_t;
-    (*graph).free_xadj = 1 as libc::c_int;
-    (*graph).free_vwgt = 1 as libc::c_int;
-    (*graph).free_vsize = 1 as libc::c_int;
-    (*graph).free_adjncy = 1 as libc::c_int;
-    (*graph).free_adjwgt = 1 as libc::c_int;
+    (*graph).free_xadj = 1;
+    (*graph).free_vwgt = 1;
+    (*graph).free_vsize = 1;
+    (*graph).free_adjncy = 1;
+    (*graph).free_adjwgt = 1;
     (*graph).where_0 = 0 as *mut idx_t;
     (*graph).pwgts = 0 as *mut idx_t;
     (*graph).id = 0 as *mut idx_t;
@@ -284,12 +282,7 @@ pub unsafe extern "C" fn libmetis__FreeRData(mut graph: *mut graph_t) {
 pub unsafe extern "C" fn libmetis__FreeGraph(mut r_graph: *mut *mut graph_t) {
     let mut graph: *mut graph_t = 0 as *mut graph_t;
     graph = *r_graph;
-    if (*graph).free_xadj != 0 {
-        gk_free(
-            &mut (*graph).xadj as *mut *mut idx_t as *mut *mut libc::c_void,
-            0 as *mut *mut libc::c_void,
-        );
-    }
+
     if (*graph).free_vwgt != 0 {
         gk_free(
             &mut (*graph).vwgt as *mut *mut idx_t as *mut *mut libc::c_void,

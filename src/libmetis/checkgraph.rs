@@ -24,17 +24,17 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
     let mut maxedge: idx_t = 0;
     let mut minewgt: idx_t = 0;
     let mut maxewgt: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut htable: *mut idx_t = 0 as *mut idx_t;
     numflag = if numflag == 0 as libc::c_int {
         0 as libc::c_int
     } else {
-        1 as libc::c_int
+        1
     };
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     htable = libmetis__ismalloc(
@@ -48,8 +48,8 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
     minewgt = maxewgt;
     i = 0 as libc::c_int;
     while i < nvtxs {
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             k = *adjncy.offset(j as isize);
             minedge = if k < minedge { k } else { minedge };
             maxedge = if k > maxedge { k } else { maxedge };
@@ -74,8 +74,8 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
                 err += 1;
                 err;
             } else {
-                l = *xadj.offset(k as isize);
-                while l < *xadj.offset((k + 1 as libc::c_int) as isize) {
+                l = xadj[k as usize];
+                while l < xadj[(k + 1) as usize] {
                     if *adjncy.offset(l as isize) == i {
                         if *adjwgt.offset(l as isize) != *adjwgt.offset(j as isize) {
                             if verbose != 0 {
@@ -99,7 +99,7 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
                         l;
                     }
                 }
-                if l == *xadj.offset((k + 1 as libc::c_int) as isize) {
+                if l == xadj[(k + 1) as usize] {
                     if verbose != 0 {
                         printf(
                             b"Missing edge: (%d %d)!\n\0" as *const u8 as *const libc::c_char,
@@ -134,8 +134,8 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
             j += 1;
             j;
         }
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             *htable.offset(*adjncy.offset(j as isize) as isize) = 0 as libc::c_int;
             j += 1;
             j;
@@ -155,7 +155,7 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
         0 as *mut *mut libc::c_void,
     );
     return if err == 0 as libc::c_int {
-        1 as libc::c_int
+        1
     } else {
         0 as libc::c_int
     };
@@ -164,7 +164,7 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
 pub unsafe extern "C" fn libmetis__CheckInputGraphWeights(
     mut nvtxs: idx_t,
     mut ncon: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut vwgt: *mut idx_t,
     mut vsize: *mut idx_t,
@@ -204,7 +204,7 @@ pub unsafe extern "C" fn libmetis__CheckInputGraphWeights(
         }
     }
     if !adjwgt.is_null() {
-        i = *xadj.offset(nvtxs as isize) - 1 as libc::c_int;
+        i = xadj[nvtxs as usize] - 1;
         while i >= 0 as libc::c_int {
             if *adjwgt.offset(i as isize) < 0 as libc::c_int {
                 printf(
@@ -217,7 +217,7 @@ pub unsafe extern "C" fn libmetis__CheckInputGraphWeights(
             i;
         }
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut graph_t {
@@ -227,7 +227,7 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     let mut l: idx_t = 0;
     let mut nvtxs: idx_t = 0;
     let mut nedges: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut nxadj: *mut idx_t = 0 as *mut idx_t;
@@ -236,7 +236,7 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     let mut ngraph: *mut graph_t = 0 as *mut graph_t;
     let mut edges: *mut uvw_t = 0 as *mut uvw_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     ngraph = libmetis__CreateGraph();
@@ -252,7 +252,7 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     );
     (*ngraph).vsize = libmetis__ismalloc(
         nvtxs as size_t,
-        1 as libc::c_int,
+        1,
         b"FixGraph: vsize\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     if !((*graph).vsize).is_null() {
@@ -261,14 +261,14 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     edges = gk_malloc(
         (::core::mem::size_of::<uvw_t>() as u64)
             .wrapping_mul(2 as libc::c_int as u64)
-            .wrapping_mul(*xadj.offset(nvtxs as isize) as u64),
+            .wrapping_mul(xadj[nvtxs as usize] as u64),
         b"FixGraph: edges\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut uvw_t;
     nedges = 0 as libc::c_int;
     i = 0 as libc::c_int;
     while i < nvtxs {
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             if i < *adjncy.offset(j as isize) {
                 (*edges.offset(nedges as isize)).u = i;
                 (*edges.offset(nedges as isize)).v = *adjncy.offset(j as isize);
@@ -290,7 +290,7 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     }
     libmetis__uvwsorti(nedges as size_t, edges);
     k = 0 as libc::c_int;
-    i = 1 as libc::c_int;
+    i = 1;
     while i < nedges {
         if (*edges.offset(k as isize)).v != (*edges.offset(i as isize)).v
             || (*edges.offset(k as isize)).u != (*edges.offset(i as isize)).u
@@ -301,13 +301,10 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
         i += 1;
         i;
     }
-    nedges = k + 1 as libc::c_int;
-    (*ngraph).xadj = libmetis__ismalloc(
-        (nvtxs + 1 as libc::c_int) as size_t,
-        0 as libc::c_int,
-        b"FixGraph: nxadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-    );
-    nxadj = (*ngraph).xadj;
+    nedges = k + 1;
+    (*ngraph).xadj = vec![0; (nvtxs + 1) as usize];
+
+    let nxadj = &mut (*ngraph).xadj;
     (*ngraph).adjncy = libmetis__imalloc(
         (2 as libc::c_int * nedges) as size_t,
         b"FixGraph: nadjncy\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -320,43 +317,42 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     nadjwgt = (*ngraph).adjwgt;
     k = 0 as libc::c_int;
     while k < nedges {
-        let ref mut fresh3 = *nxadj.offset((*edges.offset(k as isize)).u as isize);
+        let ref mut fresh3 = xadj[((*edges.offset(k as isize)).u as usize)];
         *fresh3 += 1;
         *fresh3;
-        let ref mut fresh4 = *nxadj.offset((*edges.offset(k as isize)).v as isize);
+        let ref mut fresh4 = nxadj[((*edges.offset(k as isize)).v as usize)];
         *fresh4 += 1;
         *fresh4;
         k += 1;
         k;
     }
-    i = 1 as libc::c_int;
+    i = 1;
     while i < nvtxs {
-        let ref mut fresh5 = *nxadj.offset(i as isize);
-        *fresh5 += *nxadj.offset((i - 1 as libc::c_int) as isize);
+        nxadj[(i as usize)] += nxadj[((i - 1) as usize)];
         i += 1;
         i;
     }
     i = nvtxs;
     while i > 0 as libc::c_int {
-        *nxadj.offset(i as isize) = *nxadj.offset((i - 1 as libc::c_int) as isize);
+        nxadj[(i as usize)] = nxadj[((i - 1) as usize)];
         i -= 1;
         i;
     }
-    *nxadj.offset(0 as libc::c_int as isize) = 0 as libc::c_int;
+    nxadj[0] = 0 as libc::c_int;
     k = 0 as libc::c_int;
     while k < nedges {
-        *nadjncy.offset(*nxadj.offset((*edges.offset(k as isize)).u as isize) as isize) =
+        *nadjncy.offset(nxadj[((*edges.offset(k as isize)).u as usize)] as isize) =
             (*edges.offset(k as isize)).v;
-        *nadjncy.offset(*nxadj.offset((*edges.offset(k as isize)).v as isize) as isize) =
+        *nadjncy.offset(nxadj[((*edges.offset(k as isize)).v as usize)] as isize) =
             (*edges.offset(k as isize)).u;
-        *nadjwgt.offset(*nxadj.offset((*edges.offset(k as isize)).u as isize) as isize) =
+        *nadjwgt.offset(nxadj[((*edges.offset(k as isize)).u as usize)] as isize) =
             (*edges.offset(k as isize)).w;
-        *nadjwgt.offset(*nxadj.offset((*edges.offset(k as isize)).v as isize) as isize) =
+        *nadjwgt.offset(nxadj[((*edges.offset(k as isize)).v as usize)] as isize) =
             (*edges.offset(k as isize)).w;
-        let ref mut fresh6 = *nxadj.offset((*edges.offset(k as isize)).u as isize);
+        let ref mut fresh6 = nxadj[((*edges.offset(k as isize)).u as usize)];
         *fresh6 += 1;
         *fresh6;
-        let ref mut fresh7 = *nxadj.offset((*edges.offset(k as isize)).v as isize);
+        let ref mut fresh7 = nxadj[((*edges.offset(k as isize)).v as usize)];
         *fresh7 += 1;
         *fresh7;
         k += 1;
@@ -364,11 +360,11 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     }
     i = nvtxs;
     while i > 0 as libc::c_int {
-        *nxadj.offset(i as isize) = *nxadj.offset((i - 1 as libc::c_int) as isize);
+        nxadj[(i as usize)] = nxadj[((i - 1) as usize)];
         i -= 1;
         i;
     }
-    *nxadj.offset(0 as libc::c_int as isize) = 0 as libc::c_int;
+    nxadj[0] = 0 as libc::c_int;
     gk_free(
         &mut edges as *mut *mut uvw_t as *mut *mut libc::c_void,
         0 as *mut *mut libc::c_void,

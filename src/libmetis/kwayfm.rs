@@ -42,14 +42,14 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayOptimize(
 ) {
     match (*ctrl).objtype as libc::c_uint {
         0 => {
-            if (*graph).ncon == 1 as libc::c_int {
+            if (*graph).ncon == 1 {
                 libmetis__Greedy_KWayCutOptimize(ctrl, graph, niter, ffactor, omode);
             } else {
                 libmetis__Greedy_McKWayCutOptimize(ctrl, graph, niter, ffactor, omode);
             }
         }
         1 => {
-            if (*graph).ncon == 1 as libc::c_int {
+            if (*graph).ncon == 1 {
                 libmetis__Greedy_KWayVolOptimize(ctrl, graph, niter, ffactor, omode);
             } else {
                 libmetis__Greedy_McKWayVolOptimize(ctrl, graph, niter, ffactor, omode);
@@ -88,7 +88,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
     let mut to: idx_t = 0;
     let mut oldcut: idx_t = 0;
     let mut vwgt: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -113,8 +113,8 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
     let mut bfslvl: *mut idx_t = 0 as *mut idx_t;
     let mut bfsind: *mut idx_t = 0 as *mut idx_t;
     let mut bfsmrk: *mut idx_t = 0 as *mut idx_t;
-    let mut bndtype: idx_t = if omode == 1 as libc::c_int {
-        1 as libc::c_int
+    let mut bndtype: idx_t = if omode == 1 {
+        1
     } else {
         2 as libc::c_int
     };
@@ -126,7 +126,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
     let mut mynbrs: *mut cnbr_t = 0 as *mut cnbr_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     bndind = (*graph).bndind;
@@ -174,7 +174,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
     );
     updptr = libmetis__iset(
         nvtxs as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nvtxs),
     );
     updind = libmetis__iwspacemalloc(ctrl, nvtxs);
@@ -195,7 +195,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
         printf(
             b"%s: [%6d %6d]-[%6d %6d], Bal: %5.3f, Nv-Nb[%6d %6d], Cut: %6d\0" as *const u8
                 as *const libc::c_char,
-            if omode == 1 as libc::c_int {
+            if omode == 1 {
                 b"GRC\0" as *const u8 as *const libc::c_char
             } else {
                 b"GBC\0" as *const u8 as *const libc::c_char
@@ -213,7 +213,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
             printf(
                 b", Doms: [%3d %4d]\0" as *const u8 as *const libc::c_char,
                 libmetis__imax(nparts as size_t, nads),
-                libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t),
+                libmetis__isum(nparts as size_t, nads, 1 as size_t),
             );
         }
         printf(b"\n\0" as *const u8 as *const libc::c_char);
@@ -240,7 +240,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
         if (*ctrl).minconn != 0 {
             maxndoms = libmetis__imax(nparts as size_t, nads);
         }
-        libmetis__irandArrayPermute(nbnd, perm, nbnd / 4 as libc::c_int, 1 as libc::c_int);
+        libmetis__irandArrayPermute(nbnd, perm, nbnd / 4 as libc::c_int, 1);
         ii = 0 as libc::c_int;
         while ii < nbnd {
             i = *bndind.offset(*perm.offset(ii as isize) as isize);
@@ -252,7 +252,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
             }) - (*((*graph).ckrinfo).offset(i as isize)).id as libc::c_double)
                 as real_t;
             libmetis__rpqInsert(queue, i, rgain);
-            *vstatus.offset(i as isize) = 1 as libc::c_int;
+            *vstatus.offset(i as isize) = 1;
             *updind.offset(nupd as isize) = i;
             let fresh0 = nupd;
             nupd = nupd + 1;
@@ -265,7 +265,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
         iii = 0 as libc::c_int;
         loop {
             i = libmetis__rpqGetTop(queue);
-            if i == -(1 as libc::c_int) {
+            if i == -(1) {
                 break;
             }
             *vstatus.offset(i as isize) = 2 as libc::c_int;
@@ -273,7 +273,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
             mynbrs = ((*ctrl).cnbrpool).offset((*myrinfo).inbr as isize);
             from = *where_0.offset(i as isize);
             vwgt = *((*graph).vwgt).offset(i as isize);
-            if omode == 1 as libc::c_int {
+            if omode == 1 {
                 if (*myrinfo).id > 0 as libc::c_int
                     && *pwgts.offset(from as isize) - vwgt < *minwgt.offset(from as isize)
                 {
@@ -308,7 +308,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                     *doms.offset(
                                         *(*adids.offset(to_0 as isize)).offset(k_0 as isize)
                                             as isize,
-                                    ) = 1 as libc::c_int;
+                                    ) = 1;
                                     k_0 += 1;
                                     k_0;
                                 }
@@ -319,7 +319,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                         l_0 = (*mynbrs.offset(k_0 as isize)).pid;
                                         if *doms.offset(l_0 as isize) == 0 as libc::c_int {
                                             if *nads.offset(l_0 as isize)
-                                                > maxndoms - 1 as libc::c_int
+                                                > maxndoms - 1
                                             {
                                                 nadd = maxndoms;
                                                 break;
@@ -333,7 +333,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                     k_0;
                                 }
                                 if *nads.offset(to_0 as isize) + nadd <= maxndoms {
-                                    *safetos.offset(to_0 as isize) = 1 as libc::c_int;
+                                    *safetos.offset(to_0 as isize) = 1;
                                 }
                                 if nadd == 0 as libc::c_int {
                                     *safetos.offset(to_0 as isize) = 2 as libc::c_int;
@@ -351,8 +351,8 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                 j_0;
                             }
                         }
-                        if omode == 1 as libc::c_int {
-                            k = (*myrinfo).nnbrs - 1 as libc::c_int;
+                        if omode == 1 {
+                            k = (*myrinfo).nnbrs - 1;
                             while k >= 0 as libc::c_int {
                                 to = (*mynbrs.offset(k as isize)).pid;
                                 if !(*safetos.offset(to as isize) == 0) {
@@ -371,7 +371,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                             if k < 0 as libc::c_int {
                                 current_block_317 = 5159818223158340697;
                             } else {
-                                j = k - 1 as libc::c_int;
+                                j = k - 1;
                                 while j >= 0 as libc::c_int {
                                     to = (*mynbrs.offset(j as isize)).pid;
                                     if !(*safetos.offset(to as isize) == 0) {
@@ -418,7 +418,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                 }
                             }
                         } else {
-                            k = (*myrinfo).nnbrs - 1 as libc::c_int;
+                            k = (*myrinfo).nnbrs - 1;
                             while k >= 0 as libc::c_int {
                                 to = (*mynbrs.offset(k as isize)).pid;
                                 if !(*safetos.offset(to as isize) == 0) {
@@ -438,7 +438,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                             if k < 0 as libc::c_int {
                                 current_block_317 = 5159818223158340697;
                             } else {
-                                j = k - 1 as libc::c_int;
+                                j = k - 1;
                                 while j >= 0 as libc::c_int {
                                     to = (*mynbrs.offset(j as isize)).pid;
                                     if !(*safetos.offset(to as isize) == 0) {
@@ -496,8 +496,8 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                         (*myrinfo).id - (*mynbrs.offset(k as isize)).ed,
                                         &mut maxndoms,
                                     );
-                                    j = *xadj.offset(i as isize);
-                                    while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                                    j = xadj[i as usize];
+                                    while j < xadj[(i + 1) as usize] {
                                         me = *where_0.offset(*adjncy.offset(j as isize) as isize);
                                         if me != from && me != to {
                                             libmetis__UpdateEdgeSubDomainGraph(
@@ -535,8 +535,8 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                 } else {
                                     (*mynbrs.offset(k as isize)).pid = from;
                                 }
-                                if bndtype == 1 as libc::c_int {
-                                    if *bndptr.offset(i as isize) != -(1 as libc::c_int)
+                                if bndtype == 1 {
+                                    if *bndptr.offset(i as isize) != -(1)
                                         && (*myrinfo).ed - (*myrinfo).id < 0 as libc::c_int
                                     {
                                         nbnd -= 1;
@@ -544,9 +544,9 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                             *bndind.offset(nbnd as isize);
                                         *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                                             *bndptr.offset(i as isize);
-                                        *bndptr.offset(i as isize) = -(1 as libc::c_int);
+                                        *bndptr.offset(i as isize) = -(1);
                                     }
-                                    if *bndptr.offset(i as isize) == -(1 as libc::c_int)
+                                    if *bndptr.offset(i as isize) == -(1)
                                         && (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
                                     {
                                         *bndind.offset(nbnd as isize) = i;
@@ -555,7 +555,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                         *bndptr.offset(i as isize) = fresh3;
                                     }
                                 } else {
-                                    if *bndptr.offset(i as isize) != -(1 as libc::c_int)
+                                    if *bndptr.offset(i as isize) != -(1)
                                         && (*myrinfo).ed <= 0 as libc::c_int
                                     {
                                         nbnd -= 1;
@@ -563,9 +563,9 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                             *bndind.offset(nbnd as isize);
                                         *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                                             *bndptr.offset(i as isize);
-                                        *bndptr.offset(i as isize) = -(1 as libc::c_int);
+                                        *bndptr.offset(i as isize) = -(1);
                                     }
-                                    if *bndptr.offset(i as isize) == -(1 as libc::c_int)
+                                    if *bndptr.offset(i as isize) == -(1)
                                         && (*myrinfo).ed > 0 as libc::c_int
                                     {
                                         *bndind.offset(nbnd as isize) = i;
@@ -574,20 +574,20 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                         *bndptr.offset(i as isize) = fresh4;
                                     }
                                 }
-                                j = *xadj.offset(i as isize);
-                                while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                                j = xadj[i as usize];
+                                while j < xadj[(i + 1) as usize] {
                                     ii = *adjncy.offset(j as isize);
                                     me = *where_0.offset(ii as isize);
                                     myrinfo = ((*graph).ckrinfo).offset(ii as isize);
                                     oldnnbrs = (*myrinfo).nnbrs;
                                     let mut k_1: idx_t = 0;
                                     let mut mynbrs_0: *mut cnbr_t = 0 as *mut cnbr_t;
-                                    if (*myrinfo).inbr == -(1 as libc::c_int) {
+                                    if (*myrinfo).inbr == -(1) {
                                         (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                                             ctrl,
-                                            *xadj.offset((ii + 1 as libc::c_int) as isize)
-                                                - *xadj.offset(ii as isize)
-                                                + 1 as libc::c_int,
+                                            xadj[((ii + 1) as usize)]
+                                                - xadj[(ii as usize)]
+                                                + 1,
                                         );
                                         (*myrinfo).nnbrs = 0 as libc::c_int;
                                     }
@@ -595,10 +595,10 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                     if me == from {
                                         (*myrinfo).ed += *adjwgt.offset(j as isize);
                                         (*myrinfo).id -= *adjwgt.offset(j as isize);
-                                        if bndtype == 1 as libc::c_int {
+                                        if bndtype == 1 {
                                             if (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
                                                 && *bndptr.offset(ii as isize)
-                                                    == -(1 as libc::c_int)
+                                                    == -(1)
                                             {
                                                 *bndind.offset(nbnd as isize) = ii;
                                                 let fresh5 = nbnd;
@@ -606,7 +606,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                                 *bndptr.offset(ii as isize) = fresh5;
                                             }
                                         } else if (*myrinfo).ed > 0 as libc::c_int
-                                            && *bndptr.offset(ii as isize) == -(1 as libc::c_int)
+                                            && *bndptr.offset(ii as isize) == -(1)
                                         {
                                             *bndind.offset(nbnd as isize) = ii;
                                             let fresh6 = nbnd;
@@ -616,10 +616,10 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                     } else if me == to {
                                         (*myrinfo).id += *adjwgt.offset(j as isize);
                                         (*myrinfo).ed -= *adjwgt.offset(j as isize);
-                                        if bndtype == 1 as libc::c_int {
+                                        if bndtype == 1 {
                                             if (*myrinfo).ed - (*myrinfo).id < 0 as libc::c_int
                                                 && *bndptr.offset(ii as isize)
-                                                    != -(1 as libc::c_int)
+                                                    != -(1)
                                             {
                                                 nbnd -= 1;
                                                 *bndind
@@ -628,10 +628,10 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                                 *bndptr.offset(
                                                     *bndind.offset(nbnd as isize) as isize
                                                 ) = *bndptr.offset(ii as isize);
-                                                *bndptr.offset(ii as isize) = -(1 as libc::c_int);
+                                                *bndptr.offset(ii as isize) = -(1);
                                             }
                                         } else if (*myrinfo).ed <= 0 as libc::c_int
-                                            && *bndptr.offset(ii as isize) != -(1 as libc::c_int)
+                                            && *bndptr.offset(ii as isize) != -(1)
                                         {
                                             nbnd -= 1;
                                             *bndind.offset(*bndptr.offset(ii as isize) as isize) =
@@ -639,7 +639,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                             *bndptr
                                                 .offset(*bndind.offset(nbnd as isize) as isize) =
                                                 *bndptr.offset(ii as isize);
-                                            *bndptr.offset(ii as isize) = -(1 as libc::c_int);
+                                            *bndptr.offset(ii as isize) = -(1);
                                         }
                                     }
                                     if me != from {
@@ -694,8 +694,8 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                             0.0f64
                                         }) - (*myrinfo).id as libc::c_double)
                                             as real_t;
-                                        if bndtype == 1 as libc::c_int {
-                                            if *vstatus.offset(ii as isize) == 1 as libc::c_int {
+                                        if bndtype == 1 {
+                                            if *vstatus.offset(ii as isize) == 1 {
                                                 if (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
                                                 {
                                                     libmetis__rpqUpdate(queue, ii, rgain_0);
@@ -710,20 +710,20 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                                         *updind.offset(nupd as isize) as isize
                                                     ) = *updptr.offset(ii as isize);
                                                     *updptr.offset(ii as isize) =
-                                                        -(1 as libc::c_int);
+                                                        -(1);
                                                 }
                                             } else if *vstatus.offset(ii as isize)
                                                 == 3 as libc::c_int
                                                 && (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
                                             {
                                                 libmetis__rpqInsert(queue, ii, rgain_0);
-                                                *vstatus.offset(ii as isize) = 1 as libc::c_int;
+                                                *vstatus.offset(ii as isize) = 1;
                                                 *updind.offset(nupd as isize) = ii;
                                                 let fresh9 = nupd;
                                                 nupd = nupd + 1;
                                                 *updptr.offset(ii as isize) = fresh9;
                                             }
-                                        } else if *vstatus.offset(ii as isize) == 1 as libc::c_int {
+                                        } else if *vstatus.offset(ii as isize) == 1 {
                                             if (*myrinfo).ed > 0 as libc::c_int {
                                                 libmetis__rpqUpdate(queue, ii, rgain_0);
                                             } else {
@@ -736,13 +736,13 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                                                 *updptr.offset(
                                                     *updind.offset(nupd as isize) as isize
                                                 ) = *updptr.offset(ii as isize);
-                                                *updptr.offset(ii as isize) = -(1 as libc::c_int);
+                                                *updptr.offset(ii as isize) = -(1);
                                             }
                                         } else if *vstatus.offset(ii as isize) == 3 as libc::c_int
                                             && (*myrinfo).ed > 0 as libc::c_int
                                         {
                                             libmetis__rpqInsert(queue, ii, rgain_0);
-                                            *vstatus.offset(ii as isize) = 1 as libc::c_int;
+                                            *vstatus.offset(ii as isize) = 1;
                                             *updind.offset(nupd as isize) = ii;
                                             let fresh10 = nupd;
                                             nupd = nupd + 1;
@@ -765,7 +765,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
         i = 0 as libc::c_int;
         while i < nupd {
             *vstatus.offset(*updind.offset(i as isize) as isize) = 3 as libc::c_int;
-            *updptr.offset(*updind.offset(i as isize) as isize) = -(1 as libc::c_int);
+            *updptr.offset(*updind.offset(i as isize) as isize) = -(1);
             i += 1;
             i;
         }
@@ -785,12 +785,12 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayCutOptimize(
                 printf(
                     b", Doms: [%3d %4d]\0" as *const u8 as *const libc::c_char,
                     libmetis__imax(nparts as size_t, nads),
-                    libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t),
+                    libmetis__isum(nparts as size_t, nads, 1 as size_t),
                 );
             }
             printf(b"\n\0" as *const u8 as *const libc::c_char);
         }
-        if nmoved == 0 as libc::c_int || omode == 1 as libc::c_int && (*graph).mincut == oldcut {
+        if nmoved == 0 as libc::c_int || omode == 1 && (*graph).mincut == oldcut {
             break;
         }
         pass += 1;
@@ -822,7 +822,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
     let mut to: idx_t = 0;
     let mut oldcut: idx_t = 0;
     let mut vwgt: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
     let mut pwgts: *mut idx_t = 0 as *mut idx_t;
@@ -846,8 +846,8 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
     let mut bfslvl: *mut idx_t = 0 as *mut idx_t;
     let mut bfsind: *mut idx_t = 0 as *mut idx_t;
     let mut bfsmrk: *mut idx_t = 0 as *mut idx_t;
-    let mut bndtype: idx_t = if omode == 1 as libc::c_int {
-        1 as libc::c_int
+    let mut bndtype: idx_t = if omode == 1 {
+        1
     } else {
         2 as libc::c_int
     };
@@ -861,7 +861,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
     let mut mynbrs: *mut vnbr_t = 0 as *mut vnbr_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     bndptr = (*graph).bndptr;
     bndind = (*graph).bndind;
@@ -908,7 +908,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
     );
     updptr = libmetis__iset(
         nvtxs as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nvtxs),
     );
     updind = libmetis__iwspacemalloc(ctrl, nvtxs);
@@ -933,14 +933,14 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
     );
     pmarker = libmetis__iset(
         nparts as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nparts),
     );
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         printf(
             b"%s: [%6d %6d]-[%6d %6d], Bal: %5.3f, Nv-Nb[%6d %6d], Cut: %5d, Vol: %5d\0"
                 as *const u8 as *const libc::c_char,
-            if omode == 1 as libc::c_int {
+            if omode == 1 {
                 b"GRV\0" as *const u8 as *const libc::c_char
             } else {
                 b"GBV\0" as *const u8 as *const libc::c_char
@@ -959,7 +959,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
             printf(
                 b", Doms: [%3d %4d]\0" as *const u8 as *const libc::c_char,
                 libmetis__imax(nparts as size_t, nads),
-                libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t),
+                libmetis__isum(nparts as size_t, nads, 1 as size_t),
             );
         }
         printf(b"\n\0" as *const u8 as *const libc::c_char);
@@ -990,13 +990,13 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
             (*graph).nbnd,
             perm,
             (*graph).nbnd / 4 as libc::c_int,
-            1 as libc::c_int,
+            1,
         );
         ii = 0 as libc::c_int;
         while ii < (*graph).nbnd {
             i = *bndind.offset(*perm.offset(ii as isize) as isize);
             libmetis__ipqInsert(queue, i, (*((*graph).vkrinfo).offset(i as isize)).gv);
-            *vstatus.offset(i as isize) = 1 as libc::c_int;
+            *vstatus.offset(i as isize) = 1;
             *updind.offset(nupd as isize) = i;
             let fresh11 = nupd;
             nupd = nupd + 1;
@@ -1009,7 +1009,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
         iii = 0 as libc::c_int;
         loop {
             i = libmetis__ipqGetTop(queue);
-            if i == -(1 as libc::c_int) {
+            if i == -(1) {
                 break;
             }
             *vstatus.offset(i as isize) = 2 as libc::c_int;
@@ -1017,7 +1017,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
             mynbrs = ((*ctrl).vnbrpool).offset((*myrinfo).inbr as isize);
             from = *where_0.offset(i as isize);
             vwgt = *((*graph).vwgt).offset(i as isize);
-            if omode == 1 as libc::c_int {
+            if omode == 1 {
                 if (*myrinfo).nid > 0 as libc::c_int
                     && *pwgts.offset(from as isize) - vwgt < *minwgt.offset(from as isize)
                 {
@@ -1052,7 +1052,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                                     *doms.offset(
                                         *(*adids.offset(to_0 as isize)).offset(k_0 as isize)
                                             as isize,
-                                    ) = 1 as libc::c_int;
+                                    ) = 1;
                                     k_0 += 1;
                                     k_0;
                                 }
@@ -1063,7 +1063,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                                         l_0 = (*mynbrs.offset(k_0 as isize)).pid;
                                         if *doms.offset(l_0 as isize) == 0 as libc::c_int {
                                             if *nads.offset(l_0 as isize)
-                                                > maxndoms - 1 as libc::c_int
+                                                > maxndoms - 1
                                             {
                                                 nadd = maxndoms;
                                                 break;
@@ -1077,7 +1077,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                                     k_0;
                                 }
                                 if *nads.offset(to_0 as isize) + nadd <= maxndoms {
-                                    *safetos.offset(to_0 as isize) = 1 as libc::c_int;
+                                    *safetos.offset(to_0 as isize) = 1;
                                 }
                                 if nadd == 0 as libc::c_int {
                                     *safetos.offset(to_0 as isize) = 2 as libc::c_int;
@@ -1102,8 +1102,8 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                         } else {
                             0 as libc::c_int
                         };
-                        if omode == 1 as libc::c_int {
-                            k = (*myrinfo).nnbrs - 1 as libc::c_int;
+                        if omode == 1 {
+                            k = (*myrinfo).nnbrs - 1;
                             while k >= 0 as libc::c_int {
                                 to = (*mynbrs.offset(k as isize)).pid;
                                 if !(*safetos.offset(to as isize) == 0) {
@@ -1122,7 +1122,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                             if k < 0 as libc::c_int {
                                 current_block_144 = 9859671972921157070;
                             } else {
-                                j = k - 1 as libc::c_int;
+                                j = k - 1;
                                 while j >= 0 as libc::c_int {
                                     to = (*mynbrs.offset(j as isize)).pid;
                                     if !(*safetos.offset(to as isize) == 0) {
@@ -1163,7 +1163,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                                     || (*mynbrs.offset(k as isize)).ned - (*myrinfo).nid
                                         > 0 as libc::c_int
                                 {
-                                    j = 1 as libc::c_int;
+                                    j = 1;
                                 } else if (*mynbrs.offset(k as isize)).ned - (*myrinfo).nid
                                     == 0 as libc::c_int
                                 {
@@ -1176,7 +1176,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                                             < *itpwgts.offset(to as isize)
                                                 * *pwgts.offset(from as isize)
                                     {
-                                        j = 1 as libc::c_int;
+                                        j = 1;
                                     }
                                 }
                                 if j == 0 as libc::c_int {
@@ -1186,7 +1186,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                                 }
                             }
                         } else {
-                            k = (*myrinfo).nnbrs - 1 as libc::c_int;
+                            k = (*myrinfo).nnbrs - 1;
                             while k >= 0 as libc::c_int {
                                 to = (*mynbrs.offset(k as isize)).pid;
                                 if !(*safetos.offset(to as isize) == 0) {
@@ -1206,7 +1206,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                             if k < 0 as libc::c_int {
                                 current_block_144 = 9859671972921157070;
                             } else {
-                                j = k - 1 as libc::c_int;
+                                j = k - 1;
                                 while j >= 0 as libc::c_int {
                                     to = (*mynbrs.offset(j as isize)).pid;
                                     if !(*safetos.offset(to as isize) == 0) {
@@ -1276,22 +1276,22 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                                         (*myrinfo).nid - (*mynbrs.offset(k as isize)).ned,
                                         &mut maxndoms,
                                     );
-                                    j = *xadj.offset(i as isize);
-                                    while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                                    j = xadj[i as usize];
+                                    while j < xadj[(i + 1) as usize] {
                                         me = *where_0.offset(*adjncy.offset(j as isize) as isize);
                                         if me != from && me != to {
                                             libmetis__UpdateEdgeSubDomainGraph(
                                                 ctrl,
                                                 from,
                                                 me,
-                                                -(1 as libc::c_int),
+                                                -(1),
                                                 &mut maxndoms,
                                             );
                                             libmetis__UpdateEdgeSubDomainGraph(
                                                 ctrl,
                                                 to,
                                                 me,
-                                                1 as libc::c_int,
+                                                1,
                                                 &mut maxndoms,
                                             );
                                         }
@@ -1315,7 +1315,7 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
         i = 0 as libc::c_int;
         while i < nupd {
             *vstatus.offset(*updind.offset(i as isize) as isize) = 3 as libc::c_int;
-            *updptr.offset(*updind.offset(i as isize) as isize) = -(1 as libc::c_int);
+            *updptr.offset(*updind.offset(i as isize) as isize) = -(1);
             i += 1;
             i;
         }
@@ -1335,13 +1335,13 @@ pub unsafe extern "C" fn libmetis__Greedy_KWayVolOptimize(
                 printf(
                     b", Doms: [%3d %4d]\0" as *const u8 as *const libc::c_char,
                     libmetis__imax(nparts as size_t, nads),
-                    libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t),
+                    libmetis__isum(nparts as size_t, nads, 1 as size_t),
                 );
             }
             printf(b"\n\0" as *const u8 as *const libc::c_char);
         }
         if nmoved == 0 as libc::c_int
-            || omode == 1 as libc::c_int && (*graph).minvol == oldvol && (*graph).mincut == oldcut
+            || omode == 1 && (*graph).minvol == oldvol && (*graph).mincut == oldcut
         {
             break;
         }
@@ -1375,7 +1375,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
     let mut to: idx_t = 0;
     let mut cto: idx_t = 0;
     let mut oldcut: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -1400,8 +1400,8 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
     let mut bfslvl: *mut idx_t = 0 as *mut idx_t;
     let mut bfsind: *mut idx_t = 0 as *mut idx_t;
     let mut bfsmrk: *mut idx_t = 0 as *mut idx_t;
-    let mut bndtype: idx_t = if omode == 1 as libc::c_int {
-        1 as libc::c_int
+    let mut bndtype: idx_t = if omode == 1 {
+        1
     } else {
         2 as libc::c_int
     };
@@ -1417,7 +1417,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -1486,7 +1486,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
     );
     updptr = libmetis__iset(
         nvtxs as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nvtxs),
     );
     updind = libmetis__iwspacemalloc(ctrl, nvtxs);
@@ -1507,7 +1507,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
         printf(
             b"%s: [%6d %6d %6d], Bal: %5.3f(%.3f), Nv-Nb[%6d %6d], Cut: %6d, (%d)\0" as *const u8
                 as *const libc::c_char,
-            if omode == 1 as libc::c_int {
+            if omode == 1 {
                 b"GRC\0" as *const u8 as *const libc::c_char
             } else {
                 b"GBC\0" as *const u8 as *const libc::c_char
@@ -1526,7 +1526,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
             printf(
                 b", Doms: [%3d %4d]\0" as *const u8 as *const libc::c_char,
                 libmetis__imax(nparts as size_t, nads),
-                libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t),
+                libmetis__isum(nparts as size_t, nads, 1 as size_t),
             );
         }
         printf(b"\n\0" as *const u8 as *const libc::c_char);
@@ -1545,7 +1545,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
         if (*ctrl).minconn != 0 {
             maxndoms = libmetis__imax(nparts as size_t, nads);
         }
-        libmetis__irandArrayPermute(nbnd, perm, nbnd / 4 as libc::c_int, 1 as libc::c_int);
+        libmetis__irandArrayPermute(nbnd, perm, nbnd / 4 as libc::c_int, 1);
         ii = 0 as libc::c_int;
         while ii < nbnd {
             i = *bndind.offset(*perm.offset(ii as isize) as isize);
@@ -1557,7 +1557,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
             }) - (*((*graph).ckrinfo).offset(i as isize)).id as libc::c_double)
                 as real_t;
             libmetis__rpqInsert(queue, i, rgain);
-            *vstatus.offset(i as isize) = 1 as libc::c_int;
+            *vstatus.offset(i as isize) = 1;
             *updind.offset(nupd as isize) = i;
             let fresh14 = nupd;
             nupd = nupd + 1;
@@ -1570,18 +1570,18 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
         iii = 0 as libc::c_int;
         loop {
             i = libmetis__rpqGetTop(queue);
-            if i == -(1 as libc::c_int) {
+            if i == -(1) {
                 break;
             }
             *vstatus.offset(i as isize) = 2 as libc::c_int;
             myrinfo = ((*graph).ckrinfo).offset(i as isize);
             mynbrs = ((*ctrl).cnbrpool).offset((*myrinfo).inbr as isize);
             from = *where_0.offset(i as isize);
-            if omode == 1 as libc::c_int {
+            if omode == 1 {
                 if (*myrinfo).id > 0 as libc::c_int
                     && libmetis__ivecaxpygez(
                         ncon,
-                        -(1 as libc::c_int),
+                        -(1),
                         vwgt.offset((i * ncon) as isize),
                         pwgts.offset((from * ncon) as isize),
                         minwgt.offset((from * ncon) as isize),
@@ -1593,7 +1593,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                 }
             } else if libmetis__ivecaxpygez(
                 ncon,
-                -(1 as libc::c_int),
+                -(1),
                 vwgt.offset((i * ncon) as isize),
                 pwgts.offset((from * ncon) as isize),
                 minwgt.offset((from * ncon) as isize),
@@ -1625,7 +1625,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                     *doms.offset(
                                         *(*adids.offset(to_0 as isize)).offset(k_0 as isize)
                                             as isize,
-                                    ) = 1 as libc::c_int;
+                                    ) = 1;
                                     k_0 += 1;
                                     k_0;
                                 }
@@ -1636,7 +1636,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                         l_0 = (*mynbrs.offset(k_0 as isize)).pid;
                                         if *doms.offset(l_0 as isize) == 0 as libc::c_int {
                                             if *nads.offset(l_0 as isize)
-                                                > maxndoms - 1 as libc::c_int
+                                                > maxndoms - 1
                                             {
                                                 nadd = maxndoms;
                                                 break;
@@ -1650,7 +1650,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                     k_0;
                                 }
                                 if *nads.offset(to_0 as isize) + nadd <= maxndoms {
-                                    *safetos.offset(to_0 as isize) = 1 as libc::c_int;
+                                    *safetos.offset(to_0 as isize) = 1;
                                 }
                                 if nadd == 0 as libc::c_int {
                                     *safetos.offset(to_0 as isize) = 2 as libc::c_int;
@@ -1668,8 +1668,8 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                 j_0;
                             }
                         }
-                        if omode == 1 as libc::c_int {
-                            k = (*myrinfo).nnbrs - 1 as libc::c_int;
+                        if omode == 1 {
+                            k = (*myrinfo).nnbrs - 1;
                             while k >= 0 as libc::c_int {
                                 to = (*mynbrs.offset(k as isize)).pid;
                                 if !(*safetos.offset(to as isize) == 0) {
@@ -1677,7 +1677,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                     if gain >= 0 as libc::c_int
                                         && libmetis__ivecaxpylez(
                                             ncon,
-                                            1 as libc::c_int,
+                                            1,
                                             vwgt.offset((i * ncon) as isize),
                                             pwgts.offset((to * ncon) as isize),
                                             maxwgt.offset((to * ncon) as isize),
@@ -1693,7 +1693,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                 current_block_331 = 307447392441238883;
                             } else {
                                 cto = to;
-                                j = k - 1 as libc::c_int;
+                                j = k - 1;
                                 while j >= 0 as libc::c_int {
                                     to = (*mynbrs.offset(j as isize)).pid;
                                     if !(*safetos.offset(to as isize) == 0) {
@@ -1701,7 +1701,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                             > (*mynbrs.offset(k as isize)).ed
                                             && libmetis__ivecaxpylez(
                                                 ncon,
-                                                1 as libc::c_int,
+                                                1,
                                                 vwgt.offset((i * ncon) as isize),
                                                 pwgts.offset((to * ncon) as isize),
                                                 maxwgt.offset((to * ncon) as isize),
@@ -1712,10 +1712,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                                     ncon,
                                                     vwgt.offset((i * ncon) as isize),
                                                     ubfactors,
-                                                    1 as libc::c_int,
+                                                    1,
                                                     pwgts.offset((cto * ncon) as isize),
                                                     pijbm.offset((cto * ncon) as isize),
-                                                    1 as libc::c_int,
+                                                    1,
                                                     pwgts.offset((to * ncon) as isize),
                                                     pijbm.offset((to * ncon) as isize),
                                                 ) != 0
@@ -1735,10 +1735,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                             ncon,
                                             vwgt.offset((i * ncon) as isize),
                                             ubfactors,
-                                            -(1 as libc::c_int),
+                                            -(1),
                                             pwgts.offset((from * ncon) as isize),
                                             pijbm.offset((from * ncon) as isize),
-                                            1 as libc::c_int,
+                                            1,
                                             pwgts.offset((to * ncon) as isize),
                                             pijbm.offset((to * ncon) as isize),
                                         ) != 0
@@ -1752,13 +1752,13 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                 }
                             }
                         } else {
-                            k = (*myrinfo).nnbrs - 1 as libc::c_int;
+                            k = (*myrinfo).nnbrs - 1;
                             while k >= 0 as libc::c_int {
                                 to = (*mynbrs.offset(k as isize)).pid;
                                 if !(*safetos.offset(to as isize) == 0) {
                                     if libmetis__ivecaxpylez(
                                         ncon,
-                                        1 as libc::c_int,
+                                        1,
                                         vwgt.offset((i * ncon) as isize),
                                         pwgts.offset((to * ncon) as isize),
                                         maxwgt.offset((to * ncon) as isize),
@@ -1767,10 +1767,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                             ncon,
                                             vwgt.offset((i * ncon) as isize),
                                             ubfactors,
-                                            -(1 as libc::c_int),
+                                            -(1),
                                             pwgts.offset((from * ncon) as isize),
                                             pijbm.offset((from * ncon) as isize),
-                                            1 as libc::c_int,
+                                            1,
                                             pwgts.offset((to * ncon) as isize),
                                             pijbm.offset((to * ncon) as isize),
                                         ) != 0
@@ -1785,7 +1785,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                 current_block_331 = 307447392441238883;
                             } else {
                                 cto = to;
-                                j = k - 1 as libc::c_int;
+                                j = k - 1;
                                 while j >= 0 as libc::c_int {
                                     to = (*mynbrs.offset(j as isize)).pid;
                                     if !(*safetos.offset(to as isize) == 0) {
@@ -1793,10 +1793,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                             ncon,
                                             vwgt.offset((i * ncon) as isize),
                                             ubfactors,
-                                            1 as libc::c_int,
+                                            1,
                                             pwgts.offset((cto * ncon) as isize),
                                             pijbm.offset((cto * ncon) as isize),
-                                            1 as libc::c_int,
+                                            1,
                                             pwgts.offset((to * ncon) as isize),
                                             pijbm.offset((to * ncon) as isize),
                                         ) != 0
@@ -1815,10 +1815,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                         ncon,
                                         vwgt.offset((i * ncon) as isize),
                                         ubfactors,
-                                        -(1 as libc::c_int),
+                                        -(1),
                                         pwgts.offset((from * ncon) as isize),
                                         pijbm.offset((from * ncon) as isize),
-                                        1 as libc::c_int,
+                                        1,
                                         pwgts.offset((to * ncon) as isize),
                                         pijbm.offset((to * ncon) as isize),
                                     ) == 0
@@ -1857,8 +1857,8 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                         (*myrinfo).id - (*mynbrs.offset(k as isize)).ed,
                                         &mut maxndoms,
                                     );
-                                    j = *xadj.offset(i as isize);
-                                    while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                                    j = xadj[i as usize];
+                                    while j < xadj[(i + 1) as usize] {
                                         me = *where_0.offset(*adjncy.offset(j as isize) as isize);
                                         if me != from && me != to {
                                             libmetis__UpdateEdgeSubDomainGraph(
@@ -1882,19 +1882,19 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                 }
                                 libmetis__iaxpy(
                                     ncon as size_t,
-                                    1 as libc::c_int,
+                                    1,
                                     vwgt.offset((i * ncon) as isize),
-                                    1 as libc::c_int as size_t,
+                                    1 as size_t,
                                     pwgts.offset((to * ncon) as isize),
-                                    1 as libc::c_int as size_t,
+                                    1 as size_t,
                                 );
                                 libmetis__iaxpy(
                                     ncon as size_t,
-                                    -(1 as libc::c_int),
+                                    -(1),
                                     vwgt.offset((i * ncon) as isize),
-                                    1 as libc::c_int as size_t,
+                                    1 as size_t,
                                     pwgts.offset((from * ncon) as isize),
-                                    1 as libc::c_int as size_t,
+                                    1 as size_t,
                                 );
                                 *where_0.offset(i as isize) = to;
                                 (*myrinfo).ed += (*myrinfo).id - (*mynbrs.offset(k as isize)).ed;
@@ -1908,8 +1908,8 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                 } else {
                                     (*mynbrs.offset(k as isize)).pid = from;
                                 }
-                                if bndtype == 1 as libc::c_int {
-                                    if *bndptr.offset(i as isize) != -(1 as libc::c_int)
+                                if bndtype == 1 {
+                                    if *bndptr.offset(i as isize) != -(1)
                                         && (*myrinfo).ed - (*myrinfo).id < 0 as libc::c_int
                                     {
                                         nbnd -= 1;
@@ -1917,9 +1917,9 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                             *bndind.offset(nbnd as isize);
                                         *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                                             *bndptr.offset(i as isize);
-                                        *bndptr.offset(i as isize) = -(1 as libc::c_int);
+                                        *bndptr.offset(i as isize) = -(1);
                                     }
-                                    if *bndptr.offset(i as isize) == -(1 as libc::c_int)
+                                    if *bndptr.offset(i as isize) == -(1)
                                         && (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
                                     {
                                         *bndind.offset(nbnd as isize) = i;
@@ -1928,7 +1928,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                         *bndptr.offset(i as isize) = fresh15;
                                     }
                                 } else {
-                                    if *bndptr.offset(i as isize) != -(1 as libc::c_int)
+                                    if *bndptr.offset(i as isize) != -(1)
                                         && (*myrinfo).ed <= 0 as libc::c_int
                                     {
                                         nbnd -= 1;
@@ -1936,9 +1936,9 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                             *bndind.offset(nbnd as isize);
                                         *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                                             *bndptr.offset(i as isize);
-                                        *bndptr.offset(i as isize) = -(1 as libc::c_int);
+                                        *bndptr.offset(i as isize) = -(1);
                                     }
-                                    if *bndptr.offset(i as isize) == -(1 as libc::c_int)
+                                    if *bndptr.offset(i as isize) == -(1)
                                         && (*myrinfo).ed > 0 as libc::c_int
                                     {
                                         *bndind.offset(nbnd as isize) = i;
@@ -1947,20 +1947,20 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                         *bndptr.offset(i as isize) = fresh16;
                                     }
                                 }
-                                j = *xadj.offset(i as isize);
-                                while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                                j = xadj[i as usize];
+                                while j < xadj[(i + 1) as usize] {
                                     ii = *adjncy.offset(j as isize);
                                     me = *where_0.offset(ii as isize);
                                     myrinfo = ((*graph).ckrinfo).offset(ii as isize);
                                     oldnnbrs = (*myrinfo).nnbrs;
                                     let mut k_1: idx_t = 0;
                                     let mut mynbrs_0: *mut cnbr_t = 0 as *mut cnbr_t;
-                                    if (*myrinfo).inbr == -(1 as libc::c_int) {
+                                    if (*myrinfo).inbr == -(1) {
                                         (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                                             ctrl,
-                                            *xadj.offset((ii + 1 as libc::c_int) as isize)
-                                                - *xadj.offset(ii as isize)
-                                                + 1 as libc::c_int,
+                                            xadj[((ii + 1) as usize)]
+                                                - xadj[(ii as usize)]
+                                                + 1,
                                         );
                                         (*myrinfo).nnbrs = 0 as libc::c_int;
                                     }
@@ -1968,10 +1968,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                     if me == from {
                                         (*myrinfo).ed += *adjwgt.offset(j as isize);
                                         (*myrinfo).id -= *adjwgt.offset(j as isize);
-                                        if bndtype == 1 as libc::c_int {
+                                        if bndtype == 1 {
                                             if (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
                                                 && *bndptr.offset(ii as isize)
-                                                    == -(1 as libc::c_int)
+                                                    == -(1)
                                             {
                                                 *bndind.offset(nbnd as isize) = ii;
                                                 let fresh17 = nbnd;
@@ -1979,7 +1979,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                                 *bndptr.offset(ii as isize) = fresh17;
                                             }
                                         } else if (*myrinfo).ed > 0 as libc::c_int
-                                            && *bndptr.offset(ii as isize) == -(1 as libc::c_int)
+                                            && *bndptr.offset(ii as isize) == -(1)
                                         {
                                             *bndind.offset(nbnd as isize) = ii;
                                             let fresh18 = nbnd;
@@ -1989,10 +1989,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                     } else if me == to {
                                         (*myrinfo).id += *adjwgt.offset(j as isize);
                                         (*myrinfo).ed -= *adjwgt.offset(j as isize);
-                                        if bndtype == 1 as libc::c_int {
+                                        if bndtype == 1 {
                                             if (*myrinfo).ed - (*myrinfo).id < 0 as libc::c_int
                                                 && *bndptr.offset(ii as isize)
-                                                    != -(1 as libc::c_int)
+                                                    != -(1)
                                             {
                                                 nbnd -= 1;
                                                 *bndind
@@ -2001,10 +2001,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                                 *bndptr.offset(
                                                     *bndind.offset(nbnd as isize) as isize
                                                 ) = *bndptr.offset(ii as isize);
-                                                *bndptr.offset(ii as isize) = -(1 as libc::c_int);
+                                                *bndptr.offset(ii as isize) = -(1);
                                             }
                                         } else if (*myrinfo).ed <= 0 as libc::c_int
-                                            && *bndptr.offset(ii as isize) != -(1 as libc::c_int)
+                                            && *bndptr.offset(ii as isize) != -(1)
                                         {
                                             nbnd -= 1;
                                             *bndind.offset(*bndptr.offset(ii as isize) as isize) =
@@ -2012,7 +2012,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                             *bndptr
                                                 .offset(*bndind.offset(nbnd as isize) as isize) =
                                                 *bndptr.offset(ii as isize);
-                                            *bndptr.offset(ii as isize) = -(1 as libc::c_int);
+                                            *bndptr.offset(ii as isize) = -(1);
                                         }
                                     }
                                     if me != from {
@@ -2067,8 +2067,8 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                             0.0f64
                                         }) - (*myrinfo).id as libc::c_double)
                                             as real_t;
-                                        if bndtype == 1 as libc::c_int {
-                                            if *vstatus.offset(ii as isize) == 1 as libc::c_int {
+                                        if bndtype == 1 {
+                                            if *vstatus.offset(ii as isize) == 1 {
                                                 if (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
                                                 {
                                                     libmetis__rpqUpdate(queue, ii, rgain_0);
@@ -2083,20 +2083,20 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                                         *updind.offset(nupd as isize) as isize
                                                     ) = *updptr.offset(ii as isize);
                                                     *updptr.offset(ii as isize) =
-                                                        -(1 as libc::c_int);
+                                                        -(1);
                                                 }
                                             } else if *vstatus.offset(ii as isize)
                                                 == 3 as libc::c_int
                                                 && (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
                                             {
                                                 libmetis__rpqInsert(queue, ii, rgain_0);
-                                                *vstatus.offset(ii as isize) = 1 as libc::c_int;
+                                                *vstatus.offset(ii as isize) = 1;
                                                 *updind.offset(nupd as isize) = ii;
                                                 let fresh21 = nupd;
                                                 nupd = nupd + 1;
                                                 *updptr.offset(ii as isize) = fresh21;
                                             }
-                                        } else if *vstatus.offset(ii as isize) == 1 as libc::c_int {
+                                        } else if *vstatus.offset(ii as isize) == 1 {
                                             if (*myrinfo).ed > 0 as libc::c_int {
                                                 libmetis__rpqUpdate(queue, ii, rgain_0);
                                             } else {
@@ -2109,13 +2109,13 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                                                 *updptr.offset(
                                                     *updind.offset(nupd as isize) as isize
                                                 ) = *updptr.offset(ii as isize);
-                                                *updptr.offset(ii as isize) = -(1 as libc::c_int);
+                                                *updptr.offset(ii as isize) = -(1);
                                             }
                                         } else if *vstatus.offset(ii as isize) == 3 as libc::c_int
                                             && (*myrinfo).ed > 0 as libc::c_int
                                         {
                                             libmetis__rpqInsert(queue, ii, rgain_0);
-                                            *vstatus.offset(ii as isize) = 1 as libc::c_int;
+                                            *vstatus.offset(ii as isize) = 1;
                                             *updind.offset(nupd as isize) = ii;
                                             let fresh22 = nupd;
                                             nupd = nupd + 1;
@@ -2138,7 +2138,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
         i = 0 as libc::c_int;
         while i < nupd {
             *vstatus.offset(*updind.offset(i as isize) as isize) = 3 as libc::c_int;
-            *updptr.offset(*updind.offset(i as isize) as isize) = -(1 as libc::c_int);
+            *updptr.offset(*updind.offset(i as isize) as isize) = -(1);
             i += 1;
             i;
         }
@@ -2158,12 +2158,12 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayCutOptimize(
                 printf(
                     b", Doms: [%3d %4d]\0" as *const u8 as *const libc::c_char,
                     libmetis__imax(nparts as size_t, nads),
-                    libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t),
+                    libmetis__isum(nparts as size_t, nads, 1 as size_t),
                 );
             }
             printf(b"\n\0" as *const u8 as *const libc::c_char);
         }
-        if nmoved == 0 as libc::c_int || omode == 1 as libc::c_int && (*graph).mincut == oldcut {
+        if nmoved == 0 as libc::c_int || omode == 1 && (*graph).mincut == oldcut {
             break;
         }
         pass += 1;
@@ -2196,7 +2196,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
     let mut to: idx_t = 0;
     let mut cto: idx_t = 0;
     let mut oldcut: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -2220,8 +2220,8 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
     let mut bfslvl: *mut idx_t = 0 as *mut idx_t;
     let mut bfsind: *mut idx_t = 0 as *mut idx_t;
     let mut bfsmrk: *mut idx_t = 0 as *mut idx_t;
-    let mut bndtype: idx_t = if omode == 1 as libc::c_int {
-        1 as libc::c_int
+    let mut bndtype: idx_t = if omode == 1 {
+        1
     } else {
         2 as libc::c_int
     };
@@ -2239,7 +2239,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     bndptr = (*graph).bndptr;
@@ -2307,7 +2307,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
     );
     updptr = libmetis__iset(
         nvtxs as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nvtxs),
     );
     updind = libmetis__iwspacemalloc(ctrl, nvtxs);
@@ -2332,14 +2332,14 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
     );
     pmarker = libmetis__iset(
         nparts as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nparts),
     );
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         printf(
             b"%s: [%6d %6d %6d], Bal: %5.3f(%.3f),, Nv-Nb[%6d %6d], Cut: %5d, Vol: %5d, (%d)\0"
                 as *const u8 as *const libc::c_char,
-            if omode == 1 as libc::c_int {
+            if omode == 1 {
                 b"GRV\0" as *const u8 as *const libc::c_char
             } else {
                 b"GBV\0" as *const u8 as *const libc::c_char
@@ -2359,7 +2359,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
             printf(
                 b", Doms: [%3d %4d]\0" as *const u8 as *const libc::c_char,
                 libmetis__imax(nparts as size_t, nads),
-                libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t),
+                libmetis__isum(nparts as size_t, nads, 1 as size_t),
             );
         }
         printf(b"\n\0" as *const u8 as *const libc::c_char);
@@ -2382,13 +2382,13 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
             (*graph).nbnd,
             perm,
             (*graph).nbnd / 4 as libc::c_int,
-            1 as libc::c_int,
+            1,
         );
         ii = 0 as libc::c_int;
         while ii < (*graph).nbnd {
             i = *bndind.offset(*perm.offset(ii as isize) as isize);
             libmetis__ipqInsert(queue, i, (*((*graph).vkrinfo).offset(i as isize)).gv);
-            *vstatus.offset(i as isize) = 1 as libc::c_int;
+            *vstatus.offset(i as isize) = 1;
             *updind.offset(nupd as isize) = i;
             let fresh23 = nupd;
             nupd = nupd + 1;
@@ -2401,18 +2401,18 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
         iii = 0 as libc::c_int;
         loop {
             i = libmetis__ipqGetTop(queue);
-            if i == -(1 as libc::c_int) {
+            if i == -(1) {
                 break;
             }
             *vstatus.offset(i as isize) = 2 as libc::c_int;
             myrinfo = ((*graph).vkrinfo).offset(i as isize);
             mynbrs = ((*ctrl).vnbrpool).offset((*myrinfo).inbr as isize);
             from = *where_0.offset(i as isize);
-            if omode == 1 as libc::c_int {
+            if omode == 1 {
                 if (*myrinfo).nid > 0 as libc::c_int
                     && libmetis__ivecaxpygez(
                         ncon,
-                        -(1 as libc::c_int),
+                        -(1),
                         vwgt.offset((i * ncon) as isize),
                         pwgts.offset((from * ncon) as isize),
                         minwgt.offset((from * ncon) as isize),
@@ -2424,7 +2424,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                 }
             } else if libmetis__ivecaxpygez(
                 ncon,
-                -(1 as libc::c_int),
+                -(1),
                 vwgt.offset((i * ncon) as isize),
                 pwgts.offset((from * ncon) as isize),
                 minwgt.offset((from * ncon) as isize),
@@ -2456,7 +2456,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                     *doms.offset(
                                         *(*adids.offset(to_0 as isize)).offset(k_0 as isize)
                                             as isize,
-                                    ) = 1 as libc::c_int;
+                                    ) = 1;
                                     k_0 += 1;
                                     k_0;
                                 }
@@ -2467,7 +2467,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                         l_0 = (*mynbrs.offset(k_0 as isize)).pid;
                                         if *doms.offset(l_0 as isize) == 0 as libc::c_int {
                                             if *nads.offset(l_0 as isize)
-                                                > maxndoms - 1 as libc::c_int
+                                                > maxndoms - 1
                                             {
                                                 nadd = maxndoms;
                                                 break;
@@ -2481,7 +2481,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                     k_0;
                                 }
                                 if *nads.offset(to_0 as isize) + nadd <= maxndoms {
-                                    *safetos.offset(to_0 as isize) = 1 as libc::c_int;
+                                    *safetos.offset(to_0 as isize) = 1;
                                 }
                                 if nadd == 0 as libc::c_int {
                                     *safetos.offset(to_0 as isize) = 2 as libc::c_int;
@@ -2506,8 +2506,8 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                         } else {
                             0 as libc::c_int
                         };
-                        if omode == 1 as libc::c_int {
-                            k = (*myrinfo).nnbrs - 1 as libc::c_int;
+                        if omode == 1 {
+                            k = (*myrinfo).nnbrs - 1;
                             while k >= 0 as libc::c_int {
                                 to = (*mynbrs.offset(k as isize)).pid;
                                 if !(*safetos.offset(to as isize) == 0) {
@@ -2515,7 +2515,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                     if gain >= 0 as libc::c_int
                                         && libmetis__ivecaxpylez(
                                             ncon,
-                                            1 as libc::c_int,
+                                            1,
                                             vwgt.offset((i * ncon) as isize),
                                             pwgts.offset((to * ncon) as isize),
                                             maxwgt.offset((to * ncon) as isize),
@@ -2531,7 +2531,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                 current_block_157 = 6243635450180130569;
                             } else {
                                 cto = to;
-                                j = k - 1 as libc::c_int;
+                                j = k - 1;
                                 while j >= 0 as libc::c_int {
                                     to = (*mynbrs.offset(j as isize)).pid;
                                     if !(*safetos.offset(to as isize) == 0) {
@@ -2540,7 +2540,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                             > (*mynbrs.offset(k as isize)).gv
                                             && libmetis__ivecaxpylez(
                                                 ncon,
-                                                1 as libc::c_int,
+                                                1,
                                                 vwgt.offset((i * ncon) as isize),
                                                 pwgts.offset((to * ncon) as isize),
                                                 maxwgt.offset((to * ncon) as isize),
@@ -2551,7 +2551,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                                     > (*mynbrs.offset(k as isize)).ned
                                                 && libmetis__ivecaxpylez(
                                                     ncon,
-                                                    1 as libc::c_int,
+                                                    1,
                                                     vwgt.offset((i * ncon) as isize),
                                                     pwgts.offset((to * ncon) as isize),
                                                     maxwgt.offset((to * ncon) as isize),
@@ -2564,10 +2564,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                                     ncon,
                                                     vwgt.offset((i * ncon) as isize),
                                                     ubfactors,
-                                                    1 as libc::c_int,
+                                                    1,
                                                     pwgts.offset((cto * ncon) as isize),
                                                     pijbm.offset((cto * ncon) as isize),
-                                                    1 as libc::c_int,
+                                                    1,
                                                     pwgts.offset((to * ncon) as isize),
                                                     pijbm.offset((to * ncon) as isize),
                                                 ) != 0
@@ -2585,7 +2585,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                     || (*mynbrs.offset(k as isize)).ned - (*myrinfo).nid
                                         > 0 as libc::c_int
                                 {
-                                    j = 1 as libc::c_int;
+                                    j = 1;
                                 } else if (*mynbrs.offset(k as isize)).ned - (*myrinfo).nid
                                     == 0 as libc::c_int
                                 {
@@ -2595,15 +2595,15 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                             ncon,
                                             vwgt.offset((i * ncon) as isize),
                                             ubfactors,
-                                            -(1 as libc::c_int),
+                                            -(1),
                                             pwgts.offset((from * ncon) as isize),
                                             pijbm.offset((from * ncon) as isize),
-                                            1 as libc::c_int,
+                                            1,
                                             pwgts.offset((to * ncon) as isize),
                                             pijbm.offset((to * ncon) as isize),
                                         ) != 0
                                     {
-                                        j = 1 as libc::c_int;
+                                        j = 1;
                                     }
                                 }
                                 if j == 0 as libc::c_int {
@@ -2613,13 +2613,13 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                 }
                             }
                         } else {
-                            k = (*myrinfo).nnbrs - 1 as libc::c_int;
+                            k = (*myrinfo).nnbrs - 1;
                             while k >= 0 as libc::c_int {
                                 to = (*mynbrs.offset(k as isize)).pid;
                                 if !(*safetos.offset(to as isize) == 0) {
                                     if libmetis__ivecaxpylez(
                                         ncon,
-                                        1 as libc::c_int,
+                                        1,
                                         vwgt.offset((i * ncon) as isize),
                                         pwgts.offset((to * ncon) as isize),
                                         maxwgt.offset((to * ncon) as isize),
@@ -2628,10 +2628,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                             ncon,
                                             vwgt.offset((i * ncon) as isize),
                                             ubfactors,
-                                            -(1 as libc::c_int),
+                                            -(1),
                                             pwgts.offset((from * ncon) as isize),
                                             pijbm.offset((from * ncon) as isize),
-                                            1 as libc::c_int,
+                                            1,
                                             pwgts.offset((to * ncon) as isize),
                                             pijbm.offset((to * ncon) as isize),
                                         ) != 0
@@ -2646,7 +2646,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                 current_block_157 = 6243635450180130569;
                             } else {
                                 cto = to;
-                                j = k - 1 as libc::c_int;
+                                j = k - 1;
                                 while j >= 0 as libc::c_int {
                                     to = (*mynbrs.offset(j as isize)).pid;
                                     if !(*safetos.offset(to as isize) == 0) {
@@ -2654,10 +2654,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                             ncon,
                                             vwgt.offset((i * ncon) as isize),
                                             ubfactors,
-                                            1 as libc::c_int,
+                                            1,
                                             pwgts.offset((cto * ncon) as isize),
                                             pijbm.offset((cto * ncon) as isize),
-                                            1 as libc::c_int,
+                                            1,
                                             pwgts.offset((to * ncon) as isize),
                                             pijbm.offset((to * ncon) as isize),
                                         ) != 0
@@ -2678,10 +2678,10 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                         ncon,
                                         vwgt.offset((i * ncon) as isize),
                                         ubfactors,
-                                        -(1 as libc::c_int),
+                                        -(1),
                                         pwgts.offset((from * ncon) as isize),
                                         pijbm.offset((from * ncon) as isize),
-                                        1 as libc::c_int,
+                                        1,
                                         pwgts.offset((to * ncon) as isize),
                                         pijbm.offset((to * ncon) as isize),
                                     ) == 0
@@ -2725,22 +2725,22 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                         (*myrinfo).nid - (*mynbrs.offset(k as isize)).ned,
                                         &mut maxndoms,
                                     );
-                                    j = *xadj.offset(i as isize);
-                                    while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                                    j = xadj[i as usize];
+                                    while j < xadj[(i + 1) as usize] {
                                         me = *where_0.offset(*adjncy.offset(j as isize) as isize);
                                         if me != from && me != to {
                                             libmetis__UpdateEdgeSubDomainGraph(
                                                 ctrl,
                                                 from,
                                                 me,
-                                                -(1 as libc::c_int),
+                                                -(1),
                                                 &mut maxndoms,
                                             );
                                             libmetis__UpdateEdgeSubDomainGraph(
                                                 ctrl,
                                                 to,
                                                 me,
-                                                1 as libc::c_int,
+                                                1,
                                                 &mut maxndoms,
                                             );
                                         }
@@ -2750,19 +2750,19 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                                 }
                                 libmetis__iaxpy(
                                     ncon as size_t,
-                                    1 as libc::c_int,
+                                    1,
                                     vwgt.offset((i * ncon) as isize),
-                                    1 as libc::c_int as size_t,
+                                    1 as size_t,
                                     pwgts.offset((to * ncon) as isize),
-                                    1 as libc::c_int as size_t,
+                                    1 as size_t,
                                 );
                                 libmetis__iaxpy(
                                     ncon as size_t,
-                                    -(1 as libc::c_int),
+                                    -(1),
                                     vwgt.offset((i * ncon) as isize),
-                                    1 as libc::c_int as size_t,
+                                    1 as size_t,
                                     pwgts.offset((from * ncon) as isize),
-                                    1 as libc::c_int as size_t,
+                                    1 as size_t,
                                 );
                                 libmetis__KWayVolUpdate(
                                     ctrl, graph, i, from, to, queue, vstatus, &mut nupd, updptr,
@@ -2780,7 +2780,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
         i = 0 as libc::c_int;
         while i < nupd {
             *vstatus.offset(*updind.offset(i as isize) as isize) = 3 as libc::c_int;
-            *updptr.offset(*updind.offset(i as isize) as isize) = -(1 as libc::c_int);
+            *updptr.offset(*updind.offset(i as isize) as isize) = -(1);
             i += 1;
             i;
         }
@@ -2800,13 +2800,13 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
                 printf(
                     b", Doms: [%3d %4d]\0" as *const u8 as *const libc::c_char,
                     libmetis__imax(nparts as size_t, nads),
-                    libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t),
+                    libmetis__isum(nparts as size_t, nads, 1 as size_t),
                 );
             }
             printf(b"\n\0" as *const u8 as *const libc::c_char);
         }
         if nmoved == 0 as libc::c_int
-            || omode == 1 as libc::c_int && (*graph).minvol == oldvol && (*graph).mincut == oldcut
+            || omode == 1 && (*graph).minvol == oldvol && (*graph).mincut == oldcut
         {
             break;
         }
@@ -2819,7 +2819,7 @@ pub unsafe extern "C" fn libmetis__Greedy_McKWayVolOptimize(
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__IsArticulationNode(
     mut i: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut where_0: *mut idx_t,
     mut bfslvl: *mut idx_t,
@@ -2837,11 +2837,11 @@ pub unsafe extern "C" fn libmetis__IsArticulationNode(
     let mut BFSDEPTH: idx_t = 5 as libc::c_int;
     from = *where_0.offset(i as isize);
     tnhits = 0 as libc::c_int;
-    j = *xadj.offset(i as isize);
-    while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+    j = xadj[i as usize];
+    while j < xadj[(i + 1) as usize] {
         if *where_0.offset(*adjncy.offset(j as isize) as isize) == from {
             k = *adjncy.offset(j as isize);
-            *bfsmrk.offset(k as isize) = 1 as libc::c_int;
+            *bfsmrk.offset(k as isize) = 1;
             tnhits += 1;
             tnhits;
         }
@@ -2851,23 +2851,23 @@ pub unsafe extern "C" fn libmetis__IsArticulationNode(
     if tnhits == 0 as libc::c_int {
         return 0 as libc::c_int;
     }
-    if tnhits == 1 as libc::c_int {
+    if tnhits == 1 {
         *bfsmrk.offset(k as isize) = 0 as libc::c_int;
         return 0 as libc::c_int;
     }
-    *bfslvl.offset(i as isize) = 1 as libc::c_int;
+    *bfslvl.offset(i as isize) = 1;
     *bfsind.offset(0 as libc::c_int as isize) = k;
-    *bfslvl.offset(k as isize) = 1 as libc::c_int;
+    *bfslvl.offset(k as isize) = 1;
     *bfsmrk.offset(k as isize) = 0 as libc::c_int;
     head = 0 as libc::c_int;
-    tail = 1 as libc::c_int;
-    nhits = 1 as libc::c_int;
+    tail = 1;
+    nhits = 1;
     while head < tail {
         let fresh24 = head;
         head = head + 1;
         ii = *bfsind.offset(fresh24 as isize);
-        j = *xadj.offset(ii as isize);
-        while j < *xadj.offset((ii + 1 as libc::c_int) as isize) {
+        j = xadj[(ii as usize)];
+        while j < xadj[((ii + 1) as usize)] {
             k = *adjncy.offset(j as isize);
             if *where_0.offset(k as isize) == from {
                 if *bfsmrk.offset(k as isize) != 0 {
@@ -2883,7 +2883,7 @@ pub unsafe extern "C" fn libmetis__IsArticulationNode(
                     let fresh25 = tail;
                     tail = tail + 1;
                     *bfsind.offset(fresh25 as isize) = k;
-                    *bfslvl.offset(k as isize) = *bfslvl.offset(ii as isize) + 1 as libc::c_int;
+                    *bfslvl.offset(k as isize) = *bfslvl.offset(ii as isize) + 1;
                 }
             }
             j += 1;
@@ -2901,8 +2901,8 @@ pub unsafe extern "C" fn libmetis__IsArticulationNode(
         j;
     }
     if nhits < tnhits {
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             if *where_0.offset(*adjncy.offset(j as isize) as isize) == from {
                 *bfsmrk.offset(*adjncy.offset(j as isize) as isize) = 0 as libc::c_int;
             }
@@ -2942,7 +2942,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
     let mut other: idx_t = 0;
     let mut me: idx_t = 0;
     let mut myidx: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vsize: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -2950,7 +2950,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
     let mut orinfo: *mut vkrinfo_t = 0 as *mut vkrinfo_t;
     let mut mynbrs: *mut vnbr_t = 0 as *mut vnbr_t;
     let mut onbrs: *mut vnbr_t = 0 as *mut vnbr_t;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     vsize = (*graph).vsize;
     where_0 = (*graph).where_0;
@@ -2964,8 +2964,8 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
     }
     *pmarker.offset(from as isize) = k;
     myidx = *pmarker.offset(to as isize);
-    j = *xadj.offset(v as isize);
-    while j < *xadj.offset((v + 1 as libc::c_int) as isize) {
+    j = xadj[(v as usize)];
+    while j < xadj[((v + 1) as usize)] {
         ii = *adjncy.offset(j as isize);
         other = *where_0.offset(ii as isize);
         orinfo = ((*graph).vkrinfo).offset(ii as isize);
@@ -2973,7 +2973,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
         if other == from {
             k = 0 as libc::c_int;
             while k < (*orinfo).nnbrs {
-                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) == -(1 as libc::c_int)
+                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) == -(1)
                 {
                     let ref mut fresh26 = (*onbrs.offset(k as isize)).gv;
                     *fresh26 += *vsize.offset(v as isize);
@@ -2981,11 +2981,11 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                 k += 1;
                 k;
             }
-        } else if (*mynbrs.offset(*pmarker.offset(other as isize) as isize)).ned > 1 as libc::c_int
+        } else if (*mynbrs.offset(*pmarker.offset(other as isize) as isize)).ned > 1
         {
             k = 0 as libc::c_int;
             while k < (*orinfo).nnbrs {
-                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) == -(1 as libc::c_int)
+                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) == -(1)
                 {
                     let ref mut fresh27 = (*onbrs.offset(k as isize)).gv;
                     *fresh27 += *vsize.offset(v as isize);
@@ -2996,7 +2996,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
         } else {
             k = 0 as libc::c_int;
             while k < (*orinfo).nnbrs {
-                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) != -(1 as libc::c_int)
+                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) != -(1)
                 {
                     let ref mut fresh28 = (*onbrs.offset(k as isize)).gv;
                     *fresh28 -= *vsize.offset(v as isize);
@@ -3010,12 +3010,12 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
     }
     k = 0 as libc::c_int;
     while k < (*myrinfo).nnbrs {
-        *pmarker.offset((*mynbrs.offset(k as isize)).pid as isize) = -(1 as libc::c_int);
+        *pmarker.offset((*mynbrs.offset(k as isize)).pid as isize) = -(1);
         k += 1;
         k;
     }
-    *pmarker.offset(from as isize) = -(1 as libc::c_int);
-    if myidx == -(1 as libc::c_int) {
+    *pmarker.offset(from as isize) = -(1);
+    if myidx == -(1) {
         let fresh29 = (*myrinfo).nnbrs;
         (*myrinfo).nnbrs = (*myrinfo).nnbrs + 1;
         myidx = fresh29;
@@ -3031,11 +3031,11 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
     } else {
         (*mynbrs.offset(myidx as isize)).pid = from;
     }
-    *vmarker.offset(v as isize) = 1 as libc::c_int;
+    *vmarker.offset(v as isize) = 1;
     *modind.offset(0 as libc::c_int as isize) = v;
-    nmod = 1 as libc::c_int;
-    j = *xadj.offset(v as isize);
-    while j < *xadj.offset((v + 1 as libc::c_int) as isize) {
+    nmod = 1;
+    j = xadj[(v as usize)];
+    while j < xadj[((v + 1) as usize)] {
         ii = *adjncy.offset(j as isize);
         me = *where_0.offset(ii as isize);
         if *vmarker.offset(ii as isize) == 0 {
@@ -3045,31 +3045,30 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
             *modind.offset(fresh30 as isize) = ii;
         }
         myrinfo = ((*graph).vkrinfo).offset(ii as isize);
-        if (*myrinfo).inbr == -(1 as libc::c_int) {
+        if (*myrinfo).inbr == -(1) {
             (*myrinfo).inbr = libmetis__vnbrpoolGetNext(
                 ctrl,
-                *xadj.offset((ii + 1 as libc::c_int) as isize) - *xadj.offset(ii as isize)
-                    + 1 as libc::c_int,
+                xadj[((ii + 1) as usize)] - xadj[(ii as usize)] + 1,
             );
         }
         mynbrs = ((*ctrl).vnbrpool).offset((*myrinfo).inbr as isize);
         if me == from {
-            (*myrinfo).ned += 1 as libc::c_int;
-            (*myrinfo).nid -= 1 as libc::c_int;
+            (*myrinfo).ned += 1;
+            (*myrinfo).nid -= 1;
         } else if me == to {
-            (*myrinfo).nid += 1 as libc::c_int;
-            (*myrinfo).ned -= 1 as libc::c_int;
+            (*myrinfo).nid += 1;
+            (*myrinfo).ned -= 1;
         }
         if me != from {
             k = 0 as libc::c_int;
             while k < (*myrinfo).nnbrs {
                 if (*mynbrs.offset(k as isize)).pid == from {
-                    if (*mynbrs.offset(k as isize)).ned == 1 as libc::c_int {
+                    if (*mynbrs.offset(k as isize)).ned == 1 {
                         (*myrinfo).nnbrs -= 1;
                         *mynbrs.offset(k as isize) = *mynbrs.offset((*myrinfo).nnbrs as isize);
-                        *vmarker.offset(ii as isize) = 1 as libc::c_int;
-                        jj = *xadj.offset(ii as isize);
-                        while jj < *xadj.offset((ii + 1 as libc::c_int) as isize) {
+                        *vmarker.offset(ii as isize) = 1;
+                        jj = xadj[(ii as usize)];
+                        while jj < xadj[((ii + 1) as usize)] {
                             u = *adjncy.offset(jj as isize);
                             other = *where_0.offset(u as isize);
                             orinfo = ((*graph).vkrinfo).offset(u as isize);
@@ -3098,9 +3097,9 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                         let ref mut fresh33 = (*mynbrs.offset(k as isize)).ned;
                         *fresh33 -= 1;
                         *fresh33;
-                        if (*mynbrs.offset(k as isize)).ned == 1 as libc::c_int {
-                            jj = *xadj.offset(ii as isize);
-                            while jj < *xadj.offset((ii + 1 as libc::c_int) as isize) {
+                        if (*mynbrs.offset(k as isize)).ned == 1 {
+                            jj = xadj[(ii as usize)];
+                            while jj < xadj[((ii + 1) as usize)] {
                                 u = *adjncy.offset(jj as isize);
                                 other = *where_0.offset(u as isize);
                                 if other == from {
@@ -3142,8 +3141,8 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                     *fresh36 += 1;
                     *fresh36;
                     if (*mynbrs.offset(k as isize)).ned == 2 as libc::c_int {
-                        jj = *xadj.offset(ii as isize);
-                        while jj < *xadj.offset((ii + 1 as libc::c_int) as isize) {
+                        jj = xadj[(ii as usize)];
+                        while jj < xadj[((ii + 1) as usize)] {
                             u = *adjncy.offset(jj as isize);
                             other = *where_0.offset(u as isize);
                             if u != v && other == to {
@@ -3179,10 +3178,10 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                 (*mynbrs.offset((*myrinfo).nnbrs as isize)).pid = to;
                 let fresh39 = (*myrinfo).nnbrs;
                 (*myrinfo).nnbrs = (*myrinfo).nnbrs + 1;
-                (*mynbrs.offset(fresh39 as isize)).ned = 1 as libc::c_int;
-                *vmarker.offset(ii as isize) = 1 as libc::c_int;
-                jj = *xadj.offset(ii as isize);
-                while jj < *xadj.offset((ii + 1 as libc::c_int) as isize) {
+                (*mynbrs.offset(fresh39 as isize)).ned = 1;
+                *vmarker.offset(ii as isize) = 1;
+                jj = xadj[(ii as usize)];
+                while jj < xadj[((ii + 1) as usize)] {
                     u = *adjncy.offset(jj as isize);
                     other = *where_0.offset(u as isize);
                     orinfo = ((*graph).vkrinfo).offset(u as isize);
@@ -3221,8 +3220,8 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
         k;
     }
     *pmarker.offset(to as isize) = k;
-    j = *xadj.offset(v as isize);
-    while j < *xadj.offset((v + 1 as libc::c_int) as isize) {
+    j = xadj[(v as usize)];
+    while j < xadj[((v + 1) as usize)] {
         ii = *adjncy.offset(j as isize);
         other = *where_0.offset(ii as isize);
         orinfo = ((*graph).vkrinfo).offset(ii as isize);
@@ -3230,7 +3229,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
         if other == to {
             k = 0 as libc::c_int;
             while k < (*orinfo).nnbrs {
-                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) == -(1 as libc::c_int)
+                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) == -(1)
                 {
                     let ref mut fresh42 = (*onbrs.offset(k as isize)).gv;
                     *fresh42 -= *vsize.offset(v as isize);
@@ -3238,11 +3237,11 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                 k += 1;
                 k;
             }
-        } else if (*mynbrs.offset(*pmarker.offset(other as isize) as isize)).ned > 1 as libc::c_int
+        } else if (*mynbrs.offset(*pmarker.offset(other as isize) as isize)).ned > 1
         {
             k = 0 as libc::c_int;
             while k < (*orinfo).nnbrs {
-                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) == -(1 as libc::c_int)
+                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) == -(1)
                 {
                     let ref mut fresh43 = (*onbrs.offset(k as isize)).gv;
                     *fresh43 -= *vsize.offset(v as isize);
@@ -3253,7 +3252,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
         } else {
             k = 0 as libc::c_int;
             while k < (*orinfo).nnbrs {
-                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) != -(1 as libc::c_int)
+                if *pmarker.offset((*onbrs.offset(k as isize)).pid as isize) != -(1)
                 {
                     let ref mut fresh44 = (*onbrs.offset(k as isize)).gv;
                     *fresh44 += *vsize.offset(v as isize);
@@ -3267,26 +3266,26 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
     }
     k = 0 as libc::c_int;
     while k < (*myrinfo).nnbrs {
-        *pmarker.offset((*mynbrs.offset(k as isize)).pid as isize) = -(1 as libc::c_int);
+        *pmarker.offset((*mynbrs.offset(k as isize)).pid as isize) = -(1);
         k += 1;
         k;
     }
-    *pmarker.offset(to as isize) = -(1 as libc::c_int);
+    *pmarker.offset(to as isize) = -(1);
     iii = 0 as libc::c_int;
     while iii < nmod {
         i = *modind.offset(iii as isize);
         me = *where_0.offset(i as isize);
         myrinfo = ((*graph).vkrinfo).offset(i as isize);
         mynbrs = ((*ctrl).vnbrpool).offset((*myrinfo).inbr as isize);
-        if *vmarker.offset(i as isize) == 1 as libc::c_int {
+        if *vmarker.offset(i as isize) == 1 {
             k = 0 as libc::c_int;
             while k < (*myrinfo).nnbrs {
                 (*mynbrs.offset(k as isize)).gv = 0 as libc::c_int;
                 k += 1;
                 k;
             }
-            j = *xadj.offset(i as isize);
-            while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+            j = xadj[i as usize];
+            while j < xadj[(i + 1) as usize] {
                 ii = *adjncy.offset(j as isize);
                 other = *where_0.offset(ii as isize);
                 orinfo = ((*graph).vkrinfo).offset(ii as isize);
@@ -3297,12 +3296,12 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                     kk += 1;
                     kk;
                 }
-                *pmarker.offset(other as isize) = 1 as libc::c_int;
+                *pmarker.offset(other as isize) = 1;
                 if me == other {
                     k = 0 as libc::c_int;
                     while k < (*myrinfo).nnbrs {
                         if *pmarker.offset((*mynbrs.offset(k as isize)).pid as isize)
-                            == -(1 as libc::c_int)
+                            == -(1)
                         {
                             let ref mut fresh45 = (*mynbrs.offset(k as isize)).gv;
                             *fresh45 -= *vsize.offset(ii as isize);
@@ -3311,12 +3310,12 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                         k;
                     }
                 } else if (*onbrs.offset(*pmarker.offset(me as isize) as isize)).ned
-                    == 1 as libc::c_int
+                    == 1
                 {
                     k = 0 as libc::c_int;
                     while k < (*myrinfo).nnbrs {
                         if *pmarker.offset((*mynbrs.offset(k as isize)).pid as isize)
-                            != -(1 as libc::c_int)
+                            != -(1)
                         {
                             let ref mut fresh46 = (*mynbrs.offset(k as isize)).gv;
                             *fresh46 += *vsize.offset(ii as isize);
@@ -3328,7 +3327,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                     k = 0 as libc::c_int;
                     while k < (*myrinfo).nnbrs {
                         if *pmarker.offset((*mynbrs.offset(k as isize)).pid as isize)
-                            == -(1 as libc::c_int)
+                            == -(1)
                         {
                             let ref mut fresh47 = (*mynbrs.offset(k as isize)).gv;
                             *fresh47 -= *vsize.offset(ii as isize);
@@ -3340,16 +3339,16 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                 kk = 0 as libc::c_int;
                 while kk < (*orinfo).nnbrs {
                     *pmarker.offset((*onbrs.offset(kk as isize)).pid as isize) =
-                        -(1 as libc::c_int);
+                        -(1);
                     kk += 1;
                     kk;
                 }
-                *pmarker.offset(other as isize) = -(1 as libc::c_int);
+                *pmarker.offset(other as isize) = -(1);
                 j += 1;
                 j;
             }
         }
-        (*myrinfo).gv = -(2147483647 as libc::c_int) - 1 as libc::c_int;
+        (*myrinfo).gv = -(2147483647 as libc::c_int) - 1;
         k = 0 as libc::c_int;
         while k < (*myrinfo).nnbrs {
             if (*mynbrs.offset(k as isize)).gv > (*myrinfo).gv {
@@ -3361,9 +3360,9 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
         if (*myrinfo).ned > 0 as libc::c_int && (*myrinfo).nid == 0 as libc::c_int {
             (*myrinfo).gv += *vsize.offset(i as isize);
         }
-        if bndtype == 1 as libc::c_int {
+        if bndtype == 1 {
             if (*myrinfo).gv >= 0 as libc::c_int
-                && *((*graph).bndptr).offset(i as isize) == -(1 as libc::c_int)
+                && *((*graph).bndptr).offset(i as isize) == -(1)
             {
                 *((*graph).bndind).offset((*graph).nbnd as isize) = i;
                 let fresh48 = (*graph).nbnd;
@@ -3371,7 +3370,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                 *((*graph).bndptr).offset(i as isize) = fresh48;
             }
             if (*myrinfo).gv < 0 as libc::c_int
-                && *((*graph).bndptr).offset(i as isize) != -(1 as libc::c_int)
+                && *((*graph).bndptr).offset(i as isize) != -(1)
             {
                 (*graph).nbnd -= 1;
                 *((*graph).bndind).offset(*((*graph).bndptr).offset(i as isize) as isize) =
@@ -3379,11 +3378,11 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                 *((*graph).bndptr)
                     .offset(*((*graph).bndind).offset((*graph).nbnd as isize) as isize) =
                     *((*graph).bndptr).offset(i as isize);
-                *((*graph).bndptr).offset(i as isize) = -(1 as libc::c_int);
+                *((*graph).bndptr).offset(i as isize) = -(1);
             }
         } else {
             if (*myrinfo).ned > 0 as libc::c_int
-                && *((*graph).bndptr).offset(i as isize) == -(1 as libc::c_int)
+                && *((*graph).bndptr).offset(i as isize) == -(1)
             {
                 *((*graph).bndind).offset((*graph).nbnd as isize) = i;
                 let fresh49 = (*graph).nbnd;
@@ -3391,7 +3390,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                 *((*graph).bndptr).offset(i as isize) = fresh49;
             }
             if (*myrinfo).ned == 0 as libc::c_int
-                && *((*graph).bndptr).offset(i as isize) != -(1 as libc::c_int)
+                && *((*graph).bndptr).offset(i as isize) != -(1)
             {
                 (*graph).nbnd -= 1;
                 *((*graph).bndind).offset(*((*graph).bndptr).offset(i as isize) as isize) =
@@ -3399,23 +3398,23 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                 *((*graph).bndptr)
                     .offset(*((*graph).bndind).offset((*graph).nbnd as isize) as isize) =
                     *((*graph).bndptr).offset(i as isize);
-                *((*graph).bndptr).offset(i as isize) = -(1 as libc::c_int);
+                *((*graph).bndptr).offset(i as isize) = -(1);
             }
         }
         if !queue.is_null() {
             if *vstatus.offset(i as isize) != 2 as libc::c_int {
-                if *((*graph).bndptr).offset(i as isize) != -(1 as libc::c_int) {
-                    if *vstatus.offset(i as isize) == 1 as libc::c_int {
+                if *((*graph).bndptr).offset(i as isize) != -(1) {
+                    if *vstatus.offset(i as isize) == 1 {
                         libmetis__ipqUpdate(queue, i, (*myrinfo).gv);
                     } else {
                         libmetis__ipqInsert(queue, i, (*myrinfo).gv);
-                        *vstatus.offset(i as isize) = 1 as libc::c_int;
+                        *vstatus.offset(i as isize) = 1;
                         *updind.offset(*r_nupd as isize) = i;
                         let fresh50 = *r_nupd;
                         *r_nupd = *r_nupd + 1;
                         *updptr.offset(i as isize) = fresh50;
                     }
-                } else if *vstatus.offset(i as isize) == 1 as libc::c_int {
+                } else if *vstatus.offset(i as isize) == 1 {
                     libmetis__ipqDelete(queue, i);
                     *vstatus.offset(i as isize) = 3 as libc::c_int;
                     *r_nupd -= 1;
@@ -3423,7 +3422,7 @@ pub unsafe extern "C" fn libmetis__KWayVolUpdate(
                         *updind.offset(*r_nupd as isize);
                     *updptr.offset(*updind.offset(*r_nupd as isize) as isize) =
                         *updptr.offset(i as isize);
-                    *updptr.offset(i as isize) = -(1 as libc::c_int);
+                    *updptr.offset(i as isize) = -(1);
                 }
             }
         }

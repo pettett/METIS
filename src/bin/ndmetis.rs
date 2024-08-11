@@ -40,7 +40,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
     (*params).iotimer = ((*params).iotimer as libc::c_double - gk_CPUSeconds()) as real_t;
     graph = ReadGraph(params);
     (*params).iotimer = ((*params).iotimer as libc::c_double + gk_CPUSeconds()) as real_t;
-    if (*graph).ncon != 1 as libc::c_int {
+    if (*graph).ncon != 1 {
         printf(
             b"***The input graph contains %d constraints..\n***Ordering requires a graph with one constraint.\n\0"
                 as *const u8 as *const libc::c_char,
@@ -74,7 +74,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
     (*params).parttimer = ((*params).parttimer as libc::c_double - gk_CPUSeconds()) as real_t;
     status = METIS_NodeND(
         &mut (*graph).nvtxs,
-        (*graph).xadj,
+        &mut (*graph).xadj,
         (*graph).adjncy,
         (*graph).vwgt,
         options.as_mut_ptr(),

@@ -49,13 +49,13 @@ pub unsafe extern "C" fn libmetis__RefineKWay(
             0 as libc::c_int as real_t,
             2 as libc::c_int,
         );
-        libmetis__ComputeKWayBoundary(ctrl, graph, 1 as libc::c_int);
+        libmetis__ComputeKWayBoundary(ctrl, graph, 1);
         libmetis__Greedy_KWayOptimize(
             ctrl,
             graph,
             (*ctrl).niter,
             0 as libc::c_int as real_t,
-            1 as libc::c_int,
+            1,
         );
         (*ctrl).contig = 0 as libc::c_int;
     }
@@ -74,18 +74,18 @@ pub unsafe extern "C" fn libmetis__RefineKWay(
             libmetis__Greedy_KWayOptimize(
                 ctrl,
                 graph,
-                1 as libc::c_int,
+                1,
                 0 as libc::c_int as real_t,
                 2 as libc::c_int,
             );
-            libmetis__ComputeKWayBoundary(ctrl, graph, 1 as libc::c_int);
+            libmetis__ComputeKWayBoundary(ctrl, graph, 1);
         }
         libmetis__Greedy_KWayOptimize(
             ctrl,
             graph,
             (*ctrl).niter,
             5.0f64 as real_t,
-            1 as libc::c_int,
+            1,
         );
         if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
             (*ctrl).RefTmr += gk_CPUSeconds();
@@ -100,7 +100,7 @@ pub unsafe extern "C" fn libmetis__RefineKWay(
             {
                 libmetis__EliminateComponents(ctrl, graph);
                 if libmetis__IsBalanced(ctrl, graph, 0.02f64 as real_t) == 0 {
-                    (*ctrl).contig = 1 as libc::c_int;
+                    (*ctrl).contig = 1;
                     libmetis__ComputeKWayBoundary(ctrl, graph, 2 as libc::c_int);
                     libmetis__Greedy_KWayOptimize(
                         ctrl,
@@ -109,13 +109,13 @@ pub unsafe extern "C" fn libmetis__RefineKWay(
                         0 as libc::c_int as real_t,
                         2 as libc::c_int,
                     );
-                    libmetis__ComputeKWayBoundary(ctrl, graph, 1 as libc::c_int);
+                    libmetis__ComputeKWayBoundary(ctrl, graph, 1);
                     libmetis__Greedy_KWayOptimize(
                         ctrl,
                         graph,
                         (*ctrl).niter,
                         0 as libc::c_int as real_t,
-                        1 as libc::c_int,
+                        1,
                     );
                     (*ctrl).contig = 0 as libc::c_int;
                 }
@@ -155,13 +155,13 @@ pub unsafe extern "C" fn libmetis__RefineKWay(
             0 as libc::c_int as real_t,
             2 as libc::c_int,
         );
-        libmetis__ComputeKWayBoundary(ctrl, graph, 1 as libc::c_int);
+        libmetis__ComputeKWayBoundary(ctrl, graph, 1);
         libmetis__Greedy_KWayOptimize(
             ctrl,
             graph,
             (*ctrl).niter,
             0 as libc::c_int as real_t,
-            1 as libc::c_int,
+            1,
         );
     }
     (*ctrl).contig != 0;
@@ -236,7 +236,7 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
     let mut mincut: idx_t = 0;
     let mut me: idx_t = 0;
     let mut other: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+    
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -247,17 +247,17 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
     nparts = (*ctrl).nparts;
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     where_0 = (*graph).where_0;
     pwgts = libmetis__iset((nparts * ncon) as size_t, 0 as libc::c_int, (*graph).pwgts);
     bndind = (*graph).bndind;
-    bndptr = libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), (*graph).bndptr);
+    bndptr = libmetis__iset(nvtxs as size_t, -(1), (*graph).bndptr);
     mincut = 0 as libc::c_int;
     nbnd = mincut;
-    if ncon == 1 as libc::c_int {
+    if ncon == 1 {
         i = 0 as libc::c_int;
         while i < nvtxs {
             let ref mut fresh0 = *pwgts.offset(*where_0.offset(i as isize) as isize);
@@ -294,8 +294,8 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
             while i < nvtxs {
                 me = *where_0.offset(i as isize);
                 myrinfo = ((*graph).ckrinfo).offset(i as isize);
-                j = *xadj.offset(i as isize);
-                while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                j = xadj[i as usize];
+                while j < xadj[(i + 1) as usize] {
                     if me == *where_0.offset(*adjncy.offset(j as isize) as isize) {
                         (*myrinfo).id += *adjwgt.offset(j as isize);
                     } else {
@@ -308,12 +308,11 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
                     mincut += (*myrinfo).ed;
                     (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                         ctrl,
-                        *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
-                            + 1 as libc::c_int,
+                        xadj[(i + 1) as usize] - xadj[i as usize] + 1,
                     );
                     mynbrs = ((*ctrl).cnbrpool).offset((*myrinfo).inbr as isize);
-                    j = *xadj.offset(i as isize);
-                    while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                    j = xadj[i as usize];
+                    while j < xadj[(i + 1) as usize] {
                         other = *where_0.offset(*adjncy.offset(j as isize) as isize);
                         if me != other {
                             k = 0 as libc::c_int;
@@ -344,7 +343,7 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
                         *bndptr.offset(i as isize) = fresh3;
                     }
                 } else {
-                    (*myrinfo).inbr = -(1 as libc::c_int);
+                    (*myrinfo).inbr = -(1);
                 }
                 i += 1;
                 i;
@@ -365,8 +364,8 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
             while i < nvtxs {
                 me = *where_0.offset(i as isize);
                 myrinfo_0 = ((*graph).vkrinfo).offset(i as isize);
-                j = *xadj.offset(i as isize);
-                while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                j = xadj[i as usize];
+                while j < xadj[(i + 1) as usize] {
                     if me == *where_0.offset(*adjncy.offset(j as isize) as isize) {
                         (*myrinfo_0).nid += 1;
                         (*myrinfo_0).nid;
@@ -381,12 +380,11 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
                     mincut += (*myrinfo_0).ned;
                     (*myrinfo_0).inbr = libmetis__vnbrpoolGetNext(
                         ctrl,
-                        *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
-                            + 1 as libc::c_int,
+                        xadj[(i + 1) as usize] - xadj[i as usize] + 1,
                     );
                     mynbrs_0 = ((*ctrl).vnbrpool).offset((*myrinfo_0).inbr as isize);
-                    j = *xadj.offset(i as isize);
-                    while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                    j = xadj[i as usize];
+                    while j < xadj[(i + 1) as usize] {
                         other = *where_0.offset(*adjncy.offset(j as isize) as isize);
                         if me != other {
                             k = 0 as libc::c_int;
@@ -404,7 +402,7 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
                             if k == (*myrinfo_0).nnbrs {
                                 (*mynbrs_0.offset(k as isize)).gv = 0 as libc::c_int;
                                 (*mynbrs_0.offset(k as isize)).pid = other;
-                                (*mynbrs_0.offset(k as isize)).ned = 1 as libc::c_int;
+                                (*mynbrs_0.offset(k as isize)).ned = 1;
                                 (*myrinfo_0).nnbrs += 1;
                                 (*myrinfo_0).nnbrs;
                             }
@@ -413,7 +411,7 @@ pub unsafe extern "C" fn libmetis__ComputeKWayPartitionParams(
                         j;
                     }
                 } else {
-                    (*myrinfo_0).inbr = -(1 as libc::c_int);
+                    (*myrinfo_0).inbr = -(1);
                 }
                 i += 1;
                 i;
@@ -448,7 +446,7 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
     let mut iend: idx_t = 0;
     let mut tid: idx_t = 0;
     let mut ted: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+    
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut cmap: *mut idx_t = 0 as *mut idx_t;
@@ -464,16 +462,16 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
     cwhere = (*cgraph).where_0;
     nvtxs = (*graph).nvtxs;
     cmap = (*graph).cmap;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     libmetis__AllocateKWayPartitionMemory(ctrl, graph);
     where_0 = (*graph).where_0;
     bndind = (*graph).bndind;
-    bndptr = libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), (*graph).bndptr);
+    bndptr = libmetis__iset(nvtxs as size_t, -(1), (*graph).bndptr);
     htable = libmetis__iset(
         nparts as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nparts),
     );
     match (*ctrl).objtype as libc::c_uint {
@@ -497,8 +495,8 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
             nbnd = 0 as libc::c_int;
             i = 0 as libc::c_int;
             while i < nvtxs {
-                istart = *xadj.offset(i as isize);
-                iend = *xadj.offset((i + 1 as libc::c_int) as isize);
+                istart = xadj[i as usize];
+                iend = xadj[(i + 1) as usize];
                 myrinfo = ((*graph).ckrinfo).offset(i as isize);
                 if *cmap.offset(i as isize) == 0 as libc::c_int {
                     tid = 0 as libc::c_int;
@@ -509,10 +507,10 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
                         j;
                     }
                     (*myrinfo).id = tid;
-                    (*myrinfo).inbr = -(1 as libc::c_int);
+                    (*myrinfo).inbr = -(1);
                 } else {
                     (*myrinfo).inbr =
-                        libmetis__cnbrpoolGetNext(ctrl, iend - istart + 1 as libc::c_int);
+                        libmetis__cnbrpoolGetNext(ctrl, iend - istart + 1);
                     mynbrs = ((*ctrl).cnbrpool).offset((*myrinfo).inbr as isize);
                     me = *where_0.offset(i as isize);
                     tid = 0 as libc::c_int;
@@ -525,7 +523,7 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
                         } else {
                             ted += *adjwgt.offset(j as isize);
                             k = *htable.offset(other as isize);
-                            if k == -(1 as libc::c_int) {
+                            if k == -(1) {
                                 *htable.offset(other as isize) = (*myrinfo).nnbrs;
                                 (*mynbrs.offset((*myrinfo).nnbrs as isize)).pid = other;
                                 let fresh5 = (*myrinfo).nnbrs;
@@ -543,9 +541,9 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
                     (*myrinfo).ed = ted;
                     if ted == 0 as libc::c_int {
                         (*ctrl).nbrpoolcpos = ((*ctrl).nbrpoolcpos as u64)
-                            .wrapping_sub((iend - istart + 1 as libc::c_int) as u64)
+                            .wrapping_sub((iend - istart + 1) as u64)
                             as size_t as size_t;
-                        (*myrinfo).inbr = -(1 as libc::c_int);
+                        (*myrinfo).inbr = -(1);
                     } else {
                         if ted - tid >= 0 as libc::c_int {
                             *bndind.offset(nbnd as isize) = i;
@@ -556,7 +554,7 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
                         j = 0 as libc::c_int;
                         while j < (*myrinfo).nnbrs {
                             *htable.offset((*mynbrs.offset(j as isize)).pid as isize) =
-                                -(1 as libc::c_int);
+                                -(1);
                             j += 1;
                             j;
                         }
@@ -586,15 +584,15 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
             libmetis__vnbrpoolReset(ctrl);
             i = 0 as libc::c_int;
             while i < nvtxs {
-                istart = *xadj.offset(i as isize);
-                iend = *xadj.offset((i + 1 as libc::c_int) as isize);
+                istart = xadj[i as usize];
+                iend = xadj[(i + 1) as usize];
                 myrinfo_0 = ((*graph).vkrinfo).offset(i as isize);
                 if *cmap.offset(i as isize) == 0 as libc::c_int {
                     (*myrinfo_0).nid = iend - istart;
-                    (*myrinfo_0).inbr = -(1 as libc::c_int);
+                    (*myrinfo_0).inbr = -(1);
                 } else {
                     (*myrinfo_0).inbr =
-                        libmetis__vnbrpoolGetNext(ctrl, iend - istart + 1 as libc::c_int);
+                        libmetis__vnbrpoolGetNext(ctrl, iend - istart + 1);
                     mynbrs_0 = ((*ctrl).vnbrpool).offset((*myrinfo_0).inbr as isize);
                     me = *where_0.offset(i as isize);
                     tid = 0 as libc::c_int;
@@ -609,14 +607,14 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
                             ted += 1;
                             ted;
                             k = *htable.offset(other as isize);
-                            if k == -(1 as libc::c_int) {
+                            if k == -(1) {
                                 *htable.offset(other as isize) = (*myrinfo_0).nnbrs;
                                 (*mynbrs_0.offset((*myrinfo_0).nnbrs as isize)).gv =
                                     0 as libc::c_int;
                                 (*mynbrs_0.offset((*myrinfo_0).nnbrs as isize)).pid = other;
                                 let fresh8 = (*myrinfo_0).nnbrs;
                                 (*myrinfo_0).nnbrs = (*myrinfo_0).nnbrs + 1;
-                                (*mynbrs_0.offset(fresh8 as isize)).ned = 1 as libc::c_int;
+                                (*mynbrs_0.offset(fresh8 as isize)).ned = 1;
                             } else {
                                 let ref mut fresh9 = (*mynbrs_0.offset(k as isize)).ned;
                                 *fresh9 += 1;
@@ -630,14 +628,14 @@ pub unsafe extern "C" fn libmetis__ProjectKWayPartition(
                     (*myrinfo_0).ned = ted;
                     if ted == 0 as libc::c_int {
                         (*ctrl).nbrpoolcpos = ((*ctrl).nbrpoolcpos as u64)
-                            .wrapping_sub((iend - istart + 1 as libc::c_int) as u64)
+                            .wrapping_sub((iend - istart + 1) as u64)
                             as size_t as size_t;
-                        (*myrinfo_0).inbr = -(1 as libc::c_int);
+                        (*myrinfo_0).inbr = -(1);
                     } else {
                         j = 0 as libc::c_int;
                         while j < (*myrinfo_0).nnbrs {
                             *htable.offset((*mynbrs_0.offset(j as isize)).pid as isize) =
-                                -(1 as libc::c_int);
+                                -(1);
                             j += 1;
                             j;
                         }
@@ -680,11 +678,11 @@ pub unsafe extern "C" fn libmetis__ComputeKWayBoundary(
     let mut bndptr: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
     bndind = (*graph).bndind;
-    bndptr = libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), (*graph).bndptr);
+    bndptr = libmetis__iset(nvtxs as size_t, -(1), (*graph).bndptr);
     nbnd = 0 as libc::c_int;
     match (*ctrl).objtype as libc::c_uint {
         0 => {
-            if bndtype == 1 as libc::c_int {
+            if bndtype == 1 {
                 i = 0 as libc::c_int;
                 while i < nvtxs {
                     if (*((*graph).ckrinfo).offset(i as isize)).ed
@@ -714,7 +712,7 @@ pub unsafe extern "C" fn libmetis__ComputeKWayBoundary(
             }
         }
         1 => {
-            if bndtype == 1 as libc::c_int {
+            if bndtype == 1 {
                 i = 0 as libc::c_int;
                 while i < nvtxs {
                     if (*((*graph).vkrinfo).offset(i as isize)).gv >= 0 as libc::c_int {
@@ -766,7 +764,7 @@ pub unsafe extern "C" fn libmetis__ComputeKWayVolGains(
     let mut me: idx_t = 0;
     let mut other: idx_t = 0;
     let mut pid: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+    
     let mut vsize: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -781,16 +779,16 @@ pub unsafe extern "C" fn libmetis__ComputeKWayVolGains(
     libmetis__wspacepush(ctrl);
     nparts = (*ctrl).nparts;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vsize = (*graph).vsize;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     where_0 = (*graph).where_0;
     bndind = (*graph).bndind;
-    bndptr = libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), (*graph).bndptr);
+    bndptr = libmetis__iset(nvtxs as size_t, -(1), (*graph).bndptr);
     ophtable = libmetis__iset(
         nparts as size_t,
-        -(1 as libc::c_int),
+        -(1),
         libmetis__iwspacemalloc(ctrl, nparts),
     );
     (*graph).nbnd = 0 as libc::c_int;
@@ -798,13 +796,13 @@ pub unsafe extern "C" fn libmetis__ComputeKWayVolGains(
     i = 0 as libc::c_int;
     while i < nvtxs {
         myrinfo = ((*graph).vkrinfo).offset(i as isize);
-        (*myrinfo).gv = -(2147483647 as libc::c_int) - 1 as libc::c_int;
+        (*myrinfo).gv = -(2147483647 as libc::c_int) - 1;
         if (*myrinfo).nnbrs > 0 as libc::c_int {
             me = *where_0.offset(i as isize);
             mynbrs = ((*ctrl).vnbrpool).offset((*myrinfo).inbr as isize);
             (*graph).minvol += (*myrinfo).nnbrs * *vsize.offset(i as isize);
-            j = *xadj.offset(i as isize);
-            while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+            j = xadj[i as usize];
+            while j < xadj[(i + 1) as usize] {
                 ii = *adjncy.offset(j as isize);
                 other = *where_0.offset(ii as isize);
                 orinfo = ((*graph).vkrinfo).offset(ii as isize);
@@ -815,12 +813,12 @@ pub unsafe extern "C" fn libmetis__ComputeKWayVolGains(
                     k += 1;
                     k;
                 }
-                *ophtable.offset(other as isize) = 1 as libc::c_int;
+                *ophtable.offset(other as isize) = 1;
                 if me == other {
                     k = 0 as libc::c_int;
                     while k < (*myrinfo).nnbrs {
                         if *ophtable.offset((*mynbrs.offset(k as isize)).pid as isize)
-                            == -(1 as libc::c_int)
+                            == -(1)
                         {
                             let ref mut fresh14 = (*mynbrs.offset(k as isize)).gv;
                             *fresh14 -= *vsize.offset(ii as isize);
@@ -829,12 +827,12 @@ pub unsafe extern "C" fn libmetis__ComputeKWayVolGains(
                         k;
                     }
                 } else if (*onbrs.offset(*ophtable.offset(me as isize) as isize)).ned
-                    == 1 as libc::c_int
+                    == 1
                 {
                     k = 0 as libc::c_int;
                     while k < (*myrinfo).nnbrs {
                         if *ophtable.offset((*mynbrs.offset(k as isize)).pid as isize)
-                            != -(1 as libc::c_int)
+                            != -(1)
                         {
                             let ref mut fresh15 = (*mynbrs.offset(k as isize)).gv;
                             *fresh15 += *vsize.offset(ii as isize);
@@ -846,7 +844,7 @@ pub unsafe extern "C" fn libmetis__ComputeKWayVolGains(
                     k = 0 as libc::c_int;
                     while k < (*myrinfo).nnbrs {
                         if *ophtable.offset((*mynbrs.offset(k as isize)).pid as isize)
-                            == -(1 as libc::c_int)
+                            == -(1)
                         {
                             let ref mut fresh16 = (*mynbrs.offset(k as isize)).gv;
                             *fresh16 -= *vsize.offset(ii as isize);
@@ -858,11 +856,11 @@ pub unsafe extern "C" fn libmetis__ComputeKWayVolGains(
                 k = 0 as libc::c_int;
                 while k < (*orinfo).nnbrs {
                     *ophtable.offset((*onbrs.offset(k as isize)).pid as isize) =
-                        -(1 as libc::c_int);
+                        -(1);
                     k += 1;
                     k;
                 }
-                *ophtable.offset(other as isize) = -(1 as libc::c_int);
+                *ophtable.offset(other as isize) = -(1);
                 j += 1;
                 j;
             }

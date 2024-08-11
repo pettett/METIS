@@ -9,7 +9,7 @@ use libc::{abs, printf};
 
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__MinCover(
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut asize: idx_t,
     mut bsize: idx_t,
@@ -31,7 +31,7 @@ pub unsafe extern "C" fn libmetis__MinCover(
     let mut col: idx_t = 0;
     mate = libmetis__ismalloc(
         bsize as size_t,
-        -(1 as libc::c_int),
+        -(1),
         b"MinCover: mate\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     flag = libmetis__imalloc(
@@ -52,9 +52,9 @@ pub unsafe extern "C" fn libmetis__MinCover(
     );
     i = 0 as libc::c_int;
     while i < asize {
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
-            if *mate.offset(*adjncy.offset(j as isize) as isize) == -(1 as libc::c_int) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
+            if *mate.offset(*adjncy.offset(j as isize) as isize) == -(1) {
                 *mate.offset(i as isize) = *adjncy.offset(j as isize);
                 *mate.offset(*adjncy.offset(j as isize) as isize) = i;
                 break;
@@ -72,7 +72,7 @@ pub unsafe extern "C" fn libmetis__MinCover(
         lstptr = 0 as libc::c_int;
         i = 0 as libc::c_int;
         while i < bsize {
-            *level.offset(i as isize) = -(1 as libc::c_int);
+            *level.offset(i as isize) = -(1);
             *flag.offset(i as isize) = 0 as libc::c_int;
             i += 1;
             i;
@@ -80,7 +80,7 @@ pub unsafe extern "C" fn libmetis__MinCover(
         maxlevel = bsize;
         i = 0 as libc::c_int;
         while i < asize {
-            if *mate.offset(i as isize) == -(1 as libc::c_int) {
+            if *mate.offset(i as isize) == -(1) {
                 let fresh0 = rptr;
                 rptr = rptr + 1;
                 *queue.offset(fresh0 as isize) = i;
@@ -94,13 +94,13 @@ pub unsafe extern "C" fn libmetis__MinCover(
             fptr = fptr + 1;
             row = *queue.offset(fresh1 as isize);
             if *level.offset(row as isize) < maxlevel {
-                *flag.offset(row as isize) = 1 as libc::c_int;
-                j = *xadj.offset(row as isize);
-                while j < *xadj.offset((row + 1 as libc::c_int) as isize) {
+                *flag.offset(row as isize) = 1;
+                j = xadj[(row as usize)];
+                while j < xadj[((row + 1) as usize)] {
                     col = *adjncy.offset(j as isize);
                     if *flag.offset(col as isize) == 0 {
-                        *flag.offset(col as isize) = 1 as libc::c_int;
-                        if *mate.offset(col as isize) == -(1 as libc::c_int) {
+                        *flag.offset(col as isize) = 1;
+                        if *mate.offset(col as isize) == -(1) {
                             maxlevel = *level.offset(row as isize);
                             let fresh2 = lstptr;
                             lstptr = lstptr + 1;
@@ -117,7 +117,7 @@ pub unsafe extern "C" fn libmetis__MinCover(
                             rptr = rptr + 1;
                             *queue.offset(fresh3 as isize) = *mate.offset(col as isize);
                             *level.offset(*mate.offset(col as isize) as isize) =
-                                *level.offset(row as isize) + 1 as libc::c_int;
+                                *level.offset(row as isize) + 1;
                         }
                     }
                     j += 1;
@@ -155,7 +155,7 @@ pub unsafe extern "C" fn libmetis__MinCover(
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__MinCover_Augment(
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut col: idx_t,
     mut mate: *mut idx_t,
@@ -164,13 +164,13 @@ pub unsafe extern "C" fn libmetis__MinCover_Augment(
     mut maxlevel: idx_t,
 ) -> idx_t {
     let mut i: idx_t = 0;
-    let mut row: idx_t = -(1 as libc::c_int);
+    let mut row: idx_t = -(1);
     let mut status: idx_t = 0;
     *flag.offset(col as isize) = 2 as libc::c_int;
-    i = *xadj.offset(col as isize);
-    while i < *xadj.offset((col + 1 as libc::c_int) as isize) {
+    i = xadj[(col as usize)];
+    while i < xadj[((col + 1) as usize)] {
         row = *adjncy.offset(i as isize);
-        if *flag.offset(row as isize) == 1 as libc::c_int {
+        if *flag.offset(row as isize) == 1 {
             if *level.offset(row as isize) == maxlevel {
                 *flag.offset(row as isize) = 2 as libc::c_int;
                 if maxlevel != 0 as libc::c_int {
@@ -181,15 +181,15 @@ pub unsafe extern "C" fn libmetis__MinCover_Augment(
                         mate,
                         flag,
                         level,
-                        maxlevel - 1 as libc::c_int,
+                        maxlevel - 1,
                     );
                 } else {
-                    status = 1 as libc::c_int;
+                    status = 1;
                 }
                 if status != 0 {
                     *mate.offset(col as isize) = row;
                     *mate.offset(row as isize) = col;
-                    return 1 as libc::c_int;
+                    return 1;
                 }
             }
         }
@@ -200,7 +200,7 @@ pub unsafe extern "C" fn libmetis__MinCover_Augment(
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__MinCover_Decompose(
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut asize: idx_t,
     mut bsize: idx_t,
@@ -235,14 +235,14 @@ pub unsafe extern "C" fn libmetis__MinCover_Decompose(
     }
     i = 0 as libc::c_int;
     while i < asize {
-        if *mate.offset(i as isize) == -(1 as libc::c_int) {
+        if *mate.offset(i as isize) == -(1) {
             libmetis__MinCover_ColDFS(xadj, adjncy, i, mate, where_0, 10 as libc::c_int);
         }
         i += 1;
         i;
     }
     while i < bsize {
-        if *mate.offset(i as isize) == -(1 as libc::c_int) {
+        if *mate.offset(i as isize) == -(1) {
             libmetis__MinCover_RowDFS(xadj, adjncy, i, mate, where_0, 20 as libc::c_int);
         }
         i += 1;
@@ -256,16 +256,12 @@ pub unsafe extern "C" fn libmetis__MinCover_Decompose(
         i;
     }
     k = 0 as libc::c_int;
-    if abs(
-        card[1 as libc::c_int as usize] + card[2 as libc::c_int as usize]
-            - card[6 as libc::c_int as usize],
-    ) < abs(card[1 as libc::c_int as usize]
-        - card[5 as libc::c_int as usize]
-        - card[6 as libc::c_int as usize])
+    if abs(card[1] + card[2 as libc::c_int as usize] - card[6 as libc::c_int as usize])
+        < abs(card[1] - card[5 as libc::c_int as usize] - card[6 as libc::c_int as usize])
     {
         i = 0 as libc::c_int;
         while i < bsize {
-            if *where_0.offset(i as isize) == 1 as libc::c_int
+            if *where_0.offset(i as isize) == 1
                 || *where_0.offset(i as isize) == 2 as libc::c_int
                 || *where_0.offset(i as isize) == 6 as libc::c_int
             {
@@ -279,7 +275,7 @@ pub unsafe extern "C" fn libmetis__MinCover_Decompose(
     } else {
         i = 0 as libc::c_int;
         while i < bsize {
-            if *where_0.offset(i as isize) == 1 as libc::c_int
+            if *where_0.offset(i as isize) == 1
                 || *where_0.offset(i as isize) == 5 as libc::c_int
                 || *where_0.offset(i as isize) == 6 as libc::c_int
             {
@@ -299,7 +295,7 @@ pub unsafe extern "C" fn libmetis__MinCover_Decompose(
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__MinCover_ColDFS(
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut root: idx_t,
     mut mate: *mut idx_t,
@@ -312,8 +308,8 @@ pub unsafe extern "C" fn libmetis__MinCover_ColDFS(
             return;
         }
         *where_0.offset(root as isize) = 3 as libc::c_int;
-        i = *xadj.offset(root as isize);
-        while i < *xadj.offset((root + 1 as libc::c_int) as isize) {
+        i = xadj[(root as usize)];
+        while i < xadj[((root + 1) as usize)] {
             libmetis__MinCover_ColDFS(
                 xadj,
                 adjncy,
@@ -330,7 +326,7 @@ pub unsafe extern "C" fn libmetis__MinCover_ColDFS(
             return;
         }
         *where_0.offset(root as isize) = 6 as libc::c_int;
-        if *mate.offset(root as isize) != -(1 as libc::c_int) {
+        if *mate.offset(root as isize) != -(1) {
             libmetis__MinCover_ColDFS(
                 xadj,
                 adjncy,
@@ -344,7 +340,7 @@ pub unsafe extern "C" fn libmetis__MinCover_ColDFS(
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__MinCover_RowDFS(
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut root: idx_t,
     mut mate: *mut idx_t,
@@ -357,8 +353,8 @@ pub unsafe extern "C" fn libmetis__MinCover_RowDFS(
             return;
         }
         *where_0.offset(root as isize) = 4 as libc::c_int;
-        i = *xadj.offset(root as isize);
-        while i < *xadj.offset((root + 1 as libc::c_int) as isize) {
+        i = xadj[(root as usize)];
+        while i < xadj[((root + 1) as usize)] {
             libmetis__MinCover_RowDFS(
                 xadj,
                 adjncy,
@@ -371,11 +367,11 @@ pub unsafe extern "C" fn libmetis__MinCover_RowDFS(
             i;
         }
     } else {
-        if *where_0.offset(root as isize) == 1 as libc::c_int {
+        if *where_0.offset(root as isize) == 1 {
             return;
         }
-        *where_0.offset(root as isize) = 1 as libc::c_int;
-        if *mate.offset(root as isize) != -(1 as libc::c_int) {
+        *where_0.offset(root as isize) = 1;
+        if *mate.offset(root as isize) != -(1) {
             libmetis__MinCover_RowDFS(
                 xadj,
                 adjncy,

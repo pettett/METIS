@@ -54,7 +54,6 @@ pub mod libmetis {
     pub mod debug;
     pub mod fm;
     pub mod fortran;
-    pub mod frename;
     pub mod gklib;
     pub mod graph;
     pub mod initpart;

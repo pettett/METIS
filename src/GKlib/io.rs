@@ -153,7 +153,7 @@ pub unsafe extern "C" fn gk_readfile(
             b"gk_readfile\0" as *const u8 as *const libc::c_char,
         );
         nlines = 0 as libc::c_int as size_t;
-        while gk_getline(&mut line, &mut lnlen, fpin) != -(1 as libc::c_int) as i64 {
+        while gk_getline(&mut line, &mut lnlen, fpin) != -(1) as i64 {
             gk_strtprune(
                 line,
                 b"\n\r\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -202,7 +202,7 @@ pub unsafe extern "C" fn gk_i32readfile(
             b"gk_readfile\0" as *const u8 as *const libc::c_char,
         );
         nlines = 0 as libc::c_int as size_t;
-        while gk_getline(&mut line, &mut lnlen, fpin) != -(1 as libc::c_int) as i64 {
+        while gk_getline(&mut line, &mut lnlen, fpin) != -(1) as i64 {
             let fresh2 = nlines;
             nlines = nlines.wrapping_add(1);
             sscanf(
@@ -250,7 +250,7 @@ pub unsafe extern "C" fn gk_i64readfile(
             b"gk_readfile\0" as *const u8 as *const libc::c_char,
         );
         nlines = 0 as libc::c_int as size_t;
-        while gk_getline(&mut line, &mut lnlen, fpin) != -(1 as libc::c_int) as i64 {
+        while gk_getline(&mut line, &mut lnlen, fpin) != -(1) as i64 {
             let fresh3 = nlines;
             nlines = nlines.wrapping_add(1);
             sscanf(
@@ -279,7 +279,7 @@ pub unsafe extern "C" fn gk_i32readfilebin(
     let mut nelmnts: ssize_t = 0;
     let mut array: *mut int32_t = 0 as *mut int32_t;
     let mut fpin: *mut FILE = 0 as *mut FILE;
-    *r_nelmnts = -(1 as libc::c_int) as ssize_t;
+    *r_nelmnts = -(1) as ssize_t;
     fsize = gk_getfsize(fname);
     if (fsize as u64).wrapping_rem(::core::mem::size_of::<int32_t>() as u64)
         != 0 as libc::c_int as u64
@@ -333,7 +333,7 @@ pub unsafe extern "C" fn gk_i64readfilebin(
     let mut nelmnts: ssize_t = 0;
     let mut array: *mut int64_t = 0 as *mut int64_t;
     let mut fpin: *mut FILE = 0 as *mut FILE;
-    *r_nelmnts = -(1 as libc::c_int) as ssize_t;
+    *r_nelmnts = -(1) as ssize_t;
     fsize = gk_getfsize(fname);
     if (fsize as u64).wrapping_rem(::core::mem::size_of::<int64_t>() as u64)
         != 0 as libc::c_int as u64
@@ -387,7 +387,7 @@ pub unsafe extern "C" fn gk_freadfilebin(
     let mut nelmnts: ssize_t = 0;
     let mut array: *mut libc::c_float = 0 as *mut libc::c_float;
     let mut fpin: *mut FILE = 0 as *mut FILE;
-    *r_nelmnts = -(1 as libc::c_int) as ssize_t;
+    *r_nelmnts = -(1) as ssize_t;
     fsize = gk_getfsize(fname);
     if (fsize as u64).wrapping_rem(::core::mem::size_of::<libc::c_float>() as u64)
         != 0 as libc::c_int as u64
@@ -464,7 +464,7 @@ pub unsafe extern "C" fn gk_dreadfilebin(
     let mut nelmnts: ssize_t = 0;
     let mut array: *mut libc::c_double = 0 as *mut libc::c_double;
     let mut fpin: *mut FILE = 0 as *mut FILE;
-    *r_nelmnts = -(1 as libc::c_int) as ssize_t;
+    *r_nelmnts = -(1) as ssize_t;
     fsize = gk_getfsize(fname);
     if (fsize as u64).wrapping_rem(::core::mem::size_of::<libc::c_double>() as u64)
         != 0 as libc::c_int as u64

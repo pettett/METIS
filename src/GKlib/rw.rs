@@ -1,16 +1,8 @@
 use ::libc;
 extern "C" {
     fn fabs(_: libc::c_double) -> libc::c_double;
-    fn gk_dsmalloc(
-        n: size_t,
-        ival: libc::c_double,
-        msg: *mut libc::c_char,
-    ) -> *mut libc::c_double;
-    fn gk_dset(
-        n: size_t,
-        val: libc::c_double,
-        x: *mut libc::c_double,
-    ) -> *mut libc::c_double;
+    fn gk_dsmalloc(n: size_t, ival: libc::c_double, msg: *mut libc::c_char) -> *mut libc::c_double;
+    fn gk_dset(n: size_t, val: libc::c_double, x: *mut libc::c_double) -> *mut libc::c_double;
     fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
 }
 pub type __int32_t = libc::c_int;
@@ -71,25 +63,22 @@ pub unsafe extern "C" fn gk_rw_PageRank(
     prold = gk_dsmalloc(
         nrows as size_t,
         0 as libc::c_int as libc::c_double,
-        b"gk_rw_PageRank: prnew\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_rw_PageRank: prnew\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     prnew = gk_dsmalloc(
         nrows as size_t,
         0 as libc::c_int as libc::c_double,
-        b"gk_rw_PageRank: prold\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_rw_PageRank: prold\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     rscale = gk_dsmalloc(
         nrows as size_t,
         0 as libc::c_int as libc::c_double,
-        b"gk_rw_PageRank: rscale\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_rw_PageRank: rscale\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     i = 0 as libc::c_int as ssize_t;
     while i < nrows {
         j = *rowptr.offset(i as isize);
-        while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize) {
+        while j < *rowptr.offset((i + 1 as i64) as isize) {
             *rscale.offset(i as isize) += *rowval.offset(j as isize) as libc::c_double;
             j += 1;
             j;
@@ -124,10 +113,10 @@ pub unsafe extern "C" fn gk_rw_PageRank(
         i = 0 as libc::c_int as ssize_t;
         while i < nrows {
             j = *rowptr.offset(i as isize);
-            while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize) {
-                *prnew.offset(*rowind.offset(j as isize) as isize)
-                    += *prold.offset(i as isize) * *rscale.offset(i as isize)
-                        * *rowval.offset(j as isize) as libc::c_double;
+            while j < *rowptr.offset((i + 1 as i64) as isize) {
+                *prnew.offset(*rowind.offset(j as isize) as isize) += *prold.offset(i as isize)
+                    * *rscale.offset(i as isize)
+                    * *rowval.offset(j as isize) as libc::c_double;
                 j += 1;
                 j;
             }
@@ -136,23 +125,17 @@ pub unsafe extern "C" fn gk_rw_PageRank(
         }
         i = 0 as libc::c_int as ssize_t;
         while i < nrows {
-            *prnew
-                .offset(
-                    i as isize,
-                ) = lamda as libc::c_double
+            *prnew.offset(i as isize) = lamda as libc::c_double
                 * (fromsinks * *pr.offset(i as isize) as libc::c_double
                     + *prnew.offset(i as isize))
-                + (1.0f64 - lamda as libc::c_double)
-                    * *pr.offset(i as isize) as libc::c_double;
+                + (1.0f64 - lamda as libc::c_double) * *pr.offset(i as isize) as libc::c_double;
             i += 1;
             i;
         }
         error = 0.0f64;
         i = 0 as libc::c_int as ssize_t;
         while i < nrows {
-            error = if fabs(*prnew.offset(i as isize) - *prold.offset(i as isize))
-                > error
-            {
+            error = if fabs(*prnew.offset(i as isize) - *prold.offset(i as isize)) > error {
                 fabs(*prnew.offset(i as isize) - *prold.offset(i as isize))
             } else {
                 error
@@ -178,5 +161,5 @@ pub unsafe extern "C" fn gk_rw_PageRank(
         &mut rscale as *mut *mut libc::c_double,
         0 as *mut *mut libc::c_void,
     );
-    return (iter + 1 as libc::c_int as i64) as libc::c_int;
+    return (iter + 1 as i64) as libc::c_int;
 }

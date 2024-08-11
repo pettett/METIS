@@ -24,12 +24,11 @@ pub unsafe extern "C" fn libmetis__ConstructSeparator(
     let mut k: idx_t = 0;
     let mut nvtxs: idx_t = 0;
     let mut nbnd: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
     let mut bndind: *mut idx_t = 0 as *mut idx_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     nbnd = (*graph).nbnd;
     bndind = (*graph).bndind;
     where_0 = libmetis__icopy(
@@ -40,9 +39,7 @@ pub unsafe extern "C" fn libmetis__ConstructSeparator(
     i = 0 as libc::c_int;
     while i < nbnd {
         j = *bndind.offset(i as isize);
-        if *xadj.offset((j + 1 as libc::c_int) as isize) - *xadj.offset(j as isize)
-            > 0 as libc::c_int
-        {
+        if xadj[((j + 1) as usize)] - xadj[(j as usize)] > 0 as libc::c_int {
             *where_0.offset(j as isize) = 2 as libc::c_int;
         }
         i += 1;
@@ -53,7 +50,7 @@ pub unsafe extern "C" fn libmetis__ConstructSeparator(
     libmetis__icopy(nvtxs as size_t, where_0, (*graph).where_0);
     libmetis__wspacepop(ctrl);
     libmetis__Compute2WayNodePartitionParams(ctrl, graph);
-    libmetis__FM_2WayNodeRefine2Sided(ctrl, graph, 1 as libc::c_int);
+    libmetis__FM_2WayNodeRefine2Sided(ctrl, graph, 1);
     libmetis__FM_2WayNodeRefine1Sided(ctrl, graph, 4 as libc::c_int);
 }
 #[no_mangle]
@@ -72,7 +69,6 @@ pub unsafe extern "C" fn libmetis__ConstructMinCoverSeparator(
     let mut bnvtxs: [idx_t; 3] = [0; 3];
     let mut bnedges: [idx_t; 2] = [0; 2];
     let mut csize: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut bxadj: *mut idx_t = 0 as *mut idx_t;
     let mut badjncy: *mut idx_t = 0 as *mut idx_t;
@@ -84,7 +80,7 @@ pub unsafe extern "C" fn libmetis__ConstructMinCoverSeparator(
     let mut cover: *mut idx_t = 0 as *mut idx_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     nbnd = (*graph).nbnd;
     bndind = (*graph).bndind;
@@ -94,43 +90,33 @@ pub unsafe extern "C" fn libmetis__ConstructMinCoverSeparator(
     ivmap = libmetis__iwspacemalloc(ctrl, nbnd);
     cover = libmetis__iwspacemalloc(ctrl, nbnd);
     if nbnd > 0 as libc::c_int {
-        bnedges[1 as libc::c_int as usize] = 0 as libc::c_int;
-        bnedges[0 as libc::c_int as usize] = bnedges[1 as libc::c_int as usize];
-        bnvtxs[1 as libc::c_int as usize] = bnedges[0 as libc::c_int as usize];
-        bnvtxs[0 as libc::c_int as usize] = bnvtxs[1 as libc::c_int as usize];
+        bnedges[1] = 0 as libc::c_int;
+        bnedges[0] = bnedges[1];
+        bnvtxs[1] = bnedges[0];
+        bnvtxs[0] = bnvtxs[1];
         i = 0 as libc::c_int;
         while i < nbnd {
             j = *bndind.offset(i as isize);
             k = *where_0.offset(j as isize);
-            if *xadj.offset((j + 1 as libc::c_int) as isize) - *xadj.offset(j as isize)
-                > 0 as libc::c_int
-            {
+            if xadj[((j + 1) as usize)] - xadj[(j as usize)] > 0 as libc::c_int {
                 bnvtxs[k as usize] += 1;
                 bnvtxs[k as usize];
-                bnedges[k as usize] +=
-                    *xadj.offset((j + 1 as libc::c_int) as isize) - *xadj.offset(j as isize);
+                bnedges[k as usize] += xadj[((j + 1) as usize)] - xadj[(j as usize)];
             }
             i += 1;
             i;
         }
-        bnvtxs[2 as libc::c_int as usize] =
-            bnvtxs[0 as libc::c_int as usize] + bnvtxs[1 as libc::c_int as usize];
-        bnvtxs[1 as libc::c_int as usize] = bnvtxs[0 as libc::c_int as usize];
-        bnvtxs[0 as libc::c_int as usize] = 0 as libc::c_int;
-        bxadj = libmetis__iwspacemalloc(ctrl, bnvtxs[2 as libc::c_int as usize] + 1 as libc::c_int);
-        badjncy = libmetis__iwspacemalloc(
-            ctrl,
-            bnedges[0 as libc::c_int as usize]
-                + bnedges[1 as libc::c_int as usize]
-                + 1 as libc::c_int,
-        );
+        bnvtxs[2 as libc::c_int as usize] = bnvtxs[0] + bnvtxs[1];
+        bnvtxs[1] = bnvtxs[0];
+        bnvtxs[0] = 0 as libc::c_int;
+        let mut bxadj = vec![0; (bnvtxs[2 as libc::c_int as usize] + 1) as usize];
+        // libmetis__iwspacemalloc(ctrl, bnvtxs[2 as libc::c_int as usize] + 1);
+        badjncy = libmetis__iwspacemalloc(ctrl, bnedges[0] + bnedges[1] + 1);
         i = 0 as libc::c_int;
         while i < nbnd {
             j = *bndind.offset(i as isize);
             k = *where_0.offset(j as isize);
-            if *xadj.offset((j + 1 as libc::c_int) as isize) - *xadj.offset(j as isize)
-                > 0 as libc::c_int
-            {
+            if xadj[((j + 1) as usize)] - xadj[(j as usize)] > 0 as libc::c_int {
                 *vmap.offset(j as isize) = bnvtxs[k as usize];
                 let fresh0 = bnvtxs[k as usize];
                 bnvtxs[k as usize] = bnvtxs[k as usize] + 1;
@@ -139,20 +125,20 @@ pub unsafe extern "C" fn libmetis__ConstructMinCoverSeparator(
             i += 1;
             i;
         }
-        bnvtxs[1 as libc::c_int as usize] = bnvtxs[0 as libc::c_int as usize];
-        bnvtxs[0 as libc::c_int as usize] = 0 as libc::c_int;
+        bnvtxs[1] = bnvtxs[0];
+        bnvtxs[0] = 0 as libc::c_int;
         l = 0 as libc::c_int;
-        *bxadj.offset(0 as libc::c_int as isize) = l;
+        bxadj[0] = l;
         k = 0 as libc::c_int;
         while k < 2 as libc::c_int {
             ii = 0 as libc::c_int;
             while ii < nbnd {
                 i = *bndind.offset(ii as isize);
                 if *where_0.offset(i as isize) == k
-                    && *xadj.offset(i as isize) < *xadj.offset((i + 1 as libc::c_int) as isize)
+                    && xadj[(i as usize)] < xadj[((i + 1) as usize)]
                 {
-                    j = *xadj.offset(i as isize);
-                    while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                    j = xadj[(i as usize)];
+                    while j < xadj[((i + 1) as usize)] {
                         jj = *adjncy.offset(j as isize);
                         if *where_0.offset(jj as isize) != k {
                             let fresh1 = l;
@@ -163,7 +149,7 @@ pub unsafe extern "C" fn libmetis__ConstructMinCoverSeparator(
                         j;
                     }
                     bnvtxs[k as usize] += 1;
-                    *bxadj.offset(bnvtxs[k as usize] as isize) = l;
+                    bxadj[(bnvtxs[k as usize] as usize)] = l;
                 }
                 ii += 1;
                 ii;
@@ -171,24 +157,17 @@ pub unsafe extern "C" fn libmetis__ConstructMinCoverSeparator(
             k += 1;
             k;
         }
-        libmetis__MinCover(
-            bxadj,
-            badjncy,
-            bnvtxs[0 as libc::c_int as usize],
-            bnvtxs[1 as libc::c_int as usize],
-            cover,
-            &mut csize,
-        );
+        libmetis__MinCover(&mut bxadj, badjncy, bnvtxs[0], bnvtxs[1], cover, &mut csize);
         if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_SEPINFO as libc::c_int as libc::c_uint != 0 {
             printf(
                 b"Nvtxs: %6d, [%5d %5d], Cut: %6d, SS: [%6d %6d], Cover: %6d\n\0" as *const u8
                     as *const libc::c_char,
                 nvtxs,
                 *((*graph).pwgts).offset(0 as libc::c_int as isize),
-                *((*graph).pwgts).offset(1 as libc::c_int as isize),
+                *((*graph).pwgts).offset(1 as isize),
                 (*graph).mincut,
-                bnvtxs[0 as libc::c_int as usize],
-                bnvtxs[1 as libc::c_int as usize] - bnvtxs[0 as libc::c_int as usize],
+                bnvtxs[0],
+                bnvtxs[1] - bnvtxs[0],
                 csize,
             );
         }
@@ -206,7 +185,7 @@ pub unsafe extern "C" fn libmetis__ConstructMinCoverSeparator(
                 as *const libc::c_char,
             nvtxs,
             *((*graph).pwgts).offset(0 as libc::c_int as isize),
-            *((*graph).pwgts).offset(1 as libc::c_int as isize),
+            *((*graph).pwgts).offset(1 as isize),
             (*graph).mincut,
             0 as libc::c_int,
             0 as libc::c_int,

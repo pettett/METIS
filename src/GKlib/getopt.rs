@@ -69,9 +69,9 @@ pub const PERMUTE: C2RustUnnamed = 1;
 pub static mut gk_optarg: *mut libc::c_char = 0 as *const libc::c_char
     as *mut libc::c_char;
 #[no_mangle]
-pub static mut gk_optind: libc::c_int = 1 as libc::c_int;
+pub static mut gk_optind: libc::c_int = 1;
 #[no_mangle]
-pub static mut gk_opterr: libc::c_int = 1 as libc::c_int;
+pub static mut gk_opterr: libc::c_int = 1;
 #[no_mangle]
 pub static mut gk_optopt: libc::c_int = '?' as i32;
 #[no_mangle]
@@ -158,16 +158,16 @@ unsafe extern "C" fn gk_getopt_internal(
     if *optstring.offset(0 as libc::c_int as isize) as libc::c_int == ':' as i32 {
         print_errors = 0 as libc::c_int;
     }
-    if argc < 1 as libc::c_int {
-        return -(1 as libc::c_int);
+    if argc < 1 {
+        return -(1);
     }
     gk_optarg = 0 as *mut libc::c_char;
     if gk_optind == 0 as libc::c_int || gk_getopt_initialized == 0 {
         if gk_optind == 0 as libc::c_int {
-            gk_optind = 1 as libc::c_int;
+            gk_optind = 1;
         }
         optstring = gk_getopt_initialize(argc, argv, optstring);
-        gk_getopt_initialized = 1 as libc::c_int;
+        gk_getopt_initialized = 1;
     }
     if nextchar.is_null() || *nextchar as libc::c_int == '\0' as i32 {
         if last_nonopt > gk_optind {
@@ -186,7 +186,7 @@ unsafe extern "C" fn gk_getopt_internal(
                 && (*(*argv.offset(gk_optind as isize)).offset(0 as libc::c_int as isize)
                     as libc::c_int != '-' as i32
                     || *(*argv.offset(gk_optind as isize))
-                        .offset(1 as libc::c_int as isize) as libc::c_int == '\0' as i32)
+                        .offset(1 as isize) as libc::c_int == '\0' as i32)
             {
                 gk_optind += 1;
                 gk_optind;
@@ -213,32 +213,32 @@ unsafe extern "C" fn gk_getopt_internal(
             if first_nonopt != last_nonopt {
                 gk_optind = first_nonopt;
             }
-            return -(1 as libc::c_int);
+            return -(1);
         }
         if *(*argv.offset(gk_optind as isize)).offset(0 as libc::c_int as isize)
             as libc::c_int != '-' as i32
-            || *(*argv.offset(gk_optind as isize)).offset(1 as libc::c_int as isize)
+            || *(*argv.offset(gk_optind as isize)).offset(1 as isize)
                 as libc::c_int == '\0' as i32
         {
             if ordering as libc::c_uint == REQUIRE_ORDER as libc::c_int as libc::c_uint {
-                return -(1 as libc::c_int);
+                return -(1);
             }
             let fresh4 = gk_optind;
             gk_optind = gk_optind + 1;
             gk_optarg = *argv.offset(fresh4 as isize);
-            return 1 as libc::c_int;
+            return 1;
         }
         nextchar = (*argv.offset(gk_optind as isize))
-            .offset(1 as libc::c_int as isize)
+            .offset(1 as isize)
             .offset(
                 (!longopts.is_null()
                     && *(*argv.offset(gk_optind as isize))
-                        .offset(1 as libc::c_int as isize) as libc::c_int == '-' as i32)
+                        .offset(1 as isize) as libc::c_int == '-' as i32)
                     as libc::c_int as isize,
             );
     }
     if !longopts.is_null()
-        && (*(*argv.offset(gk_optind as isize)).offset(1 as libc::c_int as isize)
+        && (*(*argv.offset(gk_optind as isize)).offset(1 as isize)
             as libc::c_int == '-' as i32
             || long_only != 0
                 && (*(*argv.offset(gk_optind as isize)).offset(2 as libc::c_int as isize)
@@ -246,7 +246,7 @@ unsafe extern "C" fn gk_getopt_internal(
                     || (strchr(
                         optstring,
                         *(*argv.offset(gk_optind as isize))
-                            .offset(1 as libc::c_int as isize) as libc::c_int,
+                            .offset(1 as isize) as libc::c_int,
                     ))
                         .is_null()))
     {
@@ -255,7 +255,7 @@ unsafe extern "C" fn gk_getopt_internal(
         let mut pfound: *mut gk_option = 0 as *mut gk_option;
         let mut exact: libc::c_int = 0 as libc::c_int;
         let mut ambig: libc::c_int = 0 as libc::c_int;
-        let mut indfound: libc::c_int = -(1 as libc::c_int);
+        let mut indfound: libc::c_int = -(1);
         let mut option_index: libc::c_int = 0;
         nameend = nextchar;
         while *nameend as libc::c_int != 0 && *nameend as libc::c_int != '=' as i32 {
@@ -276,7 +276,7 @@ unsafe extern "C" fn gk_getopt_internal(
                 {
                     pfound = p;
                     indfound = option_index;
-                    exact = 1 as libc::c_int;
+                    exact = 1;
                     break;
                 } else if pfound.is_null() {
                     pfound = p;
@@ -284,7 +284,7 @@ unsafe extern "C" fn gk_getopt_internal(
                 } else if long_only != 0 || (*pfound).has_arg != (*p).has_arg
                     || (*pfound).flag != (*p).flag || (*pfound).val != (*p).val
                 {
-                    ambig = 1 as libc::c_int;
+                    ambig = 1;
                 }
             }
             p = p.offset(1);
@@ -314,11 +314,11 @@ unsafe extern "C" fn gk_getopt_internal(
             gk_optind;
             if *nameend != 0 {
                 if (*pfound).has_arg != 0 {
-                    gk_optarg = nameend.offset(1 as libc::c_int as isize);
+                    gk_optarg = nameend.offset(1 as isize);
                 } else {
                     if print_errors != 0 {
-                        if *(*argv.offset((gk_optind - 1 as libc::c_int) as isize))
-                            .offset(1 as libc::c_int as isize) as libc::c_int
+                        if *(*argv.offset((gk_optind - 1) as isize))
+                            .offset(1 as isize) as libc::c_int
                             == '-' as i32
                         {
                             fprintf(
@@ -334,7 +334,7 @@ unsafe extern "C" fn gk_getopt_internal(
                                 b"%s: option `%c%s' doesn't allow an argument\n\0"
                                     as *const u8 as *const libc::c_char,
                                 *argv.offset(0 as libc::c_int as isize),
-                                *(*argv.offset((gk_optind - 1 as libc::c_int) as isize))
+                                *(*argv.offset((gk_optind - 1) as isize))
                                     .offset(0 as libc::c_int as isize) as libc::c_int,
                                 (*pfound).name,
                             );
@@ -344,7 +344,7 @@ unsafe extern "C" fn gk_getopt_internal(
                     gk_optopt = (*pfound).val;
                     return '?' as i32;
                 }
-            } else if (*pfound).has_arg == 1 as libc::c_int {
+            } else if (*pfound).has_arg == 1 {
                 if gk_optind < argc {
                     let fresh5 = gk_optind;
                     gk_optind = gk_optind + 1;
@@ -356,7 +356,7 @@ unsafe extern "C" fn gk_getopt_internal(
                             b"%s: option `%s' requires an argument\n\0" as *const u8
                                 as *const libc::c_char,
                             *argv.offset(0 as libc::c_int as isize),
-                            *argv.offset((gk_optind - 1 as libc::c_int) as isize),
+                            *argv.offset((gk_optind - 1) as isize),
                         );
                     }
                     nextchar = nextchar.offset(strlen(nextchar) as isize);
@@ -381,12 +381,12 @@ unsafe extern "C" fn gk_getopt_internal(
             return (*pfound).val;
         }
         if long_only == 0
-            || *(*argv.offset(gk_optind as isize)).offset(1 as libc::c_int as isize)
+            || *(*argv.offset(gk_optind as isize)).offset(1 as isize)
                 as libc::c_int == '-' as i32
             || (strchr(optstring, *nextchar as libc::c_int)).is_null()
         {
             if print_errors != 0 {
-                if *(*argv.offset(gk_optind as isize)).offset(1 as libc::c_int as isize)
+                if *(*argv.offset(gk_optind as isize)).offset(1 as isize)
                     as libc::c_int == '-' as i32
                 {
                     fprintf(
@@ -445,7 +445,7 @@ unsafe extern "C" fn gk_getopt_internal(
         return '?' as i32;
     }
     if *temp.offset(0 as libc::c_int as isize) as libc::c_int == 'W' as i32
-        && *temp.offset(1 as libc::c_int as isize) as libc::c_int == ';' as i32
+        && *temp.offset(1 as isize) as libc::c_int == ';' as i32
     {
         let mut nameend_0: *mut libc::c_char = 0 as *mut libc::c_char;
         let mut p_0: *mut gk_option = 0 as *mut gk_option;
@@ -501,13 +501,13 @@ unsafe extern "C" fn gk_getopt_internal(
                 {
                     pfound_0 = p_0;
                     indfound_0 = option_index_0;
-                    exact_0 = 1 as libc::c_int;
+                    exact_0 = 1;
                     break;
                 } else if pfound_0.is_null() {
                     pfound_0 = p_0;
                     indfound_0 = option_index_0;
                 } else {
-                    ambig_0 = 1 as libc::c_int;
+                    ambig_0 = 1;
                 }
             }
             p_0 = p_0.offset(1);
@@ -534,7 +534,7 @@ unsafe extern "C" fn gk_getopt_internal(
             option_index_0 = indfound_0;
             if *nameend_0 != 0 {
                 if (*pfound_0).has_arg != 0 {
-                    gk_optarg = nameend_0.offset(1 as libc::c_int as isize);
+                    gk_optarg = nameend_0.offset(1 as isize);
                 } else {
                     if print_errors != 0 {
                         fprintf(
@@ -548,7 +548,7 @@ unsafe extern "C" fn gk_getopt_internal(
                     nextchar = nextchar.offset(strlen(nextchar) as isize);
                     return '?' as i32;
                 }
-            } else if (*pfound_0).has_arg == 1 as libc::c_int {
+            } else if (*pfound_0).has_arg == 1 {
                 if gk_optind < argc {
                     let fresh8 = gk_optind;
                     gk_optind = gk_optind + 1;
@@ -560,7 +560,7 @@ unsafe extern "C" fn gk_getopt_internal(
                             b"%s: option `%s' requires an argument\n\0" as *const u8
                                 as *const libc::c_char,
                             *argv.offset(0 as libc::c_int as isize),
-                            *argv.offset((gk_optind - 1 as libc::c_int) as isize),
+                            *argv.offset((gk_optind - 1) as isize),
                         );
                     }
                     nextchar = nextchar.offset(strlen(nextchar) as isize);
@@ -586,7 +586,7 @@ unsafe extern "C" fn gk_getopt_internal(
         nextchar = 0 as *mut libc::c_char;
         return 'W' as i32;
     }
-    if *temp.offset(1 as libc::c_int as isize) as libc::c_int == ':' as i32 {
+    if *temp.offset(1 as isize) as libc::c_int == ':' as i32 {
         if *temp.offset(2 as libc::c_int as isize) as libc::c_int == ':' as i32 {
             if *nextchar as libc::c_int != '\0' as i32 {
                 gk_optarg = nextchar;
@@ -675,6 +675,6 @@ pub unsafe extern "C" fn gk_getopt_long_only(
         options,
         long_options,
         opt_index,
-        1 as libc::c_int,
+        1,
     );
 }

@@ -99,7 +99,7 @@
 // pub unsafe extern "C" fn gk_threetoone(mut res: *mut libc::c_char) -> libc::c_char {
 //     *res.offset(0 as libc::c_int as isize) = ({
 //         let mut __res: libc::c_int = 0;
-//         if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as libc::c_int as u64 {
+//         if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as u64 {
 //             if 0 != 0 {
 //                 let mut __c: libc::c_int = *res.offset(0 as libc::c_int as isize) as libc::c_int;
 //                 __res = if __c < -(128 as libc::c_int) || __c > 255 as libc::c_int {
@@ -117,28 +117,28 @@
 //         }
 //         __res
 //     }) as libc::c_char;
-//     *res.offset(1 as libc::c_int as isize) = ({
+//     *res.offset(1 as isize) = ({
 //         let mut __res: libc::c_int = 0;
-//         if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as libc::c_int as u64 {
+//         if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as u64 {
 //             if 0 != 0 {
-//                 let mut __c: libc::c_int = *res.offset(1 as libc::c_int as isize) as libc::c_int;
+//                 let mut __c: libc::c_int = *res.offset(1 as isize) as libc::c_int;
 //                 __res = if __c < -(128 as libc::c_int) || __c > 255 as libc::c_int {
 //                     __c
 //                 } else {
 //                     *(*__ctype_toupper_loc()).offset(__c as isize)
 //                 };
 //             } else {
-//                 __res = toupper(*res.offset(1 as libc::c_int as isize) as libc::c_int);
+//                 __res = toupper(*res.offset(1 as isize) as libc::c_int);
 //             }
 //         } else {
 //             __res = *(*__ctype_toupper_loc())
-//                 .offset(*res.offset(1 as libc::c_int as isize) as libc::c_int as isize);
+//                 .offset(*res.offset(1 as isize) as libc::c_int as isize);
 //         }
 //         __res
 //     }) as libc::c_char;
 //     *res.offset(2 as libc::c_int as isize) = ({
 //         let mut __res: libc::c_int = 0;
-//         if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as libc::c_int as u64 {
+//         if ::core::mem::size_of::<libc::c_char>() as u64 > 1 as u64 {
 //             if 0 != 0 {
 //                 let mut __c: libc::c_int = *res.offset(2 as libc::c_int as isize) as libc::c_int;
 //                 __res = if __c < -(128 as libc::c_int) || __c > 255 as libc::c_int {
@@ -276,7 +276,7 @@
 //     let mut residues: libc::c_int = 0 as libc::c_int;
 //     let mut cas: libc::c_int = 0 as libc::c_int;
 //     let mut bbs: libc::c_int = 0 as libc::c_int;
-//     let mut firstres: libc::c_int = 1 as libc::c_int;
+//     let mut firstres: libc::c_int = 1;
 //     let mut toFill: *mut pdbf = gk_malloc(
 //         ::core::mem::size_of::<pdbf>() as u64,
 //         b"fillme\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -334,9 +334,9 @@
 //                 rname.as_mut_ptr(),
 //             );
 //             if altLoc as libc::c_int != ' ' as i32 {
-//                 corruption = corruption | 1 as libc::c_int;
+//                 corruption = corruption | 1;
 //             }
-//             if firstres == 1 as libc::c_int {
+//             if firstres == 1 {
 //                 oldRserial = rserial;
 //                 oldchainid = chainid;
 //                 residues += 1;
@@ -431,7 +431,7 @@
 //         b"center of mass\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
 //     ) as *mut center_of_mass;
 //     res = 0 as libc::c_int;
-//     firstres = 1 as libc::c_int;
+//     firstres = 1;
 //     cas = 0 as libc::c_int;
 //     bbs = 0 as libc::c_int;
 //     i = 0 as libc::c_int;
@@ -485,7 +485,7 @@
 //                 b"%s\0" as *const u8 as *const libc::c_char,
 //                 rname.as_mut_ptr(),
 //             );
-//             if firstres == 1 as libc::c_int {
+//             if firstres == 1 {
 //                 *((*toFill).resSeq).offset(res as isize) = gk_threetoone(rname.as_mut_ptr());
 //                 let ref mut fresh0 = *((*toFill).threeresSeq).offset(res as isize);
 //                 *fresh0 = gk_strdup(rname.as_mut_ptr());
@@ -495,18 +495,18 @@
 //                 firstres = 0 as libc::c_int;
 //             }
 //             if oldRserial != rserial {
-//                 (*((*toFill).cm).offset((res - 1 as libc::c_int) as isize)).x =
+//                 (*((*toFill).cm).offset((res - 1) as isize)).x =
 //                     avgx / nresatoms as libc::c_double;
-//                 (*((*toFill).cm).offset((res - 1 as libc::c_int) as isize)).y =
+//                 (*((*toFill).cm).offset((res - 1) as isize)).y =
 //                     avgy / nresatoms as libc::c_double;
-//                 (*((*toFill).cm).offset((res - 1 as libc::c_int) as isize)).z =
+//                 (*((*toFill).cm).offset((res - 1) as isize)).z =
 //                     avgz / nresatoms as libc::c_double;
 //                 avgx = 0.0f64;
 //                 avgy = 0.0f64;
 //                 avgz = 0.0f64;
 //                 nresatoms = 0 as libc::c_int;
-//                 (*((*toFill).cm).offset((res - 1 as libc::c_int) as isize)).name =
-//                     *((*toFill).resSeq).offset((res - 1 as libc::c_int) as isize);
+//                 (*((*toFill).cm).offset((res - 1) as isize)).name =
+//                     *((*toFill).resSeq).offset((res - 1) as isize);
 //                 let ref mut fresh1 = *((*toFill).threeresSeq).offset(res as isize);
 //                 *fresh1 = gk_strdup(rname.as_mut_ptr());
 //                 *((*toFill).resSeq).offset(res as isize) = gk_threetoone(rname.as_mut_ptr());
@@ -587,11 +587,11 @@
 //             break;
 //         }
 //     }
-//     (*((*toFill).cm).offset((res - 1 as libc::c_int) as isize)).x =
+//     (*((*toFill).cm).offset((res - 1) as isize)).x =
 //         avgx / nresatoms as libc::c_double;
-//     (*((*toFill).cm).offset((res - 1 as libc::c_int) as isize)).y =
+//     (*((*toFill).cm).offset((res - 1) as isize)).y =
 //         avgy / nresatoms as libc::c_double;
-//     (*((*toFill).cm).offset((res - 1 as libc::c_int) as isize)).z =
+//     (*((*toFill).cm).offset((res - 1) as isize)).z =
 //         avgz / nresatoms as libc::c_double;
 //     if cas != residues {
 //         printf(
@@ -780,7 +780,7 @@
 // #[no_mangle]
 // pub unsafe extern "C" fn gk_showcorruption(mut p: *mut pdbf) {
 //     let mut corruption: libc::c_int = (*p).corruption;
-//     if corruption & 1 as libc::c_int != 0 {
+//     if corruption & 1 != 0 {
 //         printf(
 //             b"Multiple coordinate sets for at least one atom\n\0" as *const u8
 //                 as *const libc::c_char,

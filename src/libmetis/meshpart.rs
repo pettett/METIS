@@ -49,9 +49,9 @@ pub unsafe extern "C" fn METIS_PartMeshNodal(
     let mut sigrval: libc::c_int = 0 as libc::c_int;
     let mut renumber: libc::c_int = 0 as libc::c_int;
     let mut ptype: libc::c_int = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
-    let mut adjncy: *mut idx_t = 0 as *mut idx_t;
-    let mut ncon: idx_t = 1 as libc::c_int;
+    let mut xadj = None;
+    let mut adjncy = None;
+    let mut ncon: idx_t = 1;
     let mut pnumflag: idx_t = 0 as libc::c_int;
     let mut rstatus: libc::c_int = METIS_OK as libc::c_int;
     if gk_malloc_init() == 0 {
@@ -61,15 +61,14 @@ pub unsafe extern "C" fn METIS_PartMeshNodal(
     sigrval = 0; // _setjmp((*gk_jbufs.as_mut_ptr().offset(GK_CUR_JBUFS as isize)).as_mut_ptr());
     if !(sigrval != 0 as libc::c_int) {
         renumber = if options.is_null()
-            || *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize)
-                == -(1 as libc::c_int)
+            || *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize) == -(1)
         {
             0 as libc::c_int
         } else {
             *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize)
         };
         ptype = if options.is_null()
-            || *options.offset(METIS_OPTION_PTYPE as libc::c_int as isize) == -(1 as libc::c_int)
+            || *options.offset(METIS_OPTION_PTYPE as libc::c_int as isize) == -(1)
         {
             METIS_PTYPE_KWAY as libc::c_int
         } else {
@@ -87,8 +86,8 @@ pub unsafe extern "C" fn METIS_PartMeshNodal(
             rstatus = METIS_PartGraphKway(
                 nn,
                 &mut ncon,
-                xadj,
-                adjncy,
+                xadj.as_mut().unwrap(),
+                adjncy.as_mut().unwrap().as_mut_ptr(),
                 vwgt,
                 vsize,
                 0 as *mut idx_t,
@@ -103,8 +102,8 @@ pub unsafe extern "C" fn METIS_PartMeshNodal(
             rstatus = METIS_PartGraphRecursive(
                 nn,
                 &mut ncon,
-                xadj,
-                adjncy,
+                xadj.as_mut().unwrap(),
+                adjncy.as_mut().unwrap().as_mut_ptr(),
                 vwgt,
                 vsize,
                 0 as *mut idx_t,
@@ -123,10 +122,9 @@ pub unsafe extern "C" fn METIS_PartMeshNodal(
     }
     if renumber != 0 {
         libmetis__ChangeMesh2FNumbering2(*ne, *nn, eptr, eind, epart, npart);
-        *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize) = 1 as libc::c_int;
+        *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize) = 1;
     }
-    METIS_Free(xadj as *mut libc::c_void);
-    METIS_Free(adjncy as *mut libc::c_void);
+
     gk_siguntrap();
     gk_malloc_cleanup(0 as libc::c_int);
     return libmetis__metis_rcode(sigrval);
@@ -152,11 +150,13 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
     let mut ptype: libc::c_int = 0;
     let mut i: idx_t = 0;
     let mut j: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
-    let mut adjncy: *mut idx_t = 0 as *mut idx_t;
+
+    let mut xadj = None;
+    let mut adjncy = None;
+
     let mut nptr: *mut idx_t = 0 as *mut idx_t;
     let mut nind: *mut idx_t = 0 as *mut idx_t;
-    let mut ncon: idx_t = 1 as libc::c_int;
+    let mut ncon: idx_t = 1;
     let mut pnumflag: idx_t = 0 as libc::c_int;
     let mut rstatus: libc::c_int = METIS_OK as libc::c_int;
     if gk_malloc_init() == 0 {
@@ -166,15 +166,14 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
     sigrval = 0; //_setjmp((*gk_jbufs.as_mut_ptr().offset(GK_CUR_JBUFS as isize)).as_mut_ptr());
     if !(sigrval != 0 as libc::c_int) {
         renumber = if options.is_null()
-            || *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize)
-                == -(1 as libc::c_int)
+            || *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize) == -(1)
         {
             0 as libc::c_int
         } else {
             *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize)
         };
         ptype = if options.is_null()
-            || *options.offset(METIS_OPTION_PTYPE as libc::c_int as isize) == -(1 as libc::c_int)
+            || *options.offset(METIS_OPTION_PTYPE as libc::c_int as isize) == -(1)
         {
             METIS_PTYPE_KWAY as libc::c_int
         } else {
@@ -201,8 +200,8 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
             rstatus = METIS_PartGraphKway(
                 ne,
                 &mut ncon,
-                xadj,
-                adjncy,
+                xadj.as_mut().unwrap(),
+                adjncy.as_mut().unwrap().as_mut_ptr(),
                 vwgt,
                 vsize,
                 0 as *mut idx_t,
@@ -217,8 +216,8 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
             rstatus = METIS_PartGraphRecursive(
                 ne,
                 &mut ncon,
-                xadj,
-                adjncy,
+                xadj.as_mut().unwrap(),
+                adjncy.as_mut().unwrap().as_mut_ptr(),
                 vwgt,
                 vsize,
                 0 as *mut idx_t,
@@ -234,7 +233,7 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
             raise(15 as libc::c_int);
         }
         nptr = libmetis__ismalloc(
-            (*nn + 1 as libc::c_int) as size_t,
+            (*nn + 1) as size_t,
             0 as libc::c_int,
             b"METIS_PartMeshDual: nptr\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
@@ -245,7 +244,7 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
         i = 0 as libc::c_int;
         while i < *ne {
             j = *eptr.offset(i as isize);
-            while j < *eptr.offset((i + 1 as libc::c_int) as isize) {
+            while j < *eptr.offset((i + 1) as isize) {
                 let ref mut fresh0 = *nptr.offset(*eind.offset(j as isize) as isize);
                 *fresh0 += 1;
                 *fresh0;
@@ -255,16 +254,16 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
             i += 1;
             i;
         }
-        i = 1 as libc::c_int;
+        i = 1;
         while i < *nn {
             let ref mut fresh1 = *nptr.offset(i as isize);
-            *fresh1 += *nptr.offset((i - 1 as libc::c_int) as isize);
+            *fresh1 += *nptr.offset((i - 1) as isize);
             i += 1;
             i;
         }
         i = *nn;
         while i > 0 as libc::c_int {
-            *nptr.offset(i as isize) = *nptr.offset((i - 1 as libc::c_int) as isize);
+            *nptr.offset(i as isize) = *nptr.offset((i - 1) as isize);
             i -= 1;
             i;
         }
@@ -272,7 +271,7 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
         i = 0 as libc::c_int;
         while i < *ne {
             j = *eptr.offset(i as isize);
-            while j < *eptr.offset((i + 1 as libc::c_int) as isize) {
+            while j < *eptr.offset((i + 1) as isize) {
                 let ref mut fresh2 = *nptr.offset(*eind.offset(j as isize) as isize);
                 let fresh3 = *fresh2;
                 *fresh2 = *fresh2 + 1;
@@ -285,7 +284,7 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
         }
         i = *nn;
         while i > 0 as libc::c_int {
-            *nptr.offset(i as isize) = *nptr.offset((i - 1 as libc::c_int) as isize);
+            *nptr.offset(i as isize) = *nptr.offset((i - 1) as isize);
             i -= 1;
             i;
         }
@@ -299,10 +298,9 @@ pub unsafe extern "C" fn METIS_PartMeshDual(
     }
     if renumber != 0 {
         libmetis__ChangeMesh2FNumbering2(*ne, *nn, eptr, eind, epart, npart);
-        *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize) = 1 as libc::c_int;
+        *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize) = 1;
     }
-    METIS_Free(xadj as *mut libc::c_void);
-    METIS_Free(adjncy as *mut libc::c_void);
+
     gk_siguntrap();
     gk_malloc_cleanup(0 as libc::c_int);
     return libmetis__metis_rcode(sigrval);
@@ -347,45 +345,42 @@ pub unsafe extern "C" fn libmetis__InduceRowPartFromColumnPart(
     );
     nbrmrk = libmetis__ismalloc(
         nparts as size_t,
-        -(1 as libc::c_int),
+        -(1),
         b"InduceRowPartFromColumnPart: nbrmrk\0" as *const u8 as *const libc::c_char
             as *mut libc::c_char,
     );
-    libmetis__iset(nrows as size_t, -(1 as libc::c_int), rpart);
+    libmetis__iset(nrows as size_t, -(1), rpart);
     itpwgts = libmetis__imalloc(
         nparts as size_t,
         b"InduceRowPartFromColumnPart: itpwgts\0" as *const u8 as *const libc::c_char
             as *mut libc::c_char,
     );
     if tpwgts.is_null() {
-        libmetis__iset(nparts as size_t, 1 as libc::c_int + nrows / nparts, itpwgts);
+        libmetis__iset(nparts as size_t, 1 + nrows / nparts, itpwgts);
     } else {
         i = 0 as libc::c_int;
         while i < nparts {
-            *itpwgts.offset(i as isize) = (1 as libc::c_int as libc::c_float
-                + nrows as libc::c_float * *tpwgts.offset(i as isize))
-                as idx_t;
+            *itpwgts.offset(i as isize) =
+                (1 as libc::c_float + nrows as libc::c_float * *tpwgts.offset(i as isize)) as idx_t;
             i += 1;
             i;
         }
     }
     i = 0 as libc::c_int;
     while i < nrows {
-        if *rowptr.offset((i + 1 as libc::c_int) as isize) - *rowptr.offset(i as isize)
-            == 0 as libc::c_int
-        {
+        if *rowptr.offset((i + 1) as isize) - *rowptr.offset(i as isize) == 0 as libc::c_int {
             *rpart.offset(i as isize) = -(2 as libc::c_int);
         } else {
             me = *cpart.offset(*rowind.offset(*rowptr.offset(i as isize) as isize) as isize);
-            j = *rowptr.offset(i as isize) + 1 as libc::c_int;
-            while j < *rowptr.offset((i + 1 as libc::c_int) as isize) {
+            j = *rowptr.offset(i as isize) + 1;
+            while j < *rowptr.offset((i + 1) as isize) {
                 if *cpart.offset(*rowind.offset(j as isize) as isize) != me {
                     break;
                 }
                 j += 1;
                 j;
             }
-            if j == *rowptr.offset((i + 1 as libc::c_int) as isize) {
+            if j == *rowptr.offset((i + 1) as isize) {
                 *rpart.offset(i as isize) = me;
                 let ref mut fresh4 = *pwgts.offset(me as isize);
                 *fresh4 += 1;
@@ -397,14 +392,14 @@ pub unsafe extern "C" fn libmetis__InduceRowPartFromColumnPart(
     }
     i = 0 as libc::c_int;
     while i < nrows {
-        if *rpart.offset(i as isize) == -(1 as libc::c_int) {
+        if *rpart.offset(i as isize) == -(1) {
             nnbrs = 0 as libc::c_int;
             j = *rowptr.offset(i as isize);
-            while j < *rowptr.offset((i + 1 as libc::c_int) as isize) {
+            while j < *rowptr.offset((i + 1) as isize) {
                 me = *cpart.offset(*rowind.offset(j as isize) as isize);
-                if *nbrmrk.offset(me as isize) == -(1 as libc::c_int) {
+                if *nbrmrk.offset(me as isize) == -(1) {
                     *nbrdom.offset(nnbrs as isize) = me;
-                    *nbrwgt.offset(nnbrs as isize) = 1 as libc::c_int;
+                    *nbrwgt.offset(nnbrs as isize) = 1;
                     let fresh5 = nnbrs;
                     nnbrs = nnbrs + 1;
                     *nbrmrk.offset(me as isize) = fresh5;
@@ -443,7 +438,7 @@ pub unsafe extern "C" fn libmetis__InduceRowPartFromColumnPart(
             *fresh7;
             j = 0 as libc::c_int;
             while j < nnbrs {
-                *nbrmrk.offset(*nbrdom.offset(j as isize) as isize) = -(1 as libc::c_int);
+                *nbrmrk.offset(*nbrdom.offset(j as isize) as isize) = -(1);
                 j += 1;
                 j;
             }

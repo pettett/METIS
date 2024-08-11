@@ -99,7 +99,6 @@ pub unsafe extern "C" fn libmetis__Compute2WayPartitionParams(
     let mut tid: idx_t = 0;
     let mut ted: idx_t = 0;
     let mut me: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -111,7 +110,7 @@ pub unsafe extern "C" fn libmetis__Compute2WayPartitionParams(
     let mut ed: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -123,9 +122,9 @@ pub unsafe extern "C" fn libmetis__Compute2WayPartitionParams(
         0 as libc::c_int,
         (*graph).pwgts,
     );
-    bndptr = libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), (*graph).bndptr);
+    bndptr = libmetis__iset(nvtxs as size_t, -(1), (*graph).bndptr);
     bndind = (*graph).bndind;
-    if ncon == 1 as libc::c_int {
+    if ncon == 1 {
         i = 0 as libc::c_int;
         while i < nvtxs {
             let ref mut fresh0 = *pwgts.offset(*where_0.offset(i as isize) as isize);
@@ -152,8 +151,8 @@ pub unsafe extern "C" fn libmetis__Compute2WayPartitionParams(
     mincut = 0 as libc::c_int;
     i = 0 as libc::c_int;
     while i < nvtxs {
-        istart = *xadj.offset(i as isize);
-        iend = *xadj.offset((i + 1 as libc::c_int) as isize);
+        istart = xadj[i as usize];
+        iend = xadj[(i + 1) as usize];
         me = *where_0.offset(i as isize);
         ted = 0 as libc::c_int;
         tid = ted;
@@ -196,7 +195,6 @@ pub unsafe extern "C" fn libmetis__Project2WayPartition(
     let mut me: idx_t = 0;
     let mut tid: idx_t = 0;
     let mut ted: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut cmap: *mut idx_t = 0 as *mut idx_t;
@@ -214,13 +212,13 @@ pub unsafe extern "C" fn libmetis__Project2WayPartition(
     cbndptr = (*cgraph).bndptr;
     nvtxs = (*graph).nvtxs;
     cmap = (*graph).cmap;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     where_0 = (*graph).where_0;
     id = (*graph).id;
     ed = (*graph).ed;
-    bndptr = libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), (*graph).bndptr);
+    bndptr = libmetis__iset(nvtxs as size_t, -(1), (*graph).bndptr);
     bndind = (*graph).bndind;
     i = 0 as libc::c_int;
     while i < nvtxs {
@@ -233,11 +231,11 @@ pub unsafe extern "C" fn libmetis__Project2WayPartition(
     nbnd = 0 as libc::c_int;
     i = 0 as libc::c_int;
     while i < nvtxs {
-        istart = *xadj.offset(i as isize);
-        iend = *xadj.offset((i + 1 as libc::c_int) as isize);
+        istart = xadj[i as usize];
+        iend = xadj[(i + 1) as usize];
         ted = 0 as libc::c_int;
         tid = ted;
-        if *cmap.offset(i as isize) == -(1 as libc::c_int) {
+        if *cmap.offset(i as isize) == -(1) {
             j = istart;
             while j < iend {
                 tid += *adjwgt.offset(j as isize);

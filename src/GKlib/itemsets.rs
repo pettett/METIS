@@ -1,17 +1,9 @@
 use ::libc;
 extern "C" {
-    fn gk_iincset(
-        n: size_t,
-        baseval: libc::c_int,
-        x: *mut libc::c_int,
-    ) -> *mut libc::c_int;
+    fn gk_iincset(n: size_t, baseval: libc::c_int, x: *mut libc::c_int) -> *mut libc::c_int;
     fn gk_iargmax(n: size_t, x: *mut libc::c_int) -> size_t;
     fn gk_imalloc(n: size_t, msg: *mut libc::c_char) -> *mut libc::c_int;
-    fn gk_ismalloc(
-        n: size_t,
-        ival: libc::c_int,
-        msg: *mut libc::c_char,
-    ) -> *mut libc::c_int;
+    fn gk_ismalloc(n: size_t, ival: libc::c_int, msg: *mut libc::c_char) -> *mut libc::c_int;
     fn gk_iset(n: size_t, val: libc::c_int, x: *mut libc::c_int) -> *mut libc::c_int;
     fn gk_icopy(n: size_t, a: *mut libc::c_int, b: *mut libc::c_int) -> *mut libc::c_int;
     fn gk_zmalloc(n: size_t, msg: *mut libc::c_char) -> *mut ssize_t;
@@ -66,7 +58,7 @@ pub struct isparams_t {
     pub minlen: libc::c_int,
     pub maxlen: libc::c_int,
     pub tnitems: libc::c_int,
-    pub callback: Option::<
+    pub callback: Option<
         unsafe extern "C" fn(
             *mut libc::c_void,
             libc::c_int,
@@ -88,7 +80,7 @@ pub unsafe extern "C" fn gk_find_frequent_itemsets(
     mut maxfreq: libc::c_int,
     mut minlen: libc::c_int,
     mut maxlen: libc::c_int,
-    mut process_itemset: Option::<
+    mut process_itemset: Option<
         unsafe extern "C" fn(
             *mut libc::c_void,
             libc::c_int,
@@ -116,62 +108,60 @@ pub unsafe extern "C" fn gk_find_frequent_itemsets(
     let mut pattern: *mut libc::c_int = 0 as *mut libc::c_int;
     mat = gk_csr_Create();
     (*mat).nrows = ntrans;
-    (*mat)
-        .ncols = *tranind
+    (*mat).ncols = *tranind
         .offset(gk_iargmax(*tranptr.offset(ntrans as isize) as size_t, tranind) as isize)
-        + 1 as libc::c_int;
-    (*mat)
-        .rowptr = gk_zcopy(
-        (ntrans + 1 as libc::c_int) as size_t,
+        + 1;
+    (*mat).rowptr = gk_zcopy(
+        (ntrans + 1) as size_t,
         tranptr,
         gk_zmalloc(
-            (ntrans + 1 as libc::c_int) as size_t,
-            b"gk_find_frequent_itemsets: mat.rowptr\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            (ntrans + 1) as size_t,
+            b"gk_find_frequent_itemsets: mat.rowptr\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         ),
     );
-    (*mat)
-        .rowind = gk_icopy(
+    (*mat).rowind = gk_icopy(
         *tranptr.offset(ntrans as isize) as size_t,
         tranind,
         gk_imalloc(
             *tranptr.offset(ntrans as isize) as size_t,
-            b"gk_find_frequent_itemsets: mat.rowind\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"gk_find_frequent_itemsets: mat.rowind\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         ),
     );
-    (*mat)
-        .colids = gk_iincset(
+    (*mat).colids = gk_iincset(
         (*mat).ncols as size_t,
         0 as libc::c_int,
         gk_imalloc(
             (*mat).ncols as size_t,
-            b"gk_find_frequent_itemsets: mat.colids\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"gk_find_frequent_itemsets: mat.colids\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         ),
     );
     params.minfreq = minfreq;
-    params.maxfreq = if maxfreq == -(1 as libc::c_int) { (*mat).nrows } else { maxfreq };
+    params.maxfreq = if maxfreq == -(1) {
+        (*mat).nrows
+    } else {
+        maxfreq
+    };
     params.minlen = minlen;
-    params.maxlen = if maxlen == -(1 as libc::c_int) { (*mat).ncols } else { maxlen };
+    params.maxlen = if maxlen == -(1) { (*mat).ncols } else { maxlen };
     params.tnitems = (*mat).ncols;
     params.callback = process_itemset;
     params.stateptr = stateptr;
-    params
-        .rmarker = gk_ismalloc(
+    params.rmarker = gk_ismalloc(
         (*mat).nrows as size_t,
         0 as libc::c_int,
         b"gk_find_frequent_itemsets: rmarker\0" as *const u8 as *const libc::c_char
             as *mut libc::c_char,
     );
-    params
-        .cand = gk_ikvmalloc(
+    params.cand = gk_ikvmalloc(
         (*mat).ncols as size_t,
         b"gk_find_frequent_itemsets: cand\0" as *const u8 as *const libc::c_char
             as *mut libc::c_char,
     );
     gk_csr_CreateIndex(mat, 2 as libc::c_int);
-    pmat = itemsets_project_matrix(&mut params, mat, -(1 as libc::c_int));
+    pmat = itemsets_project_matrix(&mut params, mat, -(1));
     gk_csr_Free(&mut mat);
     pattern = gk_imalloc(
         (*pmat).ncols as size_t,
@@ -199,27 +189,20 @@ pub unsafe extern "C" fn itemsets_find_frequent_itemsets(
     i = 0 as libc::c_int as ssize_t;
     while i < (*mat).ncols as i64 {
         *prefix.offset(preflen as isize) = *((*mat).colids).offset(i as isize);
-        if preflen + 1 as libc::c_int >= (*params).minlen {
+        if preflen + 1 >= (*params).minlen {
             (Some(((*params).callback).expect("non-null function pointer")))
-                .expect(
-                    "non-null function pointer",
-                )(
+                .expect("non-null function pointer")(
                 (*params).stateptr,
-                preflen + 1 as libc::c_int,
+                preflen + 1,
                 prefix,
-                (*((*mat).colptr).offset((i + 1 as libc::c_int as i64) as isize)
+                (*((*mat).colptr).offset((i + 1 as i64) as isize)
                     - *((*mat).colptr).offset(i as isize)) as libc::c_int,
                 ((*mat).colind).offset(*((*mat).colptr).offset(i as isize) as isize),
             );
         }
-        if (preflen + 1 as libc::c_int) < (*params).maxlen {
+        if (preflen + 1) < (*params).maxlen {
             cmat = itemsets_project_matrix(params, mat, i as libc::c_int);
-            itemsets_find_frequent_itemsets(
-                params,
-                cmat,
-                preflen + 1 as libc::c_int,
-                prefix,
-            );
+            itemsets_find_frequent_itemsets(params, cmat, preflen + 1, prefix);
             gk_csr_Free(&mut cmat);
         }
         i += 1;
@@ -258,36 +241,34 @@ pub unsafe extern "C" fn itemsets_project_matrix(
     rmarker = (*params).rmarker;
     cand = (*params).cand;
     pmat = gk_csr_Create();
-    pnrows = (if cid == -(1 as libc::c_int) {
+    pnrows = (if cid == -(1) {
         nrows as i64
     } else {
-        *colptr.offset((cid + 1 as libc::c_int) as isize) - *colptr.offset(cid as isize)
+        *colptr.offset((cid + 1) as isize) - *colptr.offset(cid as isize)
     }) as libc::c_int;
     (*pmat).nrows = pnrows;
-    if cid == -(1 as libc::c_int) {
-        gk_iset(nrows as size_t, 1 as libc::c_int, rmarker);
+    if cid == -(1) {
+        gk_iset(nrows as size_t, 1, rmarker);
     } else {
         i = *colptr.offset(cid as isize);
-        while i < *colptr.offset((cid + 1 as libc::c_int) as isize) {
-            *rmarker.offset(*colind.offset(i as isize) as isize) = 1 as libc::c_int;
+        while i < *colptr.offset((cid + 1) as isize) {
+            *rmarker.offset(*colind.offset(i as isize) as isize) = 1;
             i += 1;
             i;
         }
     }
     pncols = 0 as libc::c_int;
     pnnz = 0 as libc::c_int as ssize_t;
-    i = (cid + 1 as libc::c_int) as ssize_t;
+    i = (cid + 1) as ssize_t;
     while i < ncols as i64 {
         k = 0 as libc::c_int as ssize_t;
         j = *colptr.offset(i as isize);
-        while j < *colptr.offset((i + 1 as libc::c_int as i64) as isize) {
+        while j < *colptr.offset((i + 1 as i64) as isize) {
             k += *rmarker.offset(*colind.offset(j as isize) as isize) as i64;
             j += 1;
             j;
         }
-        if k >= (*params).minfreq as i64
-            && k <= (*params).maxfreq as i64
-        {
+        if k >= (*params).minfreq as i64 && k <= (*params).maxfreq as i64 {
             (*cand.offset(pncols as isize)).val = i;
             let fresh0 = pncols;
             pncols = pncols + 1;
@@ -306,7 +287,7 @@ pub unsafe extern "C" fn itemsets_project_matrix(
     );
     (*pmat).colids = pcolids;
     pcolptr = gk_zmalloc(
-        (pncols + 1 as libc::c_int) as size_t,
+        (pncols + 1) as size_t,
         b"itemsets_project_matrix: pcolptr\0" as *const u8 as *const libc::c_char
             as *mut libc::c_char,
     );
@@ -323,7 +304,7 @@ pub unsafe extern "C" fn itemsets_project_matrix(
     while ii < pncols as i64 {
         i = (*cand.offset(ii as isize)).val;
         j = *colptr.offset(i as isize);
-        while j < *colptr.offset((i + 1 as libc::c_int as i64) as isize) {
+        while j < *colptr.offset((i + 1 as i64) as isize) {
             if *rmarker.offset(*colind.offset(j as isize) as isize) != 0 {
                 let fresh1 = pnnz;
                 pnnz = pnnz + 1;
@@ -333,15 +314,15 @@ pub unsafe extern "C" fn itemsets_project_matrix(
             j;
         }
         *pcolids.offset(ii as isize) = *colids.offset(i as isize);
-        *pcolptr.offset((ii + 1 as libc::c_int as i64) as isize) = pnnz;
+        *pcolptr.offset((ii + 1 as i64) as isize) = pnnz;
         ii += 1;
         ii;
     }
-    if cid == -(1 as libc::c_int) {
+    if cid == -(1) {
         gk_iset(nrows as size_t, 0 as libc::c_int, rmarker);
     } else {
         i = *colptr.offset(cid as isize);
-        while i < *colptr.offset((cid + 1 as libc::c_int) as isize) {
+        while i < *colptr.offset((cid + 1) as isize) {
             *rmarker.offset(*colind.offset(i as isize) as isize) = 0 as libc::c_int;
             i += 1;
             i;

@@ -10,71 +10,7 @@ extern "C" {
     fn gk_sigtrap() -> libc::c_int;
     fn gk_siguntrap() -> libc::c_int;
     fn gk_CPUSeconds() -> libc::c_double;
-    fn libmetis__metis_rcode(sigrval: libc::c_int) -> libc::c_int;
-    fn libmetis__Change2FNumbering(_: idx_t, _: *mut idx_t, _: *mut idx_t, _: *mut idx_t);
-    fn libmetis__FreeCtrl(r_ctrl: *mut *mut ctrl_t);
-    fn libmetis__PrintTimers(_: *mut ctrl_t);
-    fn libmetis__FreeGraph(graph: *mut *mut graph_t);
-    fn libmetis__rscale(n: size_t, alpha: real_t, x: *mut real_t, incx: size_t) -> *mut real_t;
-    fn libmetis__rsum(n: size_t, x: *mut real_t, incx: size_t) -> real_t;
-    fn libmetis__wspacepop(ctrl: *mut ctrl_t);
-    fn libmetis__SetupGraph_tvwgt(graph: *mut graph_t);
-    fn libmetis__SetupSplitGraph(
-        graph: *mut graph_t,
-        snvtxs: idx_t,
-        snedges: idx_t,
-    ) -> *mut graph_t;
-    fn libmetis__iwspacemalloc(_: *mut ctrl_t, _: idx_t) -> *mut idx_t;
-    fn libmetis__wspacepush(ctrl: *mut ctrl_t);
-    fn libmetis__Compute2WayPartitionParams(ctrl: *mut ctrl_t, graph: *mut graph_t);
-    fn libmetis__icopy(n: size_t, a: *mut idx_t, b: *mut idx_t) -> *mut idx_t;
-    fn libmetis__FreeRData(graph: *mut graph_t);
-    fn libmetis__ComputeLoadImbalanceDiff(
-        graph: *mut graph_t,
-        nparts: idx_t,
-        pijbm: *mut real_t,
-        ubvec: *mut real_t,
-    ) -> real_t;
-    fn libmetis__Refine2Way(
-        ctrl: *mut ctrl_t,
-        orggraph: *mut graph_t,
-        graph: *mut graph_t,
-        rtpwgts: *mut real_t,
-    );
-    fn libmetis__Init2WayPartition(
-        ctrl: *mut ctrl_t,
-        graph: *mut graph_t,
-        ntpwgts: *mut real_t,
-        niparts: idx_t,
-    );
-    fn libmetis__CoarsenGraph(ctrl: *mut ctrl_t, graph: *mut graph_t) -> *mut graph_t;
-    fn libmetis__Setup2WayBalMultipliers(
-        ctrl: *mut ctrl_t,
-        graph: *mut graph_t,
-        tpwgts: *mut real_t,
-    );
-    fn libmetis__rwspacemalloc(_: *mut ctrl_t, _: idx_t) -> *mut real_t;
-    fn libmetis__InitTimers(_: *mut ctrl_t);
-    fn libmetis__AllocateWorkSpace(ctrl: *mut ctrl_t, graph: *mut graph_t);
-    fn libmetis__SetupGraph(
-        ctrl: *mut ctrl_t,
-        nvtxs: idx_t,
-        ncon: idx_t,
-        xadj: *mut idx_t,
-        adjncy: *mut idx_t,
-        vwgt: *mut idx_t,
-        vsize: *mut idx_t,
-        adjwgt: *mut idx_t,
-    ) -> *mut graph_t;
-    fn libmetis__Change2CNumbering(_: idx_t, _: *mut idx_t, _: *mut idx_t);
-    fn libmetis__SetupCtrl(
-        optype: moptype_et,
-        options: *mut idx_t,
-        ncon: idx_t,
-        nparts: idx_t,
-        tpwgts: *mut real_t,
-        ubvec: *mut real_t,
-    ) -> *mut ctrl_t;
+
 }
 pub type __int32_t = libc::c_int;
 pub type __ssize_t = i64;
@@ -114,7 +50,26 @@ pub struct gk_mcore_t {
 }
 pub type idx_t = int32_t;
 pub type real_t = libc::c_float;
-use super::structure::*;
+use super::{
+    coarsen::libmetis__CoarsenGraph,
+    fortran::{libmetis__Change2CNumbering, libmetis__Change2FNumbering},
+    gklib::{libmetis__icopy, libmetis__rscale, libmetis__rsum},
+    graph::{
+        libmetis__FreeGraph, libmetis__FreeRData, libmetis__SetupGraph, libmetis__SetupGraph_tvwgt,
+        libmetis__SetupSplitGraph,
+    },
+    initpart::libmetis__Init2WayPartition,
+    mcutil::libmetis__ComputeLoadImbalanceDiff,
+    options::{libmetis__FreeCtrl, libmetis__Setup2WayBalMultipliers, libmetis__SetupCtrl},
+    refine::{libmetis__Compute2WayPartitionParams, libmetis__Refine2Way},
+    structure::*,
+    timing::{libmetis__InitTimers, libmetis__PrintTimers},
+    util::libmetis__metis_rcode,
+    wspace::{
+        libmetis__AllocateWorkSpace, libmetis__iwspacemalloc, libmetis__rwspacemalloc,
+        libmetis__wspacepop, libmetis__wspacepush,
+    },
+};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct vnbr_t {
@@ -161,41 +116,7 @@ pub type moptype_et = libc::c_uint;
 pub const METIS_OP_OMETIS: moptype_et = 2;
 pub const METIS_OP_KMETIS: moptype_et = 1;
 pub const METIS_OP_PMETIS: moptype_et = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct nrinfo_t {
@@ -227,7 +148,7 @@ pub const METIS_OK: C2RustUnnamed = 1;
 pub unsafe extern "C" fn METIS_PartGraphRecursive(
     mut nvtxs: *mut idx_t,
     mut ncon: *mut idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut vwgt: *mut idx_t,
     mut vsize: *mut idx_t,
@@ -254,9 +175,9 @@ pub unsafe extern "C" fn METIS_PartGraphRecursive(
             gk_siguntrap();
             return METIS_ERROR_INPUT as libc::c_int;
         }
-        if (*ctrl).numflag == 1 as libc::c_int {
+        if (*ctrl).numflag == 1 {
             libmetis__Change2CNumbering(*nvtxs, xadj, adjncy);
-            renumber = 1 as libc::c_int;
+            renumber = 1;
         }
         graph = libmetis__SetupGraph(ctrl, *nvtxs, *ncon, xadj, adjncy, vwgt, vsize, adjwgt);
         libmetis__AllocateWorkSpace(ctrl, graph);
@@ -323,7 +244,7 @@ pub unsafe extern "C" fn libmetis__MlevelRecursiveBisection(
     i = 0 as libc::c_int;
     while i < ncon {
         *tpwgts2.offset(i as isize) = libmetis__rsum(
-            (nparts >> 1 as libc::c_int) as size_t,
+            (nparts >> 1) as size_t,
             tpwgts.offset(i as isize),
             ncon as size_t,
         );
@@ -349,21 +270,21 @@ pub unsafe extern "C" fn libmetis__MlevelRecursiveBisection(
     i = 0 as libc::c_int;
     while i < ncon {
         wsum = libmetis__rsum(
-            (nparts >> 1 as libc::c_int) as size_t,
+            (nparts >> 1) as size_t,
             tpwgts.offset(i as isize),
             ncon as size_t,
         );
         libmetis__rscale(
-            (nparts >> 1 as libc::c_int) as size_t,
+            (nparts >> 1) as size_t,
             (1.0f64 / wsum as libc::c_double) as real_t,
             tpwgts.offset(i as isize),
             ncon as size_t,
         );
         libmetis__rscale(
-            (nparts - (nparts >> 1 as libc::c_int)) as size_t,
+            (nparts - (nparts >> 1)) as size_t,
             (1.0f64 / (1.0f64 - wsum as libc::c_double)) as real_t,
             tpwgts
-                .offset(((nparts >> 1 as libc::c_int) * ncon) as isize)
+                .offset(((nparts >> 1) * ncon) as isize)
                 .offset(i as isize),
             ncon as size_t,
         );
@@ -371,31 +292,25 @@ pub unsafe extern "C" fn libmetis__MlevelRecursiveBisection(
         i;
     }
     if nparts > 3 as libc::c_int {
-        objval += libmetis__MlevelRecursiveBisection(
-            ctrl,
-            lgraph,
-            nparts >> 1 as libc::c_int,
-            part,
-            tpwgts,
-            fpart,
-        );
+        objval +=
+            libmetis__MlevelRecursiveBisection(ctrl, lgraph, nparts >> 1, part, tpwgts, fpart);
         objval += libmetis__MlevelRecursiveBisection(
             ctrl,
             rgraph,
-            nparts - (nparts >> 1 as libc::c_int),
+            nparts - (nparts >> 1),
             part,
-            tpwgts.offset(((nparts >> 1 as libc::c_int) * ncon) as isize),
-            fpart + (nparts >> 1 as libc::c_int),
+            tpwgts.offset(((nparts >> 1) * ncon) as isize),
+            fpart + (nparts >> 1),
         );
     } else if nparts == 3 as libc::c_int {
         libmetis__FreeGraph(&mut lgraph);
         objval += libmetis__MlevelRecursiveBisection(
             ctrl,
             rgraph,
-            nparts - (nparts >> 1 as libc::c_int),
+            nparts - (nparts >> 1),
             part,
-            tpwgts.offset(((nparts >> 1 as libc::c_int) * ncon) as isize),
-            fpart + (nparts >> 1 as libc::c_int),
+            tpwgts.offset(((nparts >> 1) * ncon) as isize),
+            fpart + (nparts >> 1),
         );
     }
     return objval;
@@ -416,7 +331,7 @@ pub unsafe extern "C" fn libmetis__MultilevelBisect(
     let mut curbal: real_t = 0.0f64 as real_t;
     libmetis__Setup2WayBalMultipliers(ctrl, graph, tpwgts);
     libmetis__wspacepush(ctrl);
-    if (*ctrl).ncuts > 1 as libc::c_int {
+    if (*ctrl).ncuts > 1 {
         bestwhere = libmetis__iwspacemalloc(ctrl, (*graph).nvtxs);
     }
     i = 0 as libc::c_int;
@@ -442,14 +357,14 @@ pub unsafe extern "C" fn libmetis__MultilevelBisect(
         {
             bestobj = curobj;
             bestbal = curbal;
-            if i < (*ctrl).ncuts - 1 as libc::c_int {
+            if i < (*ctrl).ncuts - 1 {
                 libmetis__icopy((*graph).nvtxs as size_t, (*graph).where_0, bestwhere);
             }
         }
         if bestobj == 0 as libc::c_int {
             break;
         }
-        if i < (*ctrl).ncuts - 1 as libc::c_int {
+        if i < (*ctrl).ncuts - 1 {
             libmetis__FreeRData(graph);
         }
         i += 1;
@@ -480,14 +395,13 @@ pub unsafe extern "C" fn libmetis__SplitGraphPart(
     let mut ncon: idx_t = 0;
     let mut snvtxs: [idx_t; 2] = [0; 2];
     let mut snedges: [idx_t; 2] = [0; 2];
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut label: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
     let mut bndptr: *mut idx_t = 0 as *mut idx_t;
-    let mut sxadj: [*mut idx_t; 2] = [0 as *mut idx_t; 2];
     let mut svwgt: [*mut idx_t; 2] = [0 as *mut idx_t; 2];
     let mut sadjncy: [*mut idx_t; 2] = [0 as *mut idx_t; 2];
     let mut sadjwgt: [*mut idx_t; 2] = [0 as *mut idx_t; 2];
@@ -503,7 +417,7 @@ pub unsafe extern "C" fn libmetis__SplitGraphPart(
     }
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -511,54 +425,46 @@ pub unsafe extern "C" fn libmetis__SplitGraphPart(
     where_0 = (*graph).where_0;
     bndptr = (*graph).bndptr;
     rename = libmetis__iwspacemalloc(ctrl, nvtxs);
-    snedges[1 as libc::c_int as usize] = 0 as libc::c_int;
-    snedges[0 as libc::c_int as usize] = snedges[1 as libc::c_int as usize];
-    snvtxs[1 as libc::c_int as usize] = snedges[0 as libc::c_int as usize];
-    snvtxs[0 as libc::c_int as usize] = snvtxs[1 as libc::c_int as usize];
+    snedges[1] = 0 as libc::c_int;
+    snedges[0] = snedges[1];
+    snvtxs[1] = snedges[0];
+    snvtxs[0] = snvtxs[1];
     i = 0 as libc::c_int;
     while i < nvtxs {
         k = *where_0.offset(i as isize);
         let fresh0 = snvtxs[k as usize];
         snvtxs[k as usize] = snvtxs[k as usize] + 1;
         *rename.offset(i as isize) = fresh0;
-        snedges[k as usize] +=
-            *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize);
+        snedges[k as usize] += xadj[(i + 1) as usize] - xadj[i as usize];
         i += 1;
         i;
     }
-    lgraph = libmetis__SetupSplitGraph(
-        graph,
-        snvtxs[0 as libc::c_int as usize],
-        snedges[0 as libc::c_int as usize],
-    );
-    sxadj[0 as libc::c_int as usize] = (*lgraph).xadj;
-    svwgt[0 as libc::c_int as usize] = (*lgraph).vwgt;
-    sadjncy[0 as libc::c_int as usize] = (*lgraph).adjncy;
-    sadjwgt[0 as libc::c_int as usize] = (*lgraph).adjwgt;
-    slabel[0 as libc::c_int as usize] = (*lgraph).label;
-    rgraph = libmetis__SetupSplitGraph(
-        graph,
-        snvtxs[1 as libc::c_int as usize],
-        snedges[1 as libc::c_int as usize],
-    );
-    sxadj[1 as libc::c_int as usize] = (*rgraph).xadj;
-    svwgt[1 as libc::c_int as usize] = (*rgraph).vwgt;
-    sadjncy[1 as libc::c_int as usize] = (*rgraph).adjncy;
-    sadjwgt[1 as libc::c_int as usize] = (*rgraph).adjwgt;
-    slabel[1 as libc::c_int as usize] = (*rgraph).label;
-    snedges[1 as libc::c_int as usize] = 0 as libc::c_int;
-    snedges[0 as libc::c_int as usize] = snedges[1 as libc::c_int as usize];
-    snvtxs[1 as libc::c_int as usize] = snedges[0 as libc::c_int as usize];
-    snvtxs[0 as libc::c_int as usize] = snvtxs[1 as libc::c_int as usize];
-    let ref mut fresh1 = *(sxadj[1 as libc::c_int as usize]).offset(0 as libc::c_int as isize);
+    lgraph = libmetis__SetupSplitGraph(graph, snvtxs[0], snedges[0]);
+
+    svwgt[0] = (*lgraph).vwgt;
+    sadjncy[0] = (*lgraph).adjncy;
+    sadjwgt[0] = (*lgraph).adjwgt;
+    slabel[0] = (*lgraph).label;
+    rgraph = libmetis__SetupSplitGraph(graph, snvtxs[1], snedges[1]);
+    let sxadj = [&mut (*lgraph).xadj, &mut (*rgraph).xadj];
+
+    svwgt[1] = (*rgraph).vwgt;
+    sadjncy[1] = (*rgraph).adjncy;
+    sadjwgt[1] = (*rgraph).adjwgt;
+    slabel[1] = (*rgraph).label;
+    snedges[1] = 0 as libc::c_int;
+    snedges[0] = snedges[1];
+    snvtxs[1] = snedges[0];
+    snvtxs[0] = snvtxs[1];
+    let ref mut fresh1 = (sxadj[1])[0];
     *fresh1 = 0 as libc::c_int;
-    *(sxadj[0 as libc::c_int as usize]).offset(0 as libc::c_int as isize) = *fresh1;
+    (sxadj[0])[0] = *fresh1;
     i = 0 as libc::c_int;
     while i < nvtxs {
         mypart = *where_0.offset(i as isize);
-        istart = *xadj.offset(i as isize);
-        iend = *xadj.offset((i + 1 as libc::c_int) as isize);
-        if *bndptr.offset(i as isize) == -(1 as libc::c_int) {
+        istart = xadj[i as usize];
+        iend = xadj[(i + 1) as usize];
+        if *bndptr.offset(i as isize) == -(1) {
             auxadjncy = (sadjncy[mypart as usize])
                 .offset(snedges[mypart as usize] as isize)
                 .offset(-(istart as isize));
@@ -601,14 +507,13 @@ pub unsafe extern "C" fn libmetis__SplitGraphPart(
         *(slabel[mypart as usize]).offset(snvtxs[mypart as usize] as isize) =
             *label.offset(i as isize);
         snvtxs[mypart as usize] += 1;
-        *(sxadj[mypart as usize]).offset(snvtxs[mypart as usize] as isize) =
-            snedges[mypart as usize];
+        (sxadj[mypart as usize])[(snvtxs[mypart as usize] as usize)] = snedges[mypart as usize];
         i += 1;
         i;
     }
     mypart = 0 as libc::c_int;
     while mypart < 2 as libc::c_int {
-        iend = *(sxadj[mypart as usize]).offset(snvtxs[mypart as usize] as isize);
+        iend = (sxadj[mypart as usize])[(snvtxs[mypart as usize] as usize)];
         auxadjncy = sadjncy[mypart as usize];
         i = 0 as libc::c_int;
         while i < iend {
@@ -619,8 +524,8 @@ pub unsafe extern "C" fn libmetis__SplitGraphPart(
         mypart += 1;
         mypart;
     }
-    (*lgraph).nedges = snedges[0 as libc::c_int as usize];
-    (*rgraph).nedges = snedges[1 as libc::c_int as usize];
+    (*lgraph).nedges = snedges[0];
+    (*rgraph).nedges = snedges[1];
     libmetis__SetupGraph_tvwgt(lgraph);
     libmetis__SetupGraph_tvwgt(rgraph);
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {

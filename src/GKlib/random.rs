@@ -26,7 +26,7 @@ pub unsafe extern "C" fn gk_crandArrayPermuteFine(
     let mut i: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: libc::c_char = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as libc::c_char;
@@ -55,7 +55,7 @@ pub unsafe extern "C" fn gk_crandArrayPermute(
     let mut u: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: libc::c_char = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as libc::c_char;
@@ -83,8 +83,8 @@ pub unsafe extern "C" fn gk_crandArrayPermute(
             *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
                 *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+            tmp = *p.offset(v.wrapping_add(1 as u64) as isize);
+            *p.offset(v.wrapping_add(1 as u64) as isize) =
                 *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
@@ -93,8 +93,8 @@ pub unsafe extern "C" fn gk_crandArrayPermute(
             *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
-                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
+                *p.offset(u.wrapping_add(1 as u64) as isize);
+            *p.offset(u.wrapping_add(1 as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -127,7 +127,7 @@ pub unsafe extern "C" fn gk_irandArrayPermute(
     let mut u: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: libc::c_int = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as libc::c_int;
@@ -155,8 +155,8 @@ pub unsafe extern "C" fn gk_irandArrayPermute(
             *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
                 *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+            tmp = *p.offset(v.wrapping_add(1 as u64) as isize);
+            *p.offset(v.wrapping_add(1 as u64) as isize) =
                 *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
@@ -165,8 +165,8 @@ pub unsafe extern "C" fn gk_irandArrayPermute(
             *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
-                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
+                *p.offset(u.wrapping_add(1 as u64) as isize);
+            *p.offset(u.wrapping_add(1 as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -181,7 +181,7 @@ pub unsafe extern "C" fn gk_irandArrayPermuteFine(
     let mut i: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: libc::c_int = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as libc::c_int;
@@ -222,7 +222,7 @@ pub unsafe extern "C" fn gk_frandArrayPermute(
     let mut u: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: libc::c_float = 0.;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as libc::c_float;
@@ -250,8 +250,8 @@ pub unsafe extern "C" fn gk_frandArrayPermute(
             *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
                 *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+            tmp = *p.offset(v.wrapping_add(1 as u64) as isize);
+            *p.offset(v.wrapping_add(1 as u64) as isize) =
                 *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
@@ -260,8 +260,8 @@ pub unsafe extern "C" fn gk_frandArrayPermute(
             *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
-                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
+                *p.offset(u.wrapping_add(1 as u64) as isize);
+            *p.offset(u.wrapping_add(1 as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -276,7 +276,7 @@ pub unsafe extern "C" fn gk_frandArrayPermuteFine(
     let mut i: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: libc::c_float = 0.;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as libc::c_float;
@@ -325,7 +325,7 @@ pub unsafe extern "C" fn gk_drandArrayPermute(
     let mut u: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: libc::c_double = 0.;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as libc::c_double;
@@ -353,8 +353,8 @@ pub unsafe extern "C" fn gk_drandArrayPermute(
             *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
                 *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+            tmp = *p.offset(v.wrapping_add(1 as u64) as isize);
+            *p.offset(v.wrapping_add(1 as u64) as isize) =
                 *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
@@ -363,8 +363,8 @@ pub unsafe extern "C" fn gk_drandArrayPermute(
             *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
-                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
+                *p.offset(u.wrapping_add(1 as u64) as isize);
+            *p.offset(u.wrapping_add(1 as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -379,7 +379,7 @@ pub unsafe extern "C" fn gk_drandArrayPermuteFine(
     let mut i: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: libc::c_double = 0.;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as libc::c_double;
@@ -424,7 +424,7 @@ pub unsafe extern "C" fn gk_idxrandArrayPermute(
     let mut u: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: gk_idx_t = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as gk_idx_t;
@@ -452,8 +452,8 @@ pub unsafe extern "C" fn gk_idxrandArrayPermute(
             *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
                 *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+            tmp = *p.offset(v.wrapping_add(1 as u64) as isize);
+            *p.offset(v.wrapping_add(1 as u64) as isize) =
                 *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
@@ -462,8 +462,8 @@ pub unsafe extern "C" fn gk_idxrandArrayPermute(
             *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
-                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
+                *p.offset(u.wrapping_add(1 as u64) as isize);
+            *p.offset(u.wrapping_add(1 as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -478,7 +478,7 @@ pub unsafe extern "C" fn gk_idxrandArrayPermuteFine(
     let mut i: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: gk_idx_t = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as gk_idx_t;
@@ -519,7 +519,7 @@ pub unsafe extern "C" fn gk_zrandArrayPermute(
     let mut u: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: ssize_t = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as ssize_t;
@@ -547,8 +547,8 @@ pub unsafe extern "C" fn gk_zrandArrayPermute(
             *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
                 *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+            tmp = *p.offset(v.wrapping_add(1 as u64) as isize);
+            *p.offset(v.wrapping_add(1 as u64) as isize) =
                 *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
@@ -557,8 +557,8 @@ pub unsafe extern "C" fn gk_zrandArrayPermute(
             *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
             tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
             *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
-                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
+                *p.offset(u.wrapping_add(1 as u64) as isize);
+            *p.offset(u.wrapping_add(1 as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -573,7 +573,7 @@ pub unsafe extern "C" fn gk_zrandArrayPermuteFine(
     let mut i: size_t = 0;
     let mut v: size_t = 0;
     let mut tmp: ssize_t = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             *p.offset(i as isize) = i as ssize_t;

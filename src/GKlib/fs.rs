@@ -5,20 +5,11 @@ extern "C" {
     pub type _IO_marker;
     fn system(__command: *const libc::c_char) -> libc::c_int;
     fn sprintf(_: *mut libc::c_char, _: *const libc::c_char, _: ...) -> libc::c_int;
-    fn fread(
-        _: *mut libc::c_void,
-        _: u64,
-        _: u64,
-        _: *mut FILE,
-    ) -> u64;
+    fn fread(_: *mut libc::c_void, _: u64, _: u64, _: *mut FILE) -> u64;
     fn feof(__stream: *mut FILE) -> libc::c_int;
     fn strrchr(_: *const libc::c_char, _: libc::c_int) -> *mut libc::c_char;
     fn stat(__file: *const libc::c_char, __buf: *mut stat) -> libc::c_int;
-    fn gk_fopen(
-        _: *mut libc::c_char,
-        _: *mut libc::c_char,
-        _: *const libc::c_char,
-    ) -> *mut FILE;
+    fn gk_fopen(_: *mut libc::c_char, _: *mut libc::c_char, _: *const libc::c_char) -> *mut FILE;
     fn gk_fclose(_: *mut FILE);
     fn gk_strdup(orgstr: *mut libc::c_char) -> *mut libc::c_char;
 }
@@ -117,7 +108,7 @@ pub unsafe extern "C" fn gk_fexists(mut fname: *mut libc::c_char) -> libc::c_int
         st_ctimensec: 0,
         __glibc_reserved: [0; 3],
     };
-    if stat(fname, &mut status) == -(1 as libc::c_int) {
+    if stat(fname, &mut status) == -(1) {
         return 0 as libc::c_int;
     }
     return (status.st_mode & 0o170000 as libc::c_int as libc::c_uint
@@ -145,7 +136,7 @@ pub unsafe extern "C" fn gk_dexists(mut dirname: *mut libc::c_char) -> libc::c_i
         st_ctimensec: 0,
         __glibc_reserved: [0; 3],
     };
-    if stat(dirname, &mut status) == -(1 as libc::c_int) {
+    if stat(dirname, &mut status) == -(1) {
         return 0 as libc::c_int;
     }
     return (status.st_mode & 0o170000 as libc::c_int as libc::c_uint
@@ -173,8 +164,8 @@ pub unsafe extern "C" fn gk_getfsize(mut filename: *mut libc::c_char) -> intmax_
         st_ctimensec: 0,
         __glibc_reserved: [0; 3],
     };
-    if stat(filename, &mut status) == -(1 as libc::c_int) {
-        return -(1 as libc::c_int) as intmax_t;
+    if stat(filename, &mut status) == -(1) {
+        return -(1) as intmax_t;
     }
     return status.st_size;
 }
@@ -215,28 +206,23 @@ pub unsafe extern "C" fn gk_getfilestats(
             if *cptr as libc::c_int == '\n' as i32 {
                 nlines = nlines.wrapping_add(1);
                 nlines;
-                ntokens = (ntokens as u64)
-                    .wrapping_add(intoken as u64) as size_t as size_t;
+                ntokens = (ntokens as u64).wrapping_add(intoken as u64) as size_t as size_t;
                 intoken = 0 as libc::c_int;
                 if max_nlntokens < ntokens.wrapping_sub(oldntokens) {
                     max_nlntokens = ntokens.wrapping_sub(oldntokens);
                 }
                 oldntokens = ntokens;
-            } else if *cptr as libc::c_int == ' ' as i32
-                || *cptr as libc::c_int == '\t' as i32
-            {
-                ntokens = (ntokens as u64)
-                    .wrapping_add(intoken as u64) as size_t as size_t;
+            } else if *cptr as libc::c_int == ' ' as i32 || *cptr as libc::c_int == '\t' as i32 {
+                ntokens = (ntokens as u64).wrapping_add(intoken as u64) as size_t as size_t;
                 intoken = 0 as libc::c_int;
             } else {
-                intoken = 1 as libc::c_int;
+                intoken = 1;
             }
             cptr = cptr.offset(1);
             cptr;
         }
     }
-    ntokens = (ntokens as u64).wrapping_add(intoken as u64) as size_t
-        as size_t;
+    ntokens = (ntokens as u64).wrapping_add(intoken as u64) as size_t as size_t;
     if max_nlntokens < ntokens.wrapping_sub(oldntokens) {
         max_nlntokens = ntokens.wrapping_sub(oldntokens);
     }
@@ -255,9 +241,7 @@ pub unsafe extern "C" fn gk_getfilestats(
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_getbasename(
-    mut path: *mut libc::c_char,
-) -> *mut libc::c_char {
+pub unsafe extern "C" fn gk_getbasename(mut path: *mut libc::c_char) -> *mut libc::c_char {
     let mut startptr: *mut libc::c_char = 0 as *mut libc::c_char;
     let mut endptr: *mut libc::c_char = 0 as *mut libc::c_char;
     let mut basename: *mut libc::c_char = 0 as *mut libc::c_char;
@@ -265,7 +249,7 @@ pub unsafe extern "C" fn gk_getbasename(
     if startptr.is_null() {
         startptr = path;
     } else {
-        startptr = startptr.offset(1 as libc::c_int as isize);
+        startptr = startptr.offset(1 as isize);
     }
     basename = gk_strdup(startptr);
     endptr = strrchr(basename, '.' as i32);
@@ -275,27 +259,23 @@ pub unsafe extern "C" fn gk_getbasename(
     return basename;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_getextname(
-    mut path: *mut libc::c_char,
-) -> *mut libc::c_char {
+pub unsafe extern "C" fn gk_getextname(mut path: *mut libc::c_char) -> *mut libc::c_char {
     let mut startptr: *mut libc::c_char = 0 as *mut libc::c_char;
     startptr = strrchr(path, '.' as i32);
     if startptr.is_null() {
-        return gk_strdup(path)
+        return gk_strdup(path);
     } else {
-        return gk_strdup(startptr.offset(1 as libc::c_int as isize))
+        return gk_strdup(startptr.offset(1 as isize));
     };
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_getfilename(
-    mut path: *mut libc::c_char,
-) -> *mut libc::c_char {
+pub unsafe extern "C" fn gk_getfilename(mut path: *mut libc::c_char) -> *mut libc::c_char {
     let mut startptr: *mut libc::c_char = 0 as *mut libc::c_char;
     startptr = strrchr(path, '/' as i32);
     if startptr.is_null() {
-        return gk_strdup(path)
+        return gk_strdup(path);
     } else {
-        return gk_strdup(startptr.offset(1 as libc::c_int as isize))
+        return gk_strdup(startptr.offset(1 as isize));
     };
 }
 #[no_mangle]
@@ -304,7 +284,7 @@ pub unsafe extern "C" fn getpathname(mut path: *mut libc::c_char) -> *mut libc::
     let mut tmp: *mut libc::c_char = 0 as *mut libc::c_char;
     endptr = strrchr(path, '/' as i32);
     if endptr.is_null() {
-        return gk_strdup(b".\0" as *const u8 as *const libc::c_char as *mut libc::c_char)
+        return gk_strdup(b".\0" as *const u8 as *const libc::c_char as *mut libc::c_char);
     } else {
         tmp = gk_strdup(path);
         *strrchr(tmp, '/' as i32) = '\0' as i32 as libc::c_char;

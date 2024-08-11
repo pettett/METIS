@@ -36,7 +36,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
     params = parse_cmdline(argc, argv);
     (*params).iotimer = ((*params).iotimer as libc::c_double - gk_CPUSeconds()) as real_t;
     mesh = ReadMesh(params);
-    if (*mesh).ncon > 1 as libc::c_int {
+    if (*mesh).ncon > 1 {
         printf(
             b"*** Meshes with more than one balancing constraint are not supported yet.\n\0"
                 as *const u8 as *const libc::c_char,
@@ -150,11 +150,11 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
 }
 #[no_mangle]
 pub unsafe extern "C" fn MPPrintInfo(mut params: *mut params_t, mut mesh: *mut mesh_t) {
-    if (*params).ufactor == -(1 as libc::c_int) {
+    if (*params).ufactor == -(1) {
         if (*params).ptype == METIS_PTYPE_KWAY as libc::c_int {
             (*params).ufactor = 30 as libc::c_int;
         } else {
-            (*params).ufactor = 1 as libc::c_int;
+            (*params).ufactor = 1;
         }
     }
     printf(
@@ -191,7 +191,7 @@ pub unsafe extern "C" fn MPPrintInfo(mut params: *mut params_t, mut mesh: *mut m
         (*mesh).nn,
         (*params).nparts,
     );
-    if (*mesh).ncon > 1 as libc::c_int {
+    if (*mesh).ncon > 1 {
         printf(
             b"  Balancing Constraints: %d\n\0" as *const u8 as *const libc::c_char,
             (*mesh).ncon,

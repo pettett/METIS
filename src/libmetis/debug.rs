@@ -20,8 +20,8 @@ pub unsafe extern "C" fn libmetis__ComputeCut(
         cut = 0 as libc::c_int;
         i = 0 as libc::c_int;
         while i < (*graph).nvtxs {
-            j = *((*graph).xadj).offset(i as isize);
-            while j < *((*graph).xadj).offset((i + 1 as libc::c_int) as isize) {
+            j = ((*graph).xadj)[(i as usize)];
+            while j < ((*graph).xadj)[((i + 1) as usize)] {
                 if *where_0.offset(i as isize)
                     != *where_0.offset(*((*graph).adjncy).offset(j as isize) as isize)
                 {
@@ -38,8 +38,8 @@ pub unsafe extern "C" fn libmetis__ComputeCut(
         cut = 0 as libc::c_int;
         i = 0 as libc::c_int;
         while i < (*graph).nvtxs {
-            j = *((*graph).xadj).offset(i as isize);
-            while j < *((*graph).xadj).offset((i + 1 as libc::c_int) as isize) {
+            j = ((*graph).xadj)[i as usize];
+            while j < ((*graph).xadj)[(i + 1) as usize] {
                 if *where_0.offset(i as isize)
                     != *where_0.offset(*((*graph).adjncy).offset(j as isize) as isize)
                 {
@@ -66,34 +66,33 @@ pub unsafe extern "C" fn libmetis__ComputeVolume(
     let mut nvtxs: idx_t = 0;
     let mut nparts: idx_t = 0;
     let mut totalv: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut vsize: *mut idx_t = 0 as *mut idx_t;
     let mut marker: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     vsize = (*graph).vsize;
     nparts =
-        *where_0.offset(libmetis__iargmax(nvtxs as size_t, where_0) as isize) + 1 as libc::c_int;
+        *where_0.offset(libmetis__iargmax(nvtxs as size_t, where_0) as isize) + 1;
     marker = libmetis__ismalloc(
         nparts as size_t,
-        -(1 as libc::c_int),
+        -(1),
         b"ComputeVolume: marker\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     totalv = 0 as libc::c_int;
     i = 0 as libc::c_int;
     while i < nvtxs {
         *marker.offset(*where_0.offset(i as isize) as isize) = i;
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             k = *where_0.offset(*adjncy.offset(j as isize) as isize);
             if *marker.offset(k as isize) != i {
                 *marker.offset(k as isize) = i;
                 totalv += if !vsize.is_null() {
                     *vsize.offset(i as isize)
                 } else {
-                    1 as libc::c_int
+                    1
                 };
             }
             j += 1;
@@ -126,8 +125,8 @@ pub unsafe extern "C" fn libmetis__ComputeMaxCut(
     if ((*graph).adjwgt).is_null() {
         i = 0 as libc::c_int;
         while i < (*graph).nvtxs {
-            j = *((*graph).xadj).offset(i as isize);
-            while j < *((*graph).xadj).offset((i + 1 as libc::c_int) as isize) {
+            j = ((*graph).xadj)[i as usize];
+            while j < ((*graph).xadj)[(i + 1) as usize] {
                 if *where_0.offset(i as isize)
                     != *where_0.offset(*((*graph).adjncy).offset(j as isize) as isize)
                 {
@@ -144,8 +143,8 @@ pub unsafe extern "C" fn libmetis__ComputeMaxCut(
     } else {
         i = 0 as libc::c_int;
         while i < (*graph).nvtxs {
-            j = *((*graph).xadj).offset(i as isize);
-            while j < *((*graph).xadj).offset((i + 1 as libc::c_int) as isize) {
+            j = ((*graph).xadj)[i as usize];
+            while j < ((*graph).xadj)[(i + 1) as usize] {
                 if *where_0.offset(i as isize)
                     != *where_0.offset(*((*graph).adjncy).offset(j as isize) as isize)
                 {
@@ -177,13 +176,12 @@ pub unsafe extern "C" fn libmetis__CheckBnd(mut graph: *mut graph_t) -> idx_t {
     let mut j: idx_t = 0;
     let mut nvtxs: idx_t = 0;
     let mut nbnd: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
     let mut bndptr: *mut idx_t = 0 as *mut idx_t;
     let mut bndind: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     where_0 = (*graph).where_0;
     bndptr = (*graph).bndptr;
@@ -191,14 +189,12 @@ pub unsafe extern "C" fn libmetis__CheckBnd(mut graph: *mut graph_t) -> idx_t {
     nbnd = 0 as libc::c_int;
     i = 0 as libc::c_int;
     while i < nvtxs {
-        if *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
-            == 0 as libc::c_int
-        {
+        if xadj[(i + 1) as usize] - xadj[i as usize] == 0 as libc::c_int {
             nbnd += 1;
             nbnd;
         }
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             if *where_0.offset(i as isize) != *where_0.offset(*adjncy.offset(j as isize) as isize) {
                 nbnd += 1;
                 nbnd;
@@ -211,7 +207,7 @@ pub unsafe extern "C" fn libmetis__CheckBnd(mut graph: *mut graph_t) -> idx_t {
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__CheckBnd2(mut graph: *mut graph_t) -> idx_t {
@@ -221,13 +217,12 @@ pub unsafe extern "C" fn libmetis__CheckBnd2(mut graph: *mut graph_t) -> idx_t {
     let mut nbnd: idx_t = 0;
     let mut id: idx_t = 0;
     let mut ed: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
     let mut bndptr: *mut idx_t = 0 as *mut idx_t;
     let mut bndind: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     where_0 = (*graph).where_0;
     bndptr = (*graph).bndptr;
@@ -237,8 +232,8 @@ pub unsafe extern "C" fn libmetis__CheckBnd2(mut graph: *mut graph_t) -> idx_t {
     while i < nvtxs {
         ed = 0 as libc::c_int;
         id = ed;
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             if *where_0.offset(i as isize) != *where_0.offset(*adjncy.offset(j as isize) as isize) {
                 ed += *((*graph).adjwgt).offset(j as isize);
             } else {
@@ -247,16 +242,14 @@ pub unsafe extern "C" fn libmetis__CheckBnd2(mut graph: *mut graph_t) -> idx_t {
             j += 1;
             j;
         }
-        if ed - id >= 0 as libc::c_int
-            && *xadj.offset(i as isize) < *xadj.offset((i + 1 as libc::c_int) as isize)
-        {
+        if ed - id >= 0 as libc::c_int && xadj[i as usize] < xadj[(i + 1) as usize] {
             nbnd += 1;
             nbnd;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__CheckNodeBnd(
@@ -267,13 +260,12 @@ pub unsafe extern "C" fn libmetis__CheckNodeBnd(
     let mut j: idx_t = 0;
     let mut nvtxs: idx_t = 0;
     let mut nbnd: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
     let mut bndptr: *mut idx_t = 0 as *mut idx_t;
     let mut bndind: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     where_0 = (*graph).where_0;
     bndptr = (*graph).bndptr;
@@ -294,7 +286,7 @@ pub unsafe extern "C" fn libmetis__CheckNodeBnd(
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__CheckRInfo(
@@ -307,7 +299,7 @@ pub unsafe extern "C" fn libmetis__CheckRInfo(
     nbrs = ((*ctrl).cnbrpool).offset((*rinfo).inbr as isize);
     i = 0 as libc::c_int;
     while i < (*rinfo).nnbrs {
-        j = i + 1 as libc::c_int;
+        j = i + 1;
         while j < (*rinfo).nnbrs {
             j += 1;
             j;
@@ -315,7 +307,7 @@ pub unsafe extern "C" fn libmetis__CheckRInfo(
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(mut graph: *mut graph_t) -> idx_t {
@@ -326,7 +318,6 @@ pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(mut graph: *mut grap
     let mut nvtxs: idx_t = 0;
     let mut me: idx_t = 0;
     let mut other: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
@@ -334,23 +325,23 @@ pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(mut graph: *mut grap
     let mut edegrees: [idx_t; 2] = [0; 2];
     let mut pwgts: [idx_t; 3] = [0; 3];
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     where_0 = (*graph).where_0;
     pwgts[2 as libc::c_int as usize] = 0 as libc::c_int;
-    pwgts[1 as libc::c_int as usize] = pwgts[2 as libc::c_int as usize];
-    pwgts[0 as libc::c_int as usize] = pwgts[1 as libc::c_int as usize];
+    pwgts[1] = pwgts[2 as libc::c_int as usize];
+    pwgts[0] = pwgts[1];
     i = 0 as libc::c_int;
     while i < nvtxs {
         me = *where_0.offset(i as isize);
         pwgts[me as usize] += *vwgt.offset(i as isize);
         if me == 2 as libc::c_int {
-            edegrees[1 as libc::c_int as usize] = 0 as libc::c_int;
-            edegrees[0 as libc::c_int as usize] = edegrees[1 as libc::c_int as usize];
-            j = *xadj.offset(i as isize);
-            while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+            edegrees[1] = 0 as libc::c_int;
+            edegrees[0] = edegrees[1];
+            j = xadj[i as usize];
+            while j < xadj[(i + 1) as usize] {
                 other = *where_0.offset(*adjncy.offset(j as isize) as isize);
                 if other != 2 as libc::c_int {
                     edegrees[other as usize] += *vwgt.offset(*adjncy.offset(j as isize) as isize);
@@ -358,19 +349,19 @@ pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(mut graph: *mut grap
                 j += 1;
                 j;
             }
-            if edegrees[0 as libc::c_int as usize]
-                != (*((*graph).nrinfo).offset(i as isize)).edegrees[0 as libc::c_int as usize]
-                || edegrees[1 as libc::c_int as usize]
-                    != (*((*graph).nrinfo).offset(i as isize)).edegrees[1 as libc::c_int as usize]
+            if edegrees[0]
+                != (*((*graph).nrinfo).offset(i as isize)).edegrees[0]
+                || edegrees[1]
+                    != (*((*graph).nrinfo).offset(i as isize)).edegrees[1]
             {
                 printf(
                     b"Something wrong with edegrees: %d %d %d %d %d\n\0" as *const u8
                         as *const libc::c_char,
                     i,
-                    edegrees[0 as libc::c_int as usize],
-                    edegrees[1 as libc::c_int as usize],
-                    (*((*graph).nrinfo).offset(i as isize)).edegrees[0 as libc::c_int as usize],
-                    (*((*graph).nrinfo).offset(i as isize)).edegrees[1 as libc::c_int as usize],
+                    edegrees[0],
+                    edegrees[1],
+                    (*((*graph).nrinfo).offset(i as isize)).edegrees[0],
+                    (*((*graph).nrinfo).offset(i as isize)).edegrees[1],
                 );
                 return 0 as libc::c_int;
             }
@@ -378,23 +369,23 @@ pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(mut graph: *mut grap
         i += 1;
         i;
     }
-    if pwgts[0 as libc::c_int as usize] != *((*graph).pwgts).offset(0 as libc::c_int as isize)
-        || pwgts[1 as libc::c_int as usize] != *((*graph).pwgts).offset(1 as libc::c_int as isize)
+    if pwgts[0] != *((*graph).pwgts).offset(0 as libc::c_int as isize)
+        || pwgts[1] != *((*graph).pwgts).offset(1 as isize)
         || pwgts[2 as libc::c_int as usize] != *((*graph).pwgts).offset(2 as libc::c_int as isize)
     {
         printf(
             b"Something wrong with part-weights: %d %d %d %d %d %d\n\0" as *const u8
                 as *const libc::c_char,
-            pwgts[0 as libc::c_int as usize],
-            pwgts[1 as libc::c_int as usize],
+            pwgts[0],
+            pwgts[1],
             pwgts[2 as libc::c_int as usize],
             *((*graph).pwgts).offset(0 as libc::c_int as isize),
-            *((*graph).pwgts).offset(1 as libc::c_int as isize),
+            *((*graph).pwgts).offset(1 as isize),
             *((*graph).pwgts).offset(2 as libc::c_int as isize),
         );
         return 0 as libc::c_int;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__IsSeparable(mut graph: *mut graph_t) -> idx_t {
@@ -402,19 +393,18 @@ pub unsafe extern "C" fn libmetis__IsSeparable(mut graph: *mut graph_t) -> idx_t
     let mut j: idx_t = 0;
     let mut nvtxs: idx_t = 0;
     let mut other: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     where_0 = (*graph).where_0;
     i = 0 as libc::c_int;
     while i < nvtxs {
         if !(*where_0.offset(i as isize) == 2 as libc::c_int) {
-            other = (*where_0.offset(i as isize) + 1 as libc::c_int) % 2 as libc::c_int;
-            j = *xadj.offset(i as isize);
-            while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+            other = (*where_0.offset(i as isize) + 1) % 2 as libc::c_int;
+            j = xadj[i as usize];
+            while j < xadj[(i + 1) as usize] {
                 j += 1;
                 j;
             }
@@ -422,7 +412,7 @@ pub unsafe extern "C" fn libmetis__IsSeparable(mut graph: *mut graph_t) -> idx_t
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__CheckKWayVolPartitionParams(
@@ -442,7 +432,6 @@ pub unsafe extern "C" fn libmetis__CheckKWayVolPartitionParams(
     let mut me: idx_t = 0;
     let mut other: idx_t = 0;
     let mut pid: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut vsize: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut pwgts: *mut idx_t = 0 as *mut idx_t;
@@ -464,7 +453,7 @@ pub unsafe extern "C" fn libmetis__CheckKWayVolPartitionParams(
     let mut tmpnbrs: *mut vnbr_t = 0 as *mut vnbr_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vsize = (*graph).vsize;
     adjncy = (*graph).adjncy;
     where_0 = (*graph).where_0;
@@ -495,8 +484,8 @@ pub unsafe extern "C" fn libmetis__CheckKWayVolPartitionParams(
             k += 1;
             k;
         }
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             ii = *adjncy.offset(j as isize);
             other = *where_0.offset(ii as isize);
             orinfo = rinfo.offset(ii as isize);
@@ -529,7 +518,7 @@ pub unsafe extern "C" fn libmetis__CheckKWayVolPartitionParams(
                     k += 1;
                     k;
                 }
-                if (*onbrs.offset(k as isize)).ned == 1 as libc::c_int {
+                if (*onbrs.offset(k as isize)).ned == 1 {
                     k = 0 as libc::c_int;
                     while k < (*myrinfo).nnbrs {
                         if (*mynbrs.offset(k as isize)).pid == other {

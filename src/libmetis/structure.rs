@@ -172,13 +172,13 @@ pub struct vkrinfo_t {
 pub struct nrinfo_t {
     pub edegrees: [idx_t; 2],
 }
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 #[repr(C)]
 pub struct graph_t {
     pub nvtxs: idx_t,
     pub nedges: idx_t,
     pub ncon: idx_t,
-    pub xadj: *mut idx_t,
+    pub xadj: Vec<idx_t>,
     pub vwgt: *mut idx_t,
     pub vsize: *mut idx_t,
     pub adjncy: *mut idx_t,

@@ -66,7 +66,7 @@ pub const METIS_OPTION_PTYPE: C2RustUnnamed_0 = 0;
 pub unsafe extern "C" fn METIS_PartGraphKway(
     mut nvtxs: *mut idx_t,
     mut ncon: *mut idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut vwgt: *mut idx_t,
     mut vsize: *mut idx_t,
@@ -93,9 +93,9 @@ pub unsafe extern "C" fn METIS_PartGraphKway(
             gk_siguntrap();
             return METIS_ERROR_INPUT as libc::c_int;
         }
-        if (*ctrl).numflag == 1 as libc::c_int {
+        if (*ctrl).numflag == 1 {
             libmetis__Change2CNumbering(*nvtxs, xadj, adjncy);
-            renumber = 1 as libc::c_int;
+            renumber = 1;
         }
         graph = libmetis__SetupGraph(ctrl, *nvtxs, *ncon, xadj, adjncy, vwgt, vsize, adjwgt);
         libmetis__SetupKWayBalMultipliers(ctrl, graph);
@@ -253,7 +253,7 @@ pub unsafe extern "C" fn libmetis__InitKWayPartitioning(
             status = METIS_PartGraphRecursive(
                 &mut (*graph).nvtxs,
                 &mut (*graph).ncon,
-                (*graph).xadj,
+                &mut (*graph).xadj,
                 (*graph).adjncy,
                 (*graph).vwgt,
                 (*graph).vsize,

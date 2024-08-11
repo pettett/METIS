@@ -17,7 +17,7 @@ pub unsafe extern "C" fn libmetis__rvecle(
         n -= 1;
         n;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__rvecge(
@@ -34,7 +34,7 @@ pub unsafe extern "C" fn libmetis__rvecge(
         n -= 1;
         n;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__rvecsumle(
@@ -52,7 +52,7 @@ pub unsafe extern "C" fn libmetis__rvecsumle(
         n -= 1;
         n;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__rvecmaxdiff(
@@ -88,7 +88,7 @@ pub unsafe extern "C" fn libmetis__ivecle(
         n -= 1;
         n;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__ivecge(
@@ -105,7 +105,7 @@ pub unsafe extern "C" fn libmetis__ivecge(
         n -= 1;
         n;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__ivecaxpylez(
@@ -124,7 +124,7 @@ pub unsafe extern "C" fn libmetis__ivecaxpylez(
         n -= 1;
         n;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__ivecaxpygez(
@@ -143,7 +143,7 @@ pub unsafe extern "C" fn libmetis__ivecaxpygez(
         n -= 1;
         n;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__BetterVBalance(
@@ -240,10 +240,10 @@ pub unsafe extern "C" fn libmetis__BetterBalanceKWay(
         i;
     }
     if max2 < max1 {
-        return 1 as libc::c_int;
+        return 1;
     }
     if max2 == max1 && nrm2 < nrm1 {
-        return 1 as libc::c_int;
+        return 1;
     }
     return 0 as libc::c_int;
 }
@@ -335,7 +335,7 @@ pub unsafe extern "C" fn libmetis__ComputeLoadImbalanceDiffVec(
         *diffvec.offset(i as isize) = *pwgts.offset(i as isize) as libc::c_float
             * *pijbm.offset(i as isize)
             - *ubfactors.offset(i as isize);
-        j = 1 as libc::c_int;
+        j = 1;
         while j < nparts {
             cur = *pwgts.offset((j * ncon + i) as isize) as libc::c_float
                 * *pijbm.offset((j * ncon + i) as isize)
@@ -372,7 +372,7 @@ pub unsafe extern "C" fn libmetis__ComputeLoadImbalanceVec(
     while i < ncon {
         *lbvec.offset(i as isize) =
             *pwgts.offset(i as isize) as libc::c_float * *pijbm.offset(i as isize);
-        j = 1 as libc::c_int;
+        j = 1;
         while j < nparts {
             cur = *pwgts.offset((j * ncon + i) as isize) as libc::c_float
                 * *pijbm.offset((j * ncon + i) as isize);

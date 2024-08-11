@@ -27,7 +27,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayRefine(
     mut ntpwgts: *mut real_t,
     mut niter: idx_t,
 ) {
-    if (*graph).ncon == 1 as libc::c_int {
+    if (*graph).ncon == 1 {
         libmetis__FM_2WayCutRefine(ctrl, graph, ntpwgts, niter);
     } else {
         libmetis__FM_Mc2WayCutRefine(ctrl, graph, ntpwgts, niter);
@@ -54,7 +54,6 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
     let mut me: idx_t = 0;
     let mut limit: idx_t = 0;
     let mut tmp: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -79,7 +78,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
     let mut tpwgts: [idx_t; 2] = [0; 2];
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -92,11 +91,11 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
     moved = libmetis__iwspacemalloc(ctrl, nvtxs);
     swaps = libmetis__iwspacemalloc(ctrl, nvtxs);
     perm = libmetis__iwspacemalloc(ctrl, nvtxs);
-    tpwgts[0 as libc::c_int as usize] =
+    tpwgts[0] =
         (*((*graph).tvwgt).offset(0 as libc::c_int as isize) as libc::c_float
             * *ntpwgts.offset(0 as libc::c_int as isize)) as idx_t;
-    tpwgts[1 as libc::c_int as usize] =
-        *((*graph).tvwgt).offset(0 as libc::c_int as isize) - tpwgts[0 as libc::c_int as usize];
+    tpwgts[1] =
+        *((*graph).tvwgt).offset(0 as libc::c_int as isize) - tpwgts[0];
     limit = (if (if 0.01f64 * nvtxs as libc::c_double >= 15 as libc::c_int as libc::c_double {
         0.01f64 * nvtxs as libc::c_double
     } else {
@@ -110,21 +109,21 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
         15 as libc::c_int as libc::c_double
     }) as idx_t;
     avgvwgt = if (*pwgts.offset(0 as libc::c_int as isize)
-        + *pwgts.offset(1 as libc::c_int as isize))
+        + *pwgts.offset(1 as isize))
         / 20 as libc::c_int
         >= 2 as libc::c_int
-            * (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as libc::c_int as isize))
+            * (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as isize))
             / nvtxs
     {
         2 as libc::c_int
-            * (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as libc::c_int as isize))
+            * (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as isize))
             / nvtxs
     } else {
-        (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as libc::c_int as isize))
+        (*pwgts.offset(0 as libc::c_int as isize) + *pwgts.offset(1 as isize))
             / 20 as libc::c_int
     };
-    queues[0 as libc::c_int as usize] = libmetis__rpqCreate(nvtxs as size_t);
-    queues[1 as libc::c_int as usize] = libmetis__rpqCreate(nvtxs as size_t);
+    queues[0] = libmetis__rpqCreate(nvtxs as size_t);
+    queues[1] = libmetis__rpqCreate(nvtxs as size_t);
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         libmetis__Print2WayRefineStats(
             ctrl,
@@ -134,19 +133,19 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
             -(2 as libc::c_int),
         );
     }
-    origdiff = abs(tpwgts[0 as libc::c_int as usize] - *pwgts.offset(0 as libc::c_int as isize));
-    libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), moved);
+    origdiff = abs(tpwgts[0] - *pwgts.offset(0 as libc::c_int as isize));
+    libmetis__iset(nvtxs as size_t, -(1), moved);
     pass = 0 as libc::c_int;
     while pass < niter {
-        libmetis__rpqReset(queues[0 as libc::c_int as usize]);
-        libmetis__rpqReset(queues[1 as libc::c_int as usize]);
-        mincutorder = -(1 as libc::c_int);
+        libmetis__rpqReset(queues[0]);
+        libmetis__rpqReset(queues[1]);
+        mincutorder = -(1);
         initcut = (*graph).mincut;
         mincut = initcut;
         newcut = mincut;
-        mindiff = abs(tpwgts[0 as libc::c_int as usize] - *pwgts.offset(0 as libc::c_int as isize));
+        mindiff = abs(tpwgts[0] - *pwgts.offset(0 as libc::c_int as isize));
         nbnd = (*graph).nbnd;
-        libmetis__irandArrayPermute(nbnd, perm, nbnd, 1 as libc::c_int);
+        libmetis__irandArrayPermute(nbnd, perm, nbnd, 1);
         ii = 0 as libc::c_int;
         while ii < nbnd {
             i = *perm.offset(ii as isize);
@@ -161,16 +160,16 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
         }
         nswaps = 0 as libc::c_int;
         while nswaps < nvtxs {
-            from = if tpwgts[0 as libc::c_int as usize] - *pwgts.offset(0 as libc::c_int as isize)
-                < tpwgts[1 as libc::c_int as usize] - *pwgts.offset(1 as libc::c_int as isize)
+            from = if tpwgts[0] - *pwgts.offset(0 as libc::c_int as isize)
+                < tpwgts[1] - *pwgts.offset(1 as isize)
             {
                 0 as libc::c_int
             } else {
-                1 as libc::c_int
+                1
             };
-            to = (from + 1 as libc::c_int) % 2 as libc::c_int;
+            to = (from + 1) % 2 as libc::c_int;
             higain = libmetis__rpqGetTop(queues[from as usize]);
-            if higain == -(1 as libc::c_int) {
+            if higain == -(1) {
                 break;
             }
             newcut -= *ed.offset(higain as isize) - *id.offset(higain as isize);
@@ -179,16 +178,16 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
             let ref mut fresh1 = *pwgts.offset(from as isize);
             *fresh1 -= *vwgt.offset(higain as isize);
             if newcut < mincut
-                && abs(tpwgts[0 as libc::c_int as usize] - *pwgts.offset(0 as libc::c_int as isize))
+                && abs(tpwgts[0] - *pwgts.offset(0 as libc::c_int as isize))
                     <= origdiff + avgvwgt
                 || newcut == mincut
-                    && abs(tpwgts[0 as libc::c_int as usize]
+                    && abs(tpwgts[0]
                         - *pwgts.offset(0 as libc::c_int as isize))
                         < mindiff
             {
                 mincut = newcut;
                 mindiff =
-                    abs(tpwgts[0 as libc::c_int as usize]
+                    abs(tpwgts[0]
                         - *pwgts.offset(0 as libc::c_int as isize));
                 mincutorder = nswaps;
             } else if nswaps - mincutorder > limit {
@@ -214,25 +213,24 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
                     *vwgt.offset(higain as isize),
                     newcut,
                     *pwgts.offset(0 as libc::c_int as isize),
-                    *pwgts.offset(1 as libc::c_int as isize),
+                    *pwgts.offset(1 as isize),
                 );
             }
             tmp = *id.offset(higain as isize);
             *id.offset(higain as isize) = *ed.offset(higain as isize);
             *ed.offset(higain as isize) = tmp;
             if *ed.offset(higain as isize) == 0 as libc::c_int
-                && *xadj.offset(higain as isize)
-                    < *xadj.offset((higain + 1 as libc::c_int) as isize)
+                && xadj[(higain as usize)] < xadj[((higain + 1) as usize)]
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(higain as isize) as isize) =
                     *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                     *bndptr.offset(higain as isize);
-                *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+                *bndptr.offset(higain as isize) = -(1);
             }
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[(higain as usize)];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 kwgt = if to == *where_0.offset(k as isize) {
                     *adjwgt.offset(j as isize)
@@ -243,18 +241,18 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
                 *fresh4 += kwgt;
                 let ref mut fresh5 = *ed.offset(k as isize);
                 *fresh5 -= kwgt;
-                if *bndptr.offset(k as isize) != -(1 as libc::c_int) {
+                if *bndptr.offset(k as isize) != -(1) {
                     if *ed.offset(k as isize) == 0 as libc::c_int {
                         nbnd -= 1;
                         *bndind.offset(*bndptr.offset(k as isize) as isize) =
                             *bndind.offset(nbnd as isize);
                         *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                             *bndptr.offset(k as isize);
-                        *bndptr.offset(k as isize) = -(1 as libc::c_int);
-                        if *moved.offset(k as isize) == -(1 as libc::c_int) {
+                        *bndptr.offset(k as isize) = -(1);
+                        if *moved.offset(k as isize) == -(1) {
                             libmetis__rpqDelete(queues[*where_0.offset(k as isize) as usize], k);
                         }
-                    } else if *moved.offset(k as isize) == -(1 as libc::c_int) {
+                    } else if *moved.offset(k as isize) == -(1) {
                         libmetis__rpqUpdate(
                             queues[*where_0.offset(k as isize) as usize],
                             k,
@@ -266,7 +264,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
                     let fresh6 = nbnd;
                     nbnd = nbnd + 1;
                     *bndptr.offset(k as isize) = fresh6;
-                    if *moved.offset(k as isize) == -(1 as libc::c_int) {
+                    if *moved.offset(k as isize) == -(1) {
                         libmetis__rpqInsert(
                             queues[*where_0.offset(k as isize) as usize],
                             k,
@@ -282,7 +280,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
         }
         i = 0 as libc::c_int;
         while i < nswaps {
-            *moved.offset(*swaps.offset(i as isize) as isize) = -(1 as libc::c_int);
+            *moved.offset(*swaps.offset(i as isize) as isize) = -(1);
             i += 1;
             i;
         }
@@ -291,24 +289,23 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
         while nswaps > mincutorder {
             higain = *swaps.offset(nswaps as isize);
             let ref mut fresh7 = *where_0.offset(higain as isize);
-            *fresh7 = (*where_0.offset(higain as isize) + 1 as libc::c_int) % 2 as libc::c_int;
+            *fresh7 = (*where_0.offset(higain as isize) + 1) % 2 as libc::c_int;
             to = *fresh7;
             tmp = *id.offset(higain as isize);
             *id.offset(higain as isize) = *ed.offset(higain as isize);
             *ed.offset(higain as isize) = tmp;
             if *ed.offset(higain as isize) == 0 as libc::c_int
-                && *bndptr.offset(higain as isize) != -(1 as libc::c_int)
-                && *xadj.offset(higain as isize)
-                    < *xadj.offset((higain + 1 as libc::c_int) as isize)
+                && *bndptr.offset(higain as isize) != -(1)
+                && xadj[(higain as usize)] < xadj[((higain + 1) as usize)]
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(higain as isize) as isize) =
                     *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                     *bndptr.offset(higain as isize);
-                *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+                *bndptr.offset(higain as isize) = -(1);
             } else if *ed.offset(higain as isize) > 0 as libc::c_int
-                && *bndptr.offset(higain as isize) == -(1 as libc::c_int)
+                && *bndptr.offset(higain as isize) == -(1)
             {
                 *bndind.offset(nbnd as isize) = higain;
                 let fresh8 = nbnd;
@@ -318,10 +315,10 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
             let ref mut fresh9 = *pwgts.offset(to as isize);
             *fresh9 += *vwgt.offset(higain as isize);
             let ref mut fresh10 =
-                *pwgts.offset(((to + 1 as libc::c_int) % 2 as libc::c_int) as isize);
+                *pwgts.offset(((to + 1) % 2 as libc::c_int) as isize);
             *fresh10 -= *vwgt.offset(higain as isize);
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[(higain as usize)];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 kwgt = if to == *where_0.offset(k as isize) {
                     *adjwgt.offset(j as isize)
@@ -332,7 +329,7 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
                 *fresh11 += kwgt;
                 let ref mut fresh12 = *ed.offset(k as isize);
                 *fresh12 -= kwgt;
-                if *bndptr.offset(k as isize) != -(1 as libc::c_int)
+                if *bndptr.offset(k as isize) != -(1)
                     && *ed.offset(k as isize) == 0 as libc::c_int
                 {
                     nbnd -= 1;
@@ -340,9 +337,9 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
                         *bndind.offset(nbnd as isize);
                     *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                         *bndptr.offset(k as isize);
-                    *bndptr.offset(k as isize) = -(1 as libc::c_int);
+                    *bndptr.offset(k as isize) = -(1);
                 }
-                if *bndptr.offset(k as isize) == -(1 as libc::c_int)
+                if *bndptr.offset(k as isize) == -(1)
                     && *ed.offset(k as isize) > 0 as libc::c_int
                 {
                     *bndind.offset(nbnd as isize) = k;
@@ -373,8 +370,8 @@ pub unsafe extern "C" fn libmetis__FM_2WayCutRefine(
         pass += 1;
         pass;
     }
-    libmetis__rpqDestroy(queues[0 as libc::c_int as usize]);
-    libmetis__rpqDestroy(queues[1 as libc::c_int as usize]);
+    libmetis__rpqDestroy(queues[0]);
+    libmetis__rpqDestroy(queues[1]);
     libmetis__wspacepop(ctrl);
 }
 #[no_mangle]
@@ -401,7 +398,6 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
     let mut limit: idx_t = 0;
     let mut tmp: idx_t = 0;
     let mut cnum: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -433,7 +429,7 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
@@ -509,7 +505,7 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
     if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_REFINE as libc::c_int as libc::c_uint != 0 {
         libmetis__Print2WayRefineStats(ctrl, graph, ntpwgts, origbal, -(2 as libc::c_int));
     }
-    libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), moved);
+    libmetis__iset(nvtxs as size_t, -(1), moved);
     pass = 0 as libc::c_int;
     while pass < niter {
         i = 0 as libc::c_int;
@@ -518,7 +514,7 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
             i += 1;
             i;
         }
-        mincutorder = -(1 as libc::c_int);
+        mincutorder = -(1);
         initcut = (*graph).mincut;
         mincut = initcut;
         newcut = mincut;
@@ -530,7 +526,7 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
             minbalv,
         );
         nbnd = (*graph).nbnd;
-        libmetis__irandArrayPermute(nbnd, perm, nbnd / 5 as libc::c_int, 1 as libc::c_int);
+        libmetis__irandArrayPermute(nbnd, perm, nbnd / 5 as libc::c_int, 1);
         ii = 0 as libc::c_int;
         while ii < nbnd {
             i = *bndind.offset(*perm.offset(ii as isize) as isize);
@@ -556,30 +552,30 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
                 &mut from,
                 &mut cnum,
             );
-            to = (from + 1 as libc::c_int) % 2 as libc::c_int;
-            if from == -(1 as libc::c_int) || {
+            to = (from + 1) % 2 as libc::c_int;
+            if from == -(1) || {
                 higain =
                     libmetis__rpqGetTop(*queues.offset((2 as libc::c_int * cnum + from) as isize));
-                higain == -(1 as libc::c_int)
+                higain == -(1)
             } {
                 break;
             }
             newcut -= *ed.offset(higain as isize) - *id.offset(higain as isize);
             libmetis__iaxpy(
                 ncon as size_t,
-                1 as libc::c_int,
+                1,
                 vwgt.offset((higain * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
                 pwgts.offset((to * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
             );
             libmetis__iaxpy(
                 ncon as size_t,
-                -(1 as libc::c_int),
+                -(1),
                 vwgt.offset((higain * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
                 pwgts.offset((from * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
             );
             newbal = libmetis__ComputeLoadImbalanceDiffVec(
                 graph,
@@ -602,19 +598,19 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
                 newcut += *ed.offset(higain as isize) - *id.offset(higain as isize);
                 libmetis__iaxpy(
                     ncon as size_t,
-                    1 as libc::c_int,
+                    1,
                     vwgt.offset((higain * ncon) as isize),
-                    1 as libc::c_int as size_t,
+                    1 as size_t,
                     pwgts.offset((from * ncon) as isize),
-                    1 as libc::c_int as size_t,
+                    1 as size_t,
                 );
                 libmetis__iaxpy(
                     ncon as size_t,
-                    -(1 as libc::c_int),
+                    -(1),
                     vwgt.offset((higain * ncon) as isize),
-                    1 as libc::c_int as size_t,
+                    1 as size_t,
                     pwgts.offset((to * ncon) as isize),
-                    1 as libc::c_int as size_t,
+                    1 as size_t,
                 );
                 break;
             }
@@ -658,18 +654,17 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
             *id.offset(higain as isize) = *ed.offset(higain as isize);
             *ed.offset(higain as isize) = tmp;
             if *ed.offset(higain as isize) == 0 as libc::c_int
-                && *xadj.offset(higain as isize)
-                    < *xadj.offset((higain + 1 as libc::c_int) as isize)
+                && xadj[(higain as usize)] < xadj[((higain + 1) as usize)]
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(higain as isize) as isize) =
                     *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                     *bndptr.offset(higain as isize);
-                *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+                *bndptr.offset(higain as isize) = -(1);
             }
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[(higain as usize)];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 kwgt = if to == *where_0.offset(k as isize) {
                     *adjwgt.offset(j as isize)
@@ -680,15 +675,15 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
                 *fresh15 += kwgt;
                 let ref mut fresh16 = *ed.offset(k as isize);
                 *fresh16 -= kwgt;
-                if *bndptr.offset(k as isize) != -(1 as libc::c_int) {
+                if *bndptr.offset(k as isize) != -(1) {
                     if *ed.offset(k as isize) == 0 as libc::c_int {
                         nbnd -= 1;
                         *bndind.offset(*bndptr.offset(k as isize) as isize) =
                             *bndind.offset(nbnd as isize);
                         *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                             *bndptr.offset(k as isize);
-                        *bndptr.offset(k as isize) = -(1 as libc::c_int);
-                        if *moved.offset(k as isize) == -(1 as libc::c_int) {
+                        *bndptr.offset(k as isize) = -(1);
+                        if *moved.offset(k as isize) == -(1) {
                             libmetis__rpqDelete(
                                 *queues.offset(
                                     (2 as libc::c_int * *qnum.offset(k as isize)
@@ -698,7 +693,7 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
                                 k,
                             );
                         }
-                    } else if *moved.offset(k as isize) == -(1 as libc::c_int) {
+                    } else if *moved.offset(k as isize) == -(1) {
                         rgain = (*ed.offset(k as isize) - *id.offset(k as isize)) as real_t;
                         libmetis__rpqUpdate(
                             *queues.offset(
@@ -715,7 +710,7 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
                     let fresh17 = nbnd;
                     nbnd = nbnd + 1;
                     *bndptr.offset(k as isize) = fresh17;
-                    if *moved.offset(k as isize) == -(1 as libc::c_int) {
+                    if *moved.offset(k as isize) == -(1) {
                         rgain = (*ed.offset(k as isize) - *id.offset(k as isize)) as real_t;
                         libmetis__rpqInsert(
                             *queues.offset(
@@ -736,7 +731,7 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
         }
         i = 0 as libc::c_int;
         while i < nswaps {
-            *moved.offset(*swaps.offset(i as isize) as isize) = -(1 as libc::c_int);
+            *moved.offset(*swaps.offset(i as isize) as isize) = -(1);
             i += 1;
             i;
         }
@@ -745,24 +740,23 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
         while nswaps > mincutorder {
             higain = *swaps.offset(nswaps as isize);
             let ref mut fresh18 = *where_0.offset(higain as isize);
-            *fresh18 = (*where_0.offset(higain as isize) + 1 as libc::c_int) % 2 as libc::c_int;
+            *fresh18 = (*where_0.offset(higain as isize) + 1) % 2 as libc::c_int;
             to = *fresh18;
             tmp = *id.offset(higain as isize);
             *id.offset(higain as isize) = *ed.offset(higain as isize);
             *ed.offset(higain as isize) = tmp;
             if *ed.offset(higain as isize) == 0 as libc::c_int
-                && *bndptr.offset(higain as isize) != -(1 as libc::c_int)
-                && *xadj.offset(higain as isize)
-                    < *xadj.offset((higain + 1 as libc::c_int) as isize)
+                && *bndptr.offset(higain as isize) != -(1)
+                && xadj[(higain as usize)] < xadj[((higain + 1) as usize)]
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(higain as isize) as isize) =
                     *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                     *bndptr.offset(higain as isize);
-                *bndptr.offset(higain as isize) = -(1 as libc::c_int);
+                *bndptr.offset(higain as isize) = -(1);
             } else if *ed.offset(higain as isize) > 0 as libc::c_int
-                && *bndptr.offset(higain as isize) == -(1 as libc::c_int)
+                && *bndptr.offset(higain as isize) == -(1)
             {
                 *bndind.offset(nbnd as isize) = higain;
                 let fresh19 = nbnd;
@@ -771,22 +765,22 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
             }
             libmetis__iaxpy(
                 ncon as size_t,
-                1 as libc::c_int,
+                1,
                 vwgt.offset((higain * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
                 pwgts.offset((to * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
             );
             libmetis__iaxpy(
                 ncon as size_t,
-                -(1 as libc::c_int),
+                -(1),
                 vwgt.offset((higain * ncon) as isize),
-                1 as libc::c_int as size_t,
-                pwgts.offset(((to + 1 as libc::c_int) % 2 as libc::c_int * ncon) as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
+                pwgts.offset(((to + 1) % 2 as libc::c_int * ncon) as isize),
+                1 as size_t,
             );
-            j = *xadj.offset(higain as isize);
-            while j < *xadj.offset((higain + 1 as libc::c_int) as isize) {
+            j = xadj[(higain as usize)];
+            while j < xadj[((higain + 1) as usize)] {
                 k = *adjncy.offset(j as isize);
                 kwgt = if to == *where_0.offset(k as isize) {
                     *adjwgt.offset(j as isize)
@@ -797,7 +791,7 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
                 *fresh20 += kwgt;
                 let ref mut fresh21 = *ed.offset(k as isize);
                 *fresh21 -= kwgt;
-                if *bndptr.offset(k as isize) != -(1 as libc::c_int)
+                if *bndptr.offset(k as isize) != -(1)
                     && *ed.offset(k as isize) == 0 as libc::c_int
                 {
                     nbnd -= 1;
@@ -805,9 +799,9 @@ pub unsafe extern "C" fn libmetis__FM_Mc2WayCutRefine(
                         *bndind.offset(nbnd as isize);
                     *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                         *bndptr.offset(k as isize);
-                    *bndptr.offset(k as isize) = -(1 as libc::c_int);
+                    *bndptr.offset(k as isize) = -(1);
                 }
-                if *bndptr.offset(k as isize) == -(1 as libc::c_int)
+                if *bndptr.offset(k as isize) == -(1)
                     && *ed.offset(k as isize) > 0 as libc::c_int
                 {
                     *bndind.offset(nbnd as isize) = k;
@@ -855,8 +849,8 @@ pub unsafe extern "C" fn libmetis__SelectQueue(
     let mut max: real_t = 0.;
     let mut tmp: real_t = 0.;
     ncon = (*graph).ncon;
-    *from = -(1 as libc::c_int);
-    *cnum = -(1 as libc::c_int);
+    *from = -(1);
+    *cnum = -(1);
     max = 0.0f64 as real_t;
     part = 0 as libc::c_int;
     while part < 2 as libc::c_int {
@@ -876,7 +870,7 @@ pub unsafe extern "C" fn libmetis__SelectQueue(
         part += 1;
         part;
     }
-    if *from != -(1 as libc::c_int) {
+    if *from != -(1) {
         if libmetis__rpqLength(*queues.offset((2 as libc::c_int * *cnum + *from) as isize))
             == 0 as libc::c_int as u64
         {
@@ -919,7 +913,7 @@ pub unsafe extern "C" fn libmetis__SelectQueue(
             while i < ncon {
                 if libmetis__rpqLength(*queues.offset((2 as libc::c_int * i + part) as isize))
                     > 0 as libc::c_int as u64
-                    && (*from == -(1 as libc::c_int)
+                    && (*from == -(1)
                         || libmetis__rpqSeeTopKey(
                             *queues.offset((2 as libc::c_int * i + part) as isize),
                         ) > max)

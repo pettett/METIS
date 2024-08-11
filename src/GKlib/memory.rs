@@ -2719,7 +2719,7 @@ pub unsafe extern "C" fn gk_malloc_init() -> libc::c_int {
         return 0 as libc::c_int;
     }
     gk_gkmcorePush(gkmcore);
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_malloc_cleanup(mut showstats: libc::c_int) {

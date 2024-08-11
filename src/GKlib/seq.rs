@@ -3,22 +3,10 @@ extern "C" {
     pub type _IO_wide_data;
     pub type _IO_codecvt;
     pub type _IO_marker;
-    fn strtol(
-        _: *const libc::c_char,
-        _: *mut *mut libc::c_char,
-        _: libc::c_int,
-    ) -> i64;
-    fn fgets(
-        __s: *mut libc::c_char,
-        __n: libc::c_int,
-        __stream: *mut FILE,
-    ) -> *mut libc::c_char;
+    fn strtol(_: *const libc::c_char, _: *mut *mut libc::c_char, _: libc::c_int) -> i64;
+    fn fgets(__s: *mut libc::c_char, __n: libc::c_int, __stream: *mut FILE) -> *mut libc::c_char;
     fn strlen(_: *const libc::c_char) -> u64;
-    fn gk_fopen(
-        _: *mut libc::c_char,
-        _: *mut libc::c_char,
-        _: *const libc::c_char,
-    ) -> *mut FILE;
+    fn gk_fopen(_: *mut libc::c_char, _: *mut libc::c_char, _: *const libc::c_char) -> *mut FILE;
     fn gk_fclose(_: *mut FILE);
     fn gk_getfilestats(
         fname: *mut libc::c_char,
@@ -38,21 +26,13 @@ extern "C" {
         value: libc::c_int,
         errmsg: *mut libc::c_char,
     ) -> *mut *mut libc::c_int;
-    fn gk_iFreeMatrix(
-        r_matrix: *mut *mut *mut libc::c_int,
-        ndim1: size_t,
-        ndim2: size_t,
-    );
+    fn gk_iFreeMatrix(r_matrix: *mut *mut *mut libc::c_int, ndim1: size_t, ndim2: size_t);
     fn gk_malloc(nbytes: size_t, msg: *mut libc::c_char) -> *mut libc::c_void;
     fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
     fn gk_strtoupper(_: *mut libc::c_char) -> *mut libc::c_char;
     fn errexit(_: *mut libc::c_char, _: ...);
     fn gk_freetokenslist(tokens: *mut gk_Tokens_t);
-    fn gk_strtokenize(
-        line: *mut libc::c_char,
-        delim: *mut libc::c_char,
-        tokens: *mut gk_Tokens_t,
-    );
+    fn gk_strtokenize(line: *mut libc::c_char, delim: *mut libc::c_char, tokens: *mut gk_Tokens_t);
 }
 pub type __off_t = i64;
 pub type __off64_t = i64;
@@ -145,40 +125,30 @@ pub unsafe extern "C" fn gk_i2cc2i_create_common(
     nsymbols = strlen(alphabet) as libc::c_int;
     t = gk_malloc(
         ::core::mem::size_of::<gk_i2cc2i_t>() as u64,
-        b"gk_i2c_create_common\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_i2c_create_common\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut gk_i2cc2i_t;
     (*t).n = nsymbols;
-    (*t)
-        .i2c = gk_cmalloc(
+    (*t).i2c = gk_cmalloc(
         256 as libc::c_int as size_t,
-        b"gk_i2c_create_common\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_i2c_create_common\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*t)
-        .c2i = gk_imalloc(
+    (*t).c2i = gk_imalloc(
         256 as libc::c_int as size_t,
-        b"gk_i2c_create_common\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_i2c_create_common\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    gk_cset(256 as libc::c_int as size_t, -(1 as libc::c_int) as libc::c_char, (*t).i2c);
-    gk_iset(256 as libc::c_int as size_t, -(1 as libc::c_int), (*t).c2i);
+    gk_cset(256 as libc::c_int as size_t, -(1) as libc::c_char, (*t).i2c);
+    gk_iset(256 as libc::c_int as size_t, -(1), (*t).c2i);
     i = 0 as libc::c_int as gk_idx_t;
     while i < nsymbols as i64 {
         *((*t).i2c).offset(i as isize) = *alphabet.offset(i as isize);
-        *((*t).c2i)
-            .offset(
-                *alphabet.offset(i as isize) as libc::c_int as isize,
-            ) = i as libc::c_int;
+        *((*t).c2i).offset(*alphabet.offset(i as isize) as libc::c_int as isize) = i as libc::c_int;
         i += 1;
         i;
     }
     return t;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_seq_ReadGKMODPSSM(
-    mut filename: *mut libc::c_char,
-) -> *mut gk_seq_t {
+pub unsafe extern "C" fn gk_seq_ReadGKMODPSSM(mut filename: *mut libc::c_char) -> *mut gk_seq_t {
     let mut seq: *mut gk_seq_t = 0 as *mut gk_seq_t;
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
@@ -192,49 +162,47 @@ pub unsafe extern "C" fn gk_seq_ReadGKMODPSSM(
         strbuf: 0 as *mut libc::c_char,
         list: 0 as *mut *mut libc::c_char,
     };
-    static mut AAORDER: *mut libc::c_char = b"ARNDCQEGHILKMFPSTWYVBZX*\0" as *const u8
-        as *const libc::c_char as *mut libc::c_char;
+    static mut AAORDER: *mut libc::c_char =
+        b"ARNDCQEGHILKMFPSTWYVBZX*\0" as *const u8 as *const libc::c_char as *mut libc::c_char;
     static mut PSSMWIDTH: libc::c_int = 20 as libc::c_int;
     let mut header: *mut libc::c_char = 0 as *mut libc::c_char;
     let mut line: [libc::c_char; 300000] = [0; 300000];
     let mut converter: *mut gk_i2cc2i_t = 0 as *mut gk_i2cc2i_t;
     header = gk_cmalloc(
         PSSMWIDTH as size_t,
-        b"gk_seq_ReadGKMODPSSM: header\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_seq_ReadGKMODPSSM: header\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     converter = gk_i2cc2i_create_common(AAORDER);
-    gk_getfilestats(filename, &mut len, &mut ntokens, 0 as *mut size_t, &mut nbytes);
+    gk_getfilestats(
+        filename,
+        &mut len,
+        &mut ntokens,
+        0 as *mut size_t,
+        &mut nbytes,
+    );
     len = len.wrapping_sub(1);
     len;
     seq = gk_malloc(
         ::core::mem::size_of::<gk_seq_t>() as u64,
-        b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut gk_seq_t;
     gk_seq_init(seq);
     (*seq).len = len as libc::c_int;
-    (*seq)
-        .sequence = gk_imalloc(
+    (*seq).sequence = gk_imalloc(
         len,
-        b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*seq)
-        .pssm = gk_iAllocMatrix(
+    (*seq).pssm = gk_iAllocMatrix(
         len,
         PSSMWIDTH as size_t,
         0 as libc::c_int,
-        b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*seq)
-        .psfm = gk_iAllocMatrix(
+    (*seq).psfm = gk_iAllocMatrix(
         len,
         PSSMWIDTH as size_t,
         0 as libc::c_int,
-        b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     (*seq).nsymbols = PSSMWIDTH;
     (*seq).name = gk_getbasename(filename);
@@ -243,9 +211,7 @@ pub unsafe extern "C" fn gk_seq_ReadGKMODPSSM(
         b"r\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         b"gk_seq_ReadGKMODPSSM\0" as *const u8 as *const libc::c_char,
     );
-    if (fgets(line.as_mut_ptr(), 300000 as libc::c_int - 1 as libc::c_int, fpin))
-        .is_null()
-    {
+    if (fgets(line.as_mut_ptr(), 300000 as libc::c_int - 1, fpin)).is_null() {
         errexit(
             b"Unexpected end of file: %s\n\0" as *const u8 as *const libc::c_char
                 as *mut libc::c_char,
@@ -260,10 +226,8 @@ pub unsafe extern "C" fn gk_seq_ReadGKMODPSSM(
     );
     i = 0 as libc::c_int as gk_idx_t;
     while i < PSSMWIDTH as i64 {
-        *header
-            .offset(
-                i as isize,
-            ) = *(*(tokens.list).offset(i as isize)).offset(0 as libc::c_int as isize);
+        *header.offset(i as isize) =
+            *(*(tokens.list).offset(i as isize)).offset(0 as libc::c_int as isize);
         i += 1;
         i;
     }
@@ -271,9 +235,7 @@ pub unsafe extern "C" fn gk_seq_ReadGKMODPSSM(
     i = 0 as libc::c_int as gk_idx_t;
     ii = 0 as libc::c_int as gk_idx_t;
     while (ii as u64) < len {
-        if (fgets(line.as_mut_ptr(), 300000 as libc::c_int - 1 as libc::c_int, fpin))
-            .is_null()
-        {
+        if (fgets(line.as_mut_ptr(), 300000 as libc::c_int - 1, fpin)).is_null() {
             errexit(
                 b"Unexpected end of file: %s\n\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
@@ -286,35 +248,20 @@ pub unsafe extern "C" fn gk_seq_ReadGKMODPSSM(
             b" \t\n\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             &mut tokens,
         );
-        *((*seq).sequence)
-            .offset(
-                i as isize,
-            ) = *((*converter).c2i)
-            .offset(
-                *(*(tokens.list).offset(1 as libc::c_int as isize))
-                    .offset(0 as libc::c_int as isize) as libc::c_int as isize,
-            );
+        *((*seq).sequence).offset(i as isize) = *((*converter).c2i).offset(
+            *(*(tokens.list).offset(1 as isize)).offset(0 as libc::c_int as isize) as libc::c_int
+                as isize,
+        );
         j = 0 as libc::c_int as gk_idx_t;
         while j < PSSMWIDTH as i64 {
-            *(*((*seq).pssm).offset(i as isize))
-                .offset(
-                    *((*converter).c2i)
-                        .offset(*header.offset(j as isize) as libc::c_int as isize)
-                        as isize,
-                ) = atoi(
-                *(tokens.list).offset((2 as libc::c_int as i64 + j) as isize),
-            );
-            *(*((*seq).psfm).offset(i as isize))
-                .offset(
-                    *((*converter).c2i)
-                        .offset(*header.offset(j as isize) as libc::c_int as isize)
-                        as isize,
-                ) = atoi(
-                *(tokens.list)
-                    .offset(
-                        ((2 as libc::c_int + PSSMWIDTH) as i64 + j) as isize,
-                    ),
-            );
+            *(*((*seq).pssm).offset(i as isize)).offset(
+                *((*converter).c2i).offset(*header.offset(j as isize) as libc::c_int as isize)
+                    as isize,
+            ) = atoi(*(tokens.list).offset((2 as libc::c_int as i64 + j) as isize));
+            *(*((*seq).psfm).offset(i as isize)).offset(
+                *((*converter).c2i).offset(*header.offset(j as isize) as libc::c_int as isize)
+                    as isize,
+            ) = atoi(*(tokens.list).offset(((2 as libc::c_int + PSSMWIDTH) as i64 + j) as isize));
             j += 1;
             j;
         }
@@ -334,8 +281,16 @@ pub unsafe extern "C" fn gk_seq_ReadGKMODPSSM(
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_seq_free(mut seq: *mut gk_seq_t) {
-    gk_iFreeMatrix(&mut (*seq).pssm, (*seq).len as size_t, (*seq).nsymbols as size_t);
-    gk_iFreeMatrix(&mut (*seq).psfm, (*seq).len as size_t, (*seq).nsymbols as size_t);
+    gk_iFreeMatrix(
+        &mut (*seq).pssm,
+        (*seq).len as size_t,
+        (*seq).nsymbols as size_t,
+    );
+    gk_iFreeMatrix(
+        &mut (*seq).psfm,
+        (*seq).len as size_t,
+        (*seq).nsymbols as size_t,
+    );
     gk_free(
         &mut (*seq).name as *mut *mut libc::c_char as *mut *mut libc::c_void,
         &mut (*seq).sequence as *mut *mut libc::c_int,

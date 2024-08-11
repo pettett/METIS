@@ -34,7 +34,7 @@ use super::structure::*;
 pub unsafe extern "C" fn libmetis__CompressGraph(
     mut ctrl: *mut ctrl_t,
     mut nvtxs: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut vwgt: *mut idx_t,
     mut cptr: *mut idx_t,
@@ -58,12 +58,12 @@ pub unsafe extern "C" fn libmetis__CompressGraph(
     let mut graph: *mut graph_t = 0 as *mut graph_t;
     mark = libmetis__ismalloc(
         nvtxs as size_t,
-        -(1 as libc::c_int),
+        -(1),
         b"CompressGraph: mark\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     map = libmetis__ismalloc(
         nvtxs as size_t,
-        -(1 as libc::c_int),
+        -(1),
         b"CompressGraph: map\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     keys = libmetis__ikvmalloc(
@@ -73,8 +73,8 @@ pub unsafe extern "C" fn libmetis__CompressGraph(
     i = 0 as libc::c_int;
     while i < nvtxs {
         k = 0 as libc::c_int;
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             k += *adjncy.offset(j as isize);
             j += 1;
             j;
@@ -92,10 +92,10 @@ pub unsafe extern "C" fn libmetis__CompressGraph(
     cnvtxs = i;
     while i < nvtxs {
         ii = (*keys.offset(i as isize)).val;
-        if *map.offset(ii as isize) == -(1 as libc::c_int) {
+        if *map.offset(ii as isize) == -(1) {
             *mark.offset(ii as isize) = i;
-            j = *xadj.offset(ii as isize);
-            while j < *xadj.offset((ii + 1 as libc::c_int) as isize) {
+            j = xadj[(ii as usize)];
+            while j < xadj[((ii + 1) as usize)] {
                 *mark.offset(*adjncy.offset(j as isize) as isize) = i;
                 j += 1;
                 j;
@@ -104,26 +104,25 @@ pub unsafe extern "C" fn libmetis__CompressGraph(
             let fresh1 = l;
             l = l + 1;
             *cind.offset(fresh1 as isize) = ii;
-            j = i + 1 as libc::c_int;
+            j = i + 1;
             while j < nvtxs {
                 iii = (*keys.offset(j as isize)).val;
                 if (*keys.offset(i as isize)).key != (*keys.offset(j as isize)).key
-                    || *xadj.offset((ii + 1 as libc::c_int) as isize) - *xadj.offset(ii as isize)
-                        != *xadj.offset((iii + 1 as libc::c_int) as isize)
-                            - *xadj.offset(iii as isize)
+                    || xadj[((ii + 1) as usize)] - xadj[(ii as usize)]
+                        != xadj[((iii + 1) as usize)] - xadj[(iii as usize)]
                 {
                     break;
                 }
-                if *map.offset(iii as isize) == -(1 as libc::c_int) {
-                    jj = *xadj.offset(iii as isize);
-                    while jj < *xadj.offset((iii + 1 as libc::c_int) as isize) {
+                if *map.offset(iii as isize) == -(1) {
+                    jj = xadj[(iii as usize)];
+                    while jj < xadj[((iii + 1) as usize)] {
                         if *mark.offset(*adjncy.offset(jj as isize) as isize) != i {
                             break;
                         }
                         jj += 1;
                         jj;
                     }
-                    if jj == *xadj.offset((iii + 1 as libc::c_int) as isize) {
+                    if jj == xadj[((iii + 1) as usize)] {
                         *map.offset(iii as isize) = cnvtxs;
                         let fresh2 = l;
                         l = l + 1;
@@ -152,15 +151,13 @@ pub unsafe extern "C" fn libmetis__CompressGraph(
         i = 0 as libc::c_int;
         while i < cnvtxs {
             ii = *cind.offset(*cptr.offset(i as isize) as isize);
-            cnedges += *xadj.offset((ii + 1 as libc::c_int) as isize) - *xadj.offset(ii as isize);
+            cnedges += xadj[((ii + 1) as usize)] - xadj[(ii as usize)];
             i += 1;
             i;
         }
-        (*graph).xadj = libmetis__imalloc(
-            (cnvtxs + 1 as libc::c_int) as size_t,
-            b"CompressGraph: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-        );
-        cxadj = (*graph).xadj;
+        (*graph).xadj = vec![0; (cnvtxs + 1) as usize];
+
+        let mut cxadj = &mut (*graph).xadj;
         (*graph).vwgt = libmetis__ismalloc(
             cnvtxs as size_t,
             0 as libc::c_int,
@@ -174,27 +171,27 @@ pub unsafe extern "C" fn libmetis__CompressGraph(
         cadjncy = (*graph).adjncy;
         (*graph).adjwgt = libmetis__ismalloc(
             cnedges as size_t,
-            1 as libc::c_int,
+            1,
             b"CompressGraph: adjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
-        libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), mark);
-        let ref mut fresh3 = *cxadj.offset(0 as libc::c_int as isize);
+        libmetis__iset(nvtxs as size_t, -(1), mark);
+        let ref mut fresh3 = cxadj[(0 as libc::c_int as usize)];
         *fresh3 = 0 as libc::c_int;
         l = *fresh3;
         i = 0 as libc::c_int;
         while i < cnvtxs {
             *mark.offset(i as isize) = i;
             j = *cptr.offset(i as isize);
-            while j < *cptr.offset((i + 1 as libc::c_int) as isize) {
+            while j < *cptr.offset((i + 1) as isize) {
                 ii = *cind.offset(j as isize);
                 let ref mut fresh4 = *cvwgt.offset(i as isize);
                 *fresh4 += if vwgt.is_null() {
-                    1 as libc::c_int
+                    1
                 } else {
                     *vwgt.offset(ii as isize)
                 };
-                jj = *xadj.offset(ii as isize);
-                while jj < *xadj.offset((ii + 1 as libc::c_int) as isize) {
+                jj = xadj[(ii as usize)];
+                while jj < xadj[((ii + 1) as usize)] {
                     k = *map.offset(*adjncy.offset(jj as isize) as isize);
                     if *mark.offset(k as isize) != i {
                         *mark.offset(k as isize) = i;
@@ -208,13 +205,13 @@ pub unsafe extern "C" fn libmetis__CompressGraph(
                 j += 1;
                 j;
             }
-            *cxadj.offset((i + 1 as libc::c_int) as isize) = l;
+            cxadj[((i + 1) as usize)] = l;
             i += 1;
             i;
         }
         (*graph).nvtxs = cnvtxs;
         (*graph).nedges = l;
-        (*graph).ncon = 1 as libc::c_int;
+        (*graph).ncon = 1;
         libmetis__SetupGraph_tvwgt(graph);
         libmetis__SetupGraph_label(graph);
     }
@@ -230,7 +227,7 @@ pub unsafe extern "C" fn libmetis__CompressGraph(
 pub unsafe extern "C" fn libmetis__PruneGraph(
     mut ctrl: *mut ctrl_t,
     mut nvtxs: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut vwgt: *mut idx_t,
     mut iperm: *mut idx_t,
@@ -253,21 +250,18 @@ pub unsafe extern "C" fn libmetis__PruneGraph(
         nvtxs as size_t,
         b"PruneGraph: perm\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    factor = factor * *xadj.offset(nvtxs as isize) as libc::c_float / nvtxs as libc::c_float;
+    factor = factor * xadj[(nvtxs as usize)] as libc::c_float / nvtxs as libc::c_float;
     nlarge = 0 as libc::c_int;
     pnedges = nlarge;
     pnvtxs = pnedges;
     i = 0 as libc::c_int;
     while i < nvtxs {
-        if ((*xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize))
-            as libc::c_float)
-            < factor
-        {
+        if ((xadj[(i + 1) as usize] - xadj[i as usize]) as libc::c_float) < factor {
             *perm.offset(i as isize) = pnvtxs;
             let fresh6 = pnvtxs;
             pnvtxs = pnvtxs + 1;
             *iperm.offset(fresh6 as isize) = i;
-            pnedges += *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize);
+            pnedges += xadj[(i + 1) as usize] - xadj[i as usize];
         } else {
             nlarge += 1;
             *perm.offset(i as isize) = nvtxs - nlarge;
@@ -285,11 +279,9 @@ pub unsafe extern "C" fn libmetis__PruneGraph(
     }
     if nlarge > 0 as libc::c_int && nlarge < nvtxs {
         graph = libmetis__CreateGraph();
-        (*graph).xadj = libmetis__imalloc(
-            (pnvtxs + 1 as libc::c_int) as size_t,
-            b"PruneGraph: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-        );
-        pxadj = (*graph).xadj;
+        (*graph).xadj = vec![0; (pnvtxs + 1) as usize];
+
+        let mut pxadj = &mut (*graph).xadj;
         (*graph).vwgt = libmetis__imalloc(
             pnvtxs as size_t,
             b"PruneGraph: vwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -302,25 +294,22 @@ pub unsafe extern "C" fn libmetis__PruneGraph(
         padjncy = (*graph).adjncy;
         (*graph).adjwgt = libmetis__ismalloc(
             pnedges as size_t,
-            1 as libc::c_int,
+            1,
             b"PruneGraph: adjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         l = 0 as libc::c_int;
         pnedges = l;
-        *pxadj.offset(0 as libc::c_int as isize) = pnedges;
+        pxadj[(0 as libc::c_int as usize)] = pnedges;
         i = 0 as libc::c_int;
         while i < nvtxs {
-            if ((*xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize))
-                as libc::c_float)
-                < factor
-            {
+            if ((xadj[(i + 1) as usize] - xadj[i as usize]) as libc::c_float) < factor {
                 *pvwgt.offset(l as isize) = if vwgt.is_null() {
-                    1 as libc::c_int
+                    1
                 } else {
                     *vwgt.offset(i as isize)
                 };
-                j = *xadj.offset(i as isize);
-                while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                j = xadj[i as usize];
+                while j < xadj[(i + 1) as usize] {
                     k = *perm.offset(*adjncy.offset(j as isize) as isize);
                     if k < pnvtxs {
                         let fresh7 = pnedges;
@@ -331,14 +320,14 @@ pub unsafe extern "C" fn libmetis__PruneGraph(
                     j;
                 }
                 l += 1;
-                *pxadj.offset(l as isize) = pnedges;
+                pxadj[(l as usize)] = pnedges;
             }
             i += 1;
             i;
         }
         (*graph).nvtxs = pnvtxs;
         (*graph).nedges = pnedges;
-        (*graph).ncon = 1 as libc::c_int;
+        (*graph).ncon = 1;
         libmetis__SetupGraph_tvwgt(graph);
         libmetis__SetupGraph_label(graph);
     } else if nlarge > 0 as libc::c_int && nlarge == nvtxs {

@@ -20,29 +20,29 @@ pub unsafe extern "C" fn libmetis__AllocateWorkSpace(
     let mut coresize: size_t = 0;
     match (*ctrl).optype as libc::c_uint {
         0 => {
-            coresize = ((3 as libc::c_int * ((*graph).nvtxs + 1 as libc::c_int)) as u64)
+            coresize = ((3 as libc::c_int * ((*graph).nvtxs + 1)) as u64)
                 .wrapping_mul(::core::mem::size_of::<idx_t>() as u64)
                 .wrapping_add(
-                    ((5 as libc::c_int * ((*ctrl).nparts + 1 as libc::c_int) * (*graph).ncon)
+                    ((5 as libc::c_int * ((*ctrl).nparts + 1) * (*graph).ncon)
                         as u64)
                         .wrapping_mul(::core::mem::size_of::<idx_t>() as u64),
                 )
                 .wrapping_add(
-                    ((5 as libc::c_int * ((*ctrl).nparts + 1 as libc::c_int) * (*graph).ncon)
+                    ((5 as libc::c_int * ((*ctrl).nparts + 1) * (*graph).ncon)
                         as u64)
                         .wrapping_mul(::core::mem::size_of::<real_t>() as u64),
                 );
         }
         _ => {
-            coresize = ((4 as libc::c_int * ((*graph).nvtxs + 1 as libc::c_int)) as u64)
+            coresize = ((4 as libc::c_int * ((*graph).nvtxs + 1)) as u64)
                 .wrapping_mul(::core::mem::size_of::<idx_t>() as u64)
                 .wrapping_add(
-                    ((5 as libc::c_int * ((*ctrl).nparts + 1 as libc::c_int) * (*graph).ncon)
+                    ((5 as libc::c_int * ((*ctrl).nparts + 1) * (*graph).ncon)
                         as u64)
                         .wrapping_mul(::core::mem::size_of::<idx_t>() as u64),
                 )
                 .wrapping_add(
-                    ((5 as libc::c_int * ((*ctrl).nparts + 1 as libc::c_int) * (*graph).ncon)
+                    ((5 as libc::c_int * ((*ctrl).nparts + 1) * (*graph).ncon)
                         as u64)
                         .wrapping_mul(::core::mem::size_of::<real_t>() as u64),
                 );
@@ -86,12 +86,12 @@ pub unsafe extern "C" fn libmetis__AllocateRefinementWorkSpace(
     }
     if (*ctrl).minconn != 0 {
         (*ctrl).pvec1 = libmetis__imalloc(
-            ((*ctrl).nparts + 1 as libc::c_int) as size_t,
+            ((*ctrl).nparts + 1) as size_t,
             b"AllocateRefinementWorkSpace: pvec1\0" as *const u8 as *const libc::c_char
                 as *mut libc::c_char,
         );
         (*ctrl).pvec2 = libmetis__imalloc(
-            ((*ctrl).nparts + 1 as libc::c_int) as size_t,
+            ((*ctrl).nparts + 1) as size_t,
             b"AllocateRefinementWorkSpace: pvec2\0" as *const u8 as *const libc::c_char
                 as *mut libc::c_char,
         );

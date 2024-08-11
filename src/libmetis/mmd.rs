@@ -1,3 +1,5 @@
+use std::slice;
+
 use ::libc;
 pub type __int32_t = libc::c_int;
 pub type int32_t = __int32_t;
@@ -5,7 +7,7 @@ pub type idx_t = int32_t;
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__genmmd(
     mut neqns: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut [idx_t],
     mut adjncy: *mut idx_t,
     mut invp: *mut idx_t,
     mut perm: *mut idx_t,
@@ -28,8 +30,10 @@ pub unsafe extern "C" fn libmetis__genmmd(
     if neqns <= 0 as libc::c_int {
         return;
     }
-    xadj = xadj.offset(-1);
-    xadj;
+
+    // Code here is from fortran and indexes from 1
+    xadj = slice::from_raw_parts_mut(xadj.as_mut_ptr().offset(-1), xadj.len() + 1);
+
     adjncy = adjncy.offset(-1);
     adjncy;
     invp = invp.offset(-1);
@@ -46,18 +50,18 @@ pub unsafe extern "C" fn libmetis__genmmd(
     marker;
     *ncsub = 0 as libc::c_int;
     libmetis__mmdint(neqns, xadj, adjncy, head, invp, perm, qsize, list, marker);
-    num = 1 as libc::c_int;
-    nextmd = *head.offset(1 as libc::c_int as isize);
+    num = 1;
+    nextmd = *head.offset(1 as isize);
     while nextmd > 0 as libc::c_int {
         mdeg_node = nextmd;
         nextmd = *invp.offset(mdeg_node as isize);
         *marker.offset(mdeg_node as isize) = maxint;
         *invp.offset(mdeg_node as isize) = -num;
-        num = num + 1 as libc::c_int;
+        num = num + 1;
     }
     if !(num > neqns) {
-        tag = 1 as libc::c_int;
-        *head.offset(1 as libc::c_int as isize) = 0 as libc::c_int;
+        tag = 1;
+        *head.offset(1 as isize) = 0 as libc::c_int;
         mdeg = 2 as libc::c_int;
         's_88: loop {
             while *head.offset(mdeg as isize) <= 0 as libc::c_int {
@@ -89,8 +93,8 @@ pub unsafe extern "C" fn libmetis__genmmd(
                 tag += 1;
                 tag;
                 if tag >= maxint {
-                    tag = 1 as libc::c_int;
-                    i = 1 as libc::c_int;
+                    tag = 1;
+                    i = 1;
                     while i <= neqns {
                         if *marker.offset(i as isize) < maxint {
                             *marker.offset(i as isize) = 0 as libc::c_int;
@@ -100,17 +104,7 @@ pub unsafe extern "C" fn libmetis__genmmd(
                     }
                 }
                 libmetis__mmdelm(
-                    mdeg_node,
-                    xadj,
-                    adjncy,
-                    head,
-                    invp,
-                    perm,
-                    qsize,
-                    list,
-                    marker,
-                    maxint,
-                    tag,
+                    mdeg_node, xadj, adjncy, head, invp, perm, qsize, list, marker, maxint, tag,
                 );
                 num += *qsize.offset(mdeg_node as isize);
                 *list.offset(mdeg_node as isize) = ehead;
@@ -123,26 +117,14 @@ pub unsafe extern "C" fn libmetis__genmmd(
                 break;
             }
             libmetis__mmdupd(
-                ehead,
-                neqns,
-                xadj,
-                adjncy,
-                delta,
-                &mut mdeg,
-                head,
-                invp,
-                perm,
-                qsize,
-                list,
-                marker,
-                maxint,
-                &mut tag,
+                ehead, neqns, xadj, adjncy, delta, &mut mdeg, head, invp, perm, qsize, list,
+                marker, maxint, &mut tag,
             );
         }
     }
     libmetis__mmdnum(neqns, perm, invp, qsize);
-    xadj = xadj.offset(1);
-    xadj;
+    xadj = slice::from_raw_parts_mut(xadj.as_mut_ptr().offset(1), xadj.len() - 1);
+
     adjncy = adjncy.offset(1);
     adjncy;
     invp = invp.offset(1);
@@ -161,7 +143,7 @@ pub unsafe extern "C" fn libmetis__genmmd(
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__mmdelm(
     mut mdeg_node: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut [idx_t],
     mut adjncy: *mut idx_t,
     mut head: *mut idx_t,
     mut forward: *mut idx_t,
@@ -191,8 +173,8 @@ pub unsafe extern "C" fn libmetis__mmdelm(
     let mut rnode: idx_t = 0;
     let mut xqnbr: idx_t = 0;
     *marker.offset(mdeg_node as isize) = tag;
-    istart = *xadj.offset(mdeg_node as isize);
-    istop = *xadj.offset((mdeg_node + 1 as libc::c_int) as isize) - 1 as libc::c_int;
+    istart = xadj[(mdeg_node as usize)];
+    istop = xadj[((mdeg_node + 1) as usize)] - 1;
     element = 0 as libc::c_int;
     rloc = istart;
     rlmt = istop;
@@ -220,8 +202,8 @@ pub unsafe extern "C" fn libmetis__mmdelm(
         *adjncy.offset(rlmt as isize) = -element;
         link = element;
         '_n400: loop {
-            jstart = *xadj.offset(link as isize);
-            jstop = *xadj.offset((link + 1 as libc::c_int) as isize) - 1 as libc::c_int;
+            jstart = xadj[(link as usize)];
+            jstop = xadj[((link + 1) as usize)] - 1;
             j = jstart;
             loop {
                 if !(j <= jstop) {
@@ -241,9 +223,8 @@ pub unsafe extern "C" fn libmetis__mmdelm(
                     *marker.offset(node as isize) = tag;
                     while rloc >= rlmt {
                         link = -*adjncy.offset(rlmt as isize);
-                        rloc = *xadj.offset(link as isize);
-                        rlmt = *xadj.offset((link + 1 as libc::c_int) as isize)
-                            - 1 as libc::c_int;
+                        rloc = xadj[(link as usize)];
+                        rlmt = xadj[((link + 1) as usize)] - 1;
                     }
                     *adjncy.offset(rloc as isize) = node;
                     rloc += 1;
@@ -260,8 +241,8 @@ pub unsafe extern "C" fn libmetis__mmdelm(
     }
     link = mdeg_node;
     '_n1100: loop {
-        istart = *xadj.offset(link as isize);
-        istop = *xadj.offset((link + 1 as libc::c_int) as isize) - 1 as libc::c_int;
+        istart = xadj[(link as usize)];
+        istop = xadj[((link + 1) as usize)] - 1;
         i = istart;
         loop {
             if !(i <= istop) {
@@ -289,8 +270,8 @@ pub unsafe extern "C" fn libmetis__mmdelm(
                     *head.offset(npv as isize) = nxnode;
                 }
             }
-            jstart = *xadj.offset(rnode as isize);
-            jstop = *xadj.offset((rnode + 1 as libc::c_int) as isize) - 1 as libc::c_int;
+            jstart = xadj[(rnode as usize)];
+            jstop = xadj[((rnode + 1) as usize)] - 1;
             xqnbr = jstart;
             j = jstart;
             while j <= jstop {
@@ -315,7 +296,7 @@ pub unsafe extern "C" fn libmetis__mmdelm(
                 *forward.offset(rnode as isize) = -mdeg_node;
                 *backward.offset(rnode as isize) = -maxint;
             } else {
-                *forward.offset(rnode as isize) = nqnbrs + 1 as libc::c_int;
+                *forward.offset(rnode as isize) = nqnbrs + 1;
                 *backward.offset(rnode as isize) = 0 as libc::c_int;
                 *adjncy.offset(xqnbr as isize) = mdeg_node;
                 xqnbr += 1;
@@ -327,12 +308,12 @@ pub unsafe extern "C" fn libmetis__mmdelm(
             i += 1;
             i;
         }
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__mmdint(
     mut neqns: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut [idx_t],
     mut adjncy: *mut idx_t,
     mut head: *mut idx_t,
     mut forward: *mut idx_t,
@@ -344,21 +325,20 @@ pub unsafe extern "C" fn libmetis__mmdint(
     let mut fnode: idx_t = 0;
     let mut ndeg: idx_t = 0;
     let mut node: idx_t = 0;
-    node = 1 as libc::c_int;
+    node = 1;
     while node <= neqns {
         *head.offset(node as isize) = 0 as libc::c_int;
-        *qsize.offset(node as isize) = 1 as libc::c_int;
+        *qsize.offset(node as isize) = 1;
         *marker.offset(node as isize) = 0 as libc::c_int;
         *list.offset(node as isize) = 0 as libc::c_int;
         node += 1;
         node;
     }
-    node = 1 as libc::c_int;
+    node = 1;
     while node <= neqns {
-        ndeg = *xadj.offset((node + 1 as libc::c_int) as isize)
-            - *xadj.offset(node as isize);
+        ndeg = xadj[((node + 1) as usize)] - xadj[(node as usize)];
         if ndeg == 0 as libc::c_int {
-            ndeg = 1 as libc::c_int;
+            ndeg = 1;
         }
         fnode = *head.offset(ndeg as isize);
         *forward.offset(node as isize) = fnode;
@@ -385,7 +365,7 @@ pub unsafe extern "C" fn libmetis__mmdnum(
     let mut nqsize: idx_t = 0;
     let mut num: idx_t = 0;
     let mut root: idx_t = 0;
-    node = 1 as libc::c_int;
+    node = 1;
     while node <= neqns {
         nqsize = *qsize.offset(node as isize);
         if nqsize <= 0 as libc::c_int {
@@ -397,7 +377,7 @@ pub unsafe extern "C" fn libmetis__mmdnum(
         node += 1;
         node;
     }
-    node = 1 as libc::c_int;
+    node = 1;
     while node <= neqns {
         if *perm.offset(node as isize) <= 0 as libc::c_int {
             father = node;
@@ -405,7 +385,7 @@ pub unsafe extern "C" fn libmetis__mmdnum(
                 father = -*perm.offset(father as isize);
             }
             root = father;
-            num = *perm.offset(root as isize) + 1 as libc::c_int;
+            num = *perm.offset(root as isize) + 1;
             *invp.offset(node as isize) = -num;
             *perm.offset(root as isize) = num;
             father = node;
@@ -419,7 +399,7 @@ pub unsafe extern "C" fn libmetis__mmdnum(
         node += 1;
         node;
     }
-    node = 1 as libc::c_int;
+    node = 1;
     while node <= neqns {
         num = -*invp.offset(node as isize);
         *invp.offset(node as isize) = num;
@@ -432,7 +412,7 @@ pub unsafe extern "C" fn libmetis__mmdnum(
 pub unsafe extern "C" fn libmetis__mmdupd(
     mut ehead: idx_t,
     mut neqns: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut [idx_t],
     mut adjncy: *mut idx_t,
     mut delta: idx_t,
     mut mdeg: *mut idx_t,
@@ -473,8 +453,8 @@ pub unsafe extern "C" fn libmetis__mmdupd(
         }
         mtag = *tag + mdeg0;
         if mtag >= maxint {
-            *tag = 1 as libc::c_int;
-            i = 1 as libc::c_int;
+            *tag = 1;
+            i = 1;
             while i <= neqns {
                 if *marker.offset(i as isize) < maxint {
                     *marker.offset(i as isize) = 0 as libc::c_int;
@@ -489,8 +469,8 @@ pub unsafe extern "C" fn libmetis__mmdupd(
         deg0 = 0 as libc::c_int;
         link = element;
         '_n400: loop {
-            istart = *xadj.offset(link as isize);
-            istop = *xadj.offset((link + 1 as libc::c_int) as isize) - 1 as libc::c_int;
+            istart = xadj[(link as usize)];
+            istop = xadj[((link + 1) as usize)] - 1;
             i = istart;
             loop {
                 if !(i <= istop) {
@@ -522,7 +502,7 @@ pub unsafe extern "C" fn libmetis__mmdupd(
             }
         }
         enode = q2head;
-        iq2 = 1 as libc::c_int;
+        iq2 = 1;
         '_n900: loop {
             if enode <= 0 as libc::c_int {
                 enode = qxhead;
@@ -534,19 +514,18 @@ pub unsafe extern "C" fn libmetis__mmdupd(
                 *tag += 1;
                 *tag;
                 deg = deg0;
-                istart = *xadj.offset(enode as isize);
+                istart = xadj[(enode as usize)];
                 nabor = *adjncy.offset(istart as isize);
                 if nabor == element {
-                    nabor = *adjncy.offset((istart + 1 as libc::c_int) as isize);
+                    nabor = *adjncy.offset((istart + 1) as isize);
                 }
                 link = nabor;
                 if *forward.offset(nabor as isize) >= 0 as libc::c_int {
                     deg += *qsize.offset(nabor as isize);
                 } else {
                     '_n1000: loop {
-                        istart = *xadj.offset(link as isize);
-                        istop = *xadj.offset((link + 1 as libc::c_int) as isize)
-                            - 1 as libc::c_int;
+                        istart = xadj[(link as usize)];
+                        istop = xadj[((link + 1) as usize)] - 1;
                         i = istart;
                         while i <= istop {
                             node = *adjncy.offset(i as isize);
@@ -562,9 +541,7 @@ pub unsafe extern "C" fn libmetis__mmdupd(
                                     if *marker.offset(node as isize) < *tag {
                                         *marker.offset(node as isize) = *tag;
                                         deg += *qsize.offset(node as isize);
-                                    } else if *backward.offset(node as isize)
-                                        == 0 as libc::c_int
-                                    {
+                                    } else if *backward.offset(node as isize) == 0 as libc::c_int {
                                         if *forward.offset(node as isize) == 2 as libc::c_int {
                                             let ref mut fresh1 = *qsize.offset(enode as isize);
                                             *fresh1 += *qsize.offset(node as isize);
@@ -592,14 +569,14 @@ pub unsafe extern "C" fn libmetis__mmdupd(
                 match current_block {
                     17454654331926439509 => {
                         enode = *list.offset(enode as isize);
-                        if iq2 == 1 as libc::c_int {
+                        if iq2 == 1 {
                             break;
                         } else {
                             current_block = 1867586960090983514;
                         }
                     }
                     8022740728492411272 => {
-                        deg = deg - *qsize.offset(enode as isize) + 1 as libc::c_int;
+                        deg = deg - *qsize.offset(enode as isize) + 1;
                         fnode = *head.offset(deg as isize);
                         *forward.offset(enode as isize) = fnode;
                         *backward.offset(enode as isize) = -deg;
@@ -623,9 +600,8 @@ pub unsafe extern "C" fn libmetis__mmdupd(
                         *tag += 1;
                         *tag;
                         deg = deg0;
-                        istart = *xadj.offset(enode as isize);
-                        istop = *xadj.offset((enode + 1 as libc::c_int) as isize)
-                            - 1 as libc::c_int;
+                        istart = xadj[(enode as usize)];
+                        istop = xadj[((enode + 1) as usize)] - 1;
                         i = istart;
                         while i <= istop {
                             nabor = *adjncy.offset(i as isize);
@@ -639,9 +615,9 @@ pub unsafe extern "C" fn libmetis__mmdupd(
                                     deg += *qsize.offset(nabor as isize);
                                 } else {
                                     '_n1700: loop {
-                                        jstart = *xadj.offset(link as isize);
-                                        jstop = *xadj.offset((link + 1 as libc::c_int) as isize)
-                                            - 1 as libc::c_int;
+                                        jstart = xadj[(link as usize)];
+                                        jstop = xadj[((link + 1) as usize)]
+                                            - 1;
                                         j = jstart;
                                         loop {
                                             if !(j <= jstop) {
@@ -675,5 +651,5 @@ pub unsafe extern "C" fn libmetis__mmdupd(
         }
         *tag = mtag;
         element = *list.offset(element as isize);
-    };
+    }
 }

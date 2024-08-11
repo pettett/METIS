@@ -72,7 +72,7 @@ pub struct C2RustUnnamed_8 {
 pub unsafe extern "C" fn libmetis__iargmax(mut n: size_t, mut x: *mut idx_t) -> size_t {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    i = 1 as libc::c_int as size_t;
+    i = 1 as size_t;
     while i < n {
         max = if *x.offset(i as isize) > *x.offset(max as isize) {
             i
@@ -88,7 +88,7 @@ pub unsafe extern "C" fn libmetis__iargmax(mut n: size_t, mut x: *mut idx_t) -> 
 pub unsafe extern "C" fn libmetis__iargmin(mut n: size_t, mut x: *mut idx_t) -> size_t {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    i = 1 as libc::c_int as size_t;
+    i = 1 as size_t;
     while i < n {
         min = if *x.offset(i as isize) < *x.offset(min as isize) {
             i
@@ -121,7 +121,7 @@ pub unsafe extern "C" fn libmetis__iargmax_n(
         i;
     }
     libmetis__ikvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize)).val as size_t;
+    max_n = (*cand.offset(k.wrapping_sub(1 as u64) as isize)).val as size_t;
     gk_free(
         &mut cand as *mut *mut ikv_t as *mut libc::c_void as *mut *mut libc::c_void,
         0 as *mut *mut libc::c_void,
@@ -167,7 +167,7 @@ pub unsafe extern "C" fn libmetis__imax(mut n: size_t, mut x: *mut idx_t) -> idx
     if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int;
     }
-    i = 1 as libc::c_int as size_t;
+    i = 1 as size_t;
     while i < n {
         max = if *x.offset(i as isize) > *x.offset(max as isize) {
             i
@@ -186,7 +186,7 @@ pub unsafe extern "C" fn libmetis__imin(mut n: size_t, mut x: *mut idx_t) -> idx
     if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int;
     }
-    i = 1 as libc::c_int as size_t;
+    i = 1 as size_t;
     while i < n {
         min = if *x.offset(i as isize) < *x.offset(min as isize) {
             i
@@ -298,7 +298,7 @@ pub unsafe extern "C" fn libmetis__rargmax_n(
         i;
     }
     libmetis__rkvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize)).val as size_t;
+    max_n = (*cand.offset(k.wrapping_sub(1 as u64) as isize)).val as size_t;
     gk_free(
         &mut cand as *mut *mut rkv_t as *mut libc::c_void as *mut *mut libc::c_void,
         0 as *mut *mut libc::c_void,
@@ -309,7 +309,7 @@ pub unsafe extern "C" fn libmetis__rargmax_n(
 pub unsafe extern "C" fn libmetis__rargmin(mut n: size_t, mut x: *mut real_t) -> size_t {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    i = 1 as libc::c_int as size_t;
+    i = 1 as size_t;
     while i < n {
         min = if *x.offset(i as isize) < *x.offset(min as isize) {
             i
@@ -325,7 +325,7 @@ pub unsafe extern "C" fn libmetis__rargmin(mut n: size_t, mut x: *mut real_t) ->
 pub unsafe extern "C" fn libmetis__rargmax(mut n: size_t, mut x: *mut real_t) -> size_t {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    i = 1 as libc::c_int as size_t;
+    i = 1 as size_t;
     while i < n {
         max = if *x.offset(i as isize) > *x.offset(max as isize) {
             i
@@ -359,7 +359,7 @@ pub unsafe extern "C" fn libmetis__rmax(mut n: size_t, mut x: *mut real_t) -> re
     if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as real_t;
     }
-    i = 1 as libc::c_int as size_t;
+    i = 1 as size_t;
     while i < n {
         max = if *x.offset(i as isize) > *x.offset(max as isize) {
             i
@@ -378,7 +378,7 @@ pub unsafe extern "C" fn libmetis__rmin(mut n: size_t, mut x: *mut real_t) -> re
     if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as real_t;
     }
-    i = 1 as libc::c_int as size_t;
+    i = 1 as size_t;
     while i < n {
         min = if *x.offset(i as isize) < *x.offset(min as isize) {
             i
@@ -1096,7 +1096,7 @@ pub unsafe extern "C" fn libmetis__ipqInit(mut queue: *mut ipq_t, mut maxnodes: 
     );
     (*queue).locator = gk_idxsmalloc(
         maxnodes,
-        -(1 as libc::c_int) as gk_idx_t,
+        -(1) as gk_idx_t,
         b"gk_PQInit: locator\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
 }
@@ -1111,14 +1111,14 @@ pub unsafe extern "C" fn libmetis__ipqCheckHeap(mut queue: *mut ipq_t) -> libc::
     locator = (*queue).locator;
     nnodes = (*queue).nnodes as size_t;
     if nnodes == 0 as libc::c_int as u64 {
-        return 1 as libc::c_int;
+        return 1;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
@@ -1126,23 +1126,23 @@ pub unsafe extern "C" fn libmetis__ipqCheckHeap(mut queue: *mut ipq_t) -> libc::
     i = 0 as libc::c_int as gk_idx_t;
     j = i;
     while i < (*queue).maxnodes {
-        if *locator.offset(i as isize) != -(1 as libc::c_int) as i64 {
+        if *locator.offset(i as isize) != -(1) as i64 {
             j += 1;
             j;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__ipqReset(mut queue: *mut ipq_t) {
     let mut i: gk_idx_t = 0;
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut ikv_t = (*queue).heap;
-    i = (*queue).nnodes - 1 as libc::c_int as i64;
+    i = (*queue).nnodes - 1 as i64;
     while i >= 0 as libc::c_int as i64 {
-        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1 as libc::c_int) as gk_idx_t;
+        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1) as gk_idx_t;
         i -= 1;
         i;
     }
@@ -1189,7 +1189,7 @@ pub unsafe extern "C" fn libmetis__ipqInsert(
     (*queue).nnodes = (*queue).nnodes + 1;
     i = fresh4;
     while i > 0 as libc::c_int as i64 {
-        j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+        j = i - 1 as i64 >> 1;
         if !(key > (*heap.offset(j as isize)).key) {
             break;
         }
@@ -1215,7 +1215,7 @@ pub unsafe extern "C" fn libmetis__ipqDelete(
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut ikv_t = (*queue).heap;
     i = *locator.offset(node as isize);
-    *locator.offset(node as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(node as isize) = -(1) as gk_idx_t;
     (*queue).nnodes -= 1;
     if (*queue).nnodes > 0 as libc::c_int as i64
         && (*heap.offset((*queue).nnodes as isize)).val != node
@@ -1225,7 +1225,7 @@ pub unsafe extern "C" fn libmetis__ipqDelete(
         oldkey = (*heap.offset(i as isize)).key;
         if newkey > oldkey {
             while i > 0 as libc::c_int as i64 {
-                j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+                j = i - 1 as i64 >> 1;
                 if !(newkey > (*heap.offset(j as isize)).key) {
                     break;
                 }
@@ -1236,13 +1236,13 @@ pub unsafe extern "C" fn libmetis__ipqDelete(
         } else {
             nnodes = (*queue).nnodes;
             loop {
-                j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+                j = (i << 1) + 1 as i64;
                 if !(j < nnodes) {
                     break;
                 }
                 if (*heap.offset(j as isize)).key > newkey {
-                    if (j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if (j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > (*heap.offset(j as isize)).key
                     {
                         j += 1;
@@ -1252,8 +1252,8 @@ pub unsafe extern "C" fn libmetis__ipqDelete(
                     *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                     i = j;
                 } else {
-                    if !((j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                    if !((j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                     {
                         break;
                     }
@@ -1287,7 +1287,7 @@ pub unsafe extern "C" fn libmetis__ipqUpdate(
     i = *locator.offset(node as isize);
     if newkey > oldkey {
         while i > 0 as libc::c_int as i64 {
-            j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+            j = i - 1 as i64 >> 1;
             if !(newkey > (*heap.offset(j as isize)).key) {
                 break;
             }
@@ -1298,13 +1298,13 @@ pub unsafe extern "C" fn libmetis__ipqUpdate(
     } else {
         nnodes = (*queue).nnodes;
         loop {
-            j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+            j = (i << 1) + 1 as i64;
             if !(j < nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > newkey {
-                if (j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
                     j += 1;
@@ -1314,8 +1314,8 @@ pub unsafe extern "C" fn libmetis__ipqUpdate(
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                if !((j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                 {
                     break;
                 }
@@ -1360,7 +1360,7 @@ pub unsafe extern "C" fn libmetis__ipqSeeTopKey(mut queue: *mut ipq_t) -> idx_t 
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__ipqSeeTopVal(mut queue: *mut ipq_t) -> idx_t {
     return if (*queue).nnodes == 0 as libc::c_int as i64 {
-        -(1 as libc::c_int)
+        -(1)
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).val
     };
@@ -1375,41 +1375,41 @@ pub unsafe extern "C" fn libmetis__ipqGetTop(mut queue: *mut ipq_t) -> idx_t {
     let mut node: idx_t = 0;
     let mut key: idx_t = 0;
     if (*queue).nnodes == 0 as libc::c_int as i64 {
-        return -(1 as libc::c_int);
+        return -(1);
     }
     (*queue).nnodes -= 1;
     (*queue).nnodes;
     heap = (*queue).heap;
     locator = (*queue).locator;
     vtx = (*heap.offset(0 as libc::c_int as isize)).val;
-    *locator.offset(vtx as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(vtx as isize) = -(1) as gk_idx_t;
     i = (*queue).nnodes;
     if i > 0 as libc::c_int as i64 {
         key = (*heap.offset(i as isize)).key;
         node = (*heap.offset(i as isize)).val;
         i = 0 as libc::c_int as gk_idx_t;
         loop {
-            j = 2 as libc::c_int as i64 * i + 1 as libc::c_int as i64;
+            j = 2 as libc::c_int as i64 * i + 1 as i64;
             if !(j < (*queue).nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > key {
-                if (j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
-                    j = j + 1 as libc::c_int as i64;
+                    j = j + 1 as i64;
                 }
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > key)
+                if !((j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > key)
                 {
                     break;
                 }
-                j = j + 1 as libc::c_int as i64;
+                j = j + 1 as i64;
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
@@ -1437,7 +1437,7 @@ pub unsafe extern "C" fn libmetis__rpqUpdate(
     i = *locator.offset(node as isize);
     if newkey > oldkey {
         while i > 0 as libc::c_int as i64 {
-            j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+            j = i - 1 as i64 >> 1;
             if !(newkey > (*heap.offset(j as isize)).key) {
                 break;
             }
@@ -1448,13 +1448,13 @@ pub unsafe extern "C" fn libmetis__rpqUpdate(
     } else {
         nnodes = (*queue).nnodes;
         loop {
-            j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+            j = (i << 1) + 1 as i64;
             if !(j < nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > newkey {
-                if (j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
                     j += 1;
@@ -1464,8 +1464,8 @@ pub unsafe extern "C" fn libmetis__rpqUpdate(
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                if !((j + 1 as i64) < nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                 {
                     break;
                 }
@@ -1492,14 +1492,14 @@ pub unsafe extern "C" fn libmetis__rpqCheckHeap(mut queue: *mut rpq_t) -> libc::
     locator = (*queue).locator;
     nnodes = (*queue).nnodes as size_t;
     if nnodes == 0 as libc::c_int as u64 {
-        return 1 as libc::c_int;
+        return 1;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < nnodes {
         i += 1;
         i;
@@ -1507,14 +1507,14 @@ pub unsafe extern "C" fn libmetis__rpqCheckHeap(mut queue: *mut rpq_t) -> libc::
     i = 0 as libc::c_int as gk_idx_t;
     j = i;
     while i < (*queue).maxnodes {
-        if *locator.offset(i as isize) != -(1 as libc::c_int) as i64 {
+        if *locator.offset(i as isize) != -(1) as i64 {
             j += 1;
             j;
         }
         i += 1;
         i;
     }
-    return 1 as libc::c_int;
+    return 1;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__rpqInit(mut queue: *mut rpq_t, mut maxnodes: size_t) {
@@ -1526,7 +1526,7 @@ pub unsafe extern "C" fn libmetis__rpqInit(mut queue: *mut rpq_t, mut maxnodes: 
     );
     (*queue).locator = gk_idxsmalloc(
         maxnodes,
-        -(1 as libc::c_int) as gk_idx_t,
+        -(1) as gk_idx_t,
         b"gk_PQInit: locator\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
 }
@@ -1535,9 +1535,9 @@ pub unsafe extern "C" fn libmetis__rpqReset(mut queue: *mut rpq_t) {
     let mut i: gk_idx_t = 0;
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut rkv_t = (*queue).heap;
-    i = (*queue).nnodes - 1 as libc::c_int as i64;
+    i = (*queue).nnodes - 1 as i64;
     while i >= 0 as libc::c_int as i64 {
-        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1 as libc::c_int) as gk_idx_t;
+        *locator.offset((*heap.offset(i as isize)).val as isize) = -(1) as gk_idx_t;
         i -= 1;
         i;
     }
@@ -1584,7 +1584,7 @@ pub unsafe extern "C" fn libmetis__rpqInsert(
     (*queue).nnodes = (*queue).nnodes + 1;
     i = fresh5;
     while i > 0 as libc::c_int as i64 {
-        j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+        j = i - 1 as i64 >> 1;
         if !(key > (*heap.offset(j as isize)).key) {
             break;
         }
@@ -1610,7 +1610,7 @@ pub unsafe extern "C" fn libmetis__rpqDelete(
     let mut locator: *mut gk_idx_t = (*queue).locator;
     let mut heap: *mut rkv_t = (*queue).heap;
     i = *locator.offset(node as isize);
-    *locator.offset(node as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(node as isize) = -(1) as gk_idx_t;
     (*queue).nnodes -= 1;
     if (*queue).nnodes > 0 as libc::c_int as i64
         && (*heap.offset((*queue).nnodes as isize)).val != node
@@ -1620,7 +1620,7 @@ pub unsafe extern "C" fn libmetis__rpqDelete(
         oldkey = (*heap.offset(i as isize)).key;
         if newkey > oldkey {
             while i > 0 as libc::c_int as i64 {
-                j = i - 1 as libc::c_int as i64 >> 1 as libc::c_int;
+                j = i - 1 as i64 >> 1;
                 if !(newkey > (*heap.offset(j as isize)).key) {
                     break;
                 }
@@ -1631,13 +1631,13 @@ pub unsafe extern "C" fn libmetis__rpqDelete(
         } else {
             nnodes = (*queue).nnodes;
             loop {
-                j = (i << 1 as libc::c_int) + 1 as libc::c_int as i64;
+                j = (i << 1) + 1 as i64;
                 if !(j < nnodes) {
                     break;
                 }
                 if (*heap.offset(j as isize)).key > newkey {
-                    if (j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                    if (j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key
                             > (*heap.offset(j as isize)).key
                     {
                         j += 1;
@@ -1647,8 +1647,8 @@ pub unsafe extern "C" fn libmetis__rpqDelete(
                     *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                     i = j;
                 } else {
-                    if !((j + 1 as libc::c_int as i64) < nnodes
-                        && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > newkey)
+                    if !((j + 1 as i64) < nnodes
+                        && (*heap.offset((j + 1 as i64) as isize)).key > newkey)
                     {
                         break;
                     }
@@ -1695,7 +1695,7 @@ pub unsafe extern "C" fn libmetis__rpqSeeTopKey(mut queue: *mut rpq_t) -> real_t
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__rpqSeeTopVal(mut queue: *mut rpq_t) -> idx_t {
     return if (*queue).nnodes == 0 as libc::c_int as i64 {
-        -(1 as libc::c_int)
+        -(1)
     } else {
         (*((*queue).heap).offset(0 as libc::c_int as isize)).val
     };
@@ -1710,41 +1710,41 @@ pub unsafe extern "C" fn libmetis__rpqGetTop(mut queue: *mut rpq_t) -> idx_t {
     let mut node: idx_t = 0;
     let mut key: real_t = 0.;
     if (*queue).nnodes == 0 as libc::c_int as i64 {
-        return -(1 as libc::c_int);
+        return -(1);
     }
     (*queue).nnodes -= 1;
     (*queue).nnodes;
     heap = (*queue).heap;
     locator = (*queue).locator;
     vtx = (*heap.offset(0 as libc::c_int as isize)).val;
-    *locator.offset(vtx as isize) = -(1 as libc::c_int) as gk_idx_t;
+    *locator.offset(vtx as isize) = -(1) as gk_idx_t;
     i = (*queue).nnodes;
     if i > 0 as libc::c_int as i64 {
         key = (*heap.offset(i as isize)).key;
         node = (*heap.offset(i as isize)).val;
         i = 0 as libc::c_int as gk_idx_t;
         loop {
-            j = 2 as libc::c_int as i64 * i + 1 as libc::c_int as i64;
+            j = 2 as libc::c_int as i64 * i + 1 as i64;
             if !(j < (*queue).nnodes) {
                 break;
             }
             if (*heap.offset(j as isize)).key > key {
-                if (j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key
+                if (j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key
                         > (*heap.offset(j as isize)).key
                 {
-                    j = j + 1 as libc::c_int as i64;
+                    j = j + 1 as i64;
                 }
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
             } else {
-                if !((j + 1 as libc::c_int as i64) < (*queue).nnodes
-                    && (*heap.offset((j + 1 as libc::c_int as i64) as isize)).key > key)
+                if !((j + 1 as i64) < (*queue).nnodes
+                    && (*heap.offset((j + 1 as i64) as isize)).key > key)
                 {
                     break;
                 }
-                j = j + 1 as libc::c_int as i64;
+                j = j + 1 as i64;
                 *heap.offset(i as isize) = *heap.offset(j as isize);
                 *locator.offset((*heap.offset(i as isize)).val as isize) = i;
                 i = j;
@@ -1771,7 +1771,7 @@ pub unsafe extern "C" fn libmetis__irandArrayPermute(
     let mut u: idx_t = 0;
     let mut v: idx_t = 0;
     let mut tmp: idx_t = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int;
         while i < n {
             *p.offset(i as isize) = i;
@@ -1798,15 +1798,15 @@ pub unsafe extern "C" fn libmetis__irandArrayPermute(
             tmp = *p.offset((v + 0 as libc::c_int) as isize);
             *p.offset((v + 0 as libc::c_int) as isize) = *p.offset((u + 2 as libc::c_int) as isize);
             *p.offset((u + 2 as libc::c_int) as isize) = tmp;
-            tmp = *p.offset((v + 1 as libc::c_int) as isize);
-            *p.offset((v + 1 as libc::c_int) as isize) = *p.offset((u + 3 as libc::c_int) as isize);
+            tmp = *p.offset((v + 1) as isize);
+            *p.offset((v + 1) as isize) = *p.offset((u + 3 as libc::c_int) as isize);
             *p.offset((u + 3 as libc::c_int) as isize) = tmp;
             tmp = *p.offset((v + 2 as libc::c_int) as isize);
             *p.offset((v + 2 as libc::c_int) as isize) = *p.offset((u + 0 as libc::c_int) as isize);
             *p.offset((u + 0 as libc::c_int) as isize) = tmp;
             tmp = *p.offset((v + 3 as libc::c_int) as isize);
-            *p.offset((v + 3 as libc::c_int) as isize) = *p.offset((u + 1 as libc::c_int) as isize);
-            *p.offset((u + 1 as libc::c_int) as isize) = tmp;
+            *p.offset((v + 3 as libc::c_int) as isize) = *p.offset((u + 1) as isize);
+            *p.offset((u + 1) as isize) = tmp;
             i += 1;
             i;
         }
@@ -1821,7 +1821,7 @@ pub unsafe extern "C" fn libmetis__irandArrayPermuteFine(
     let mut i: idx_t = 0;
     let mut v: idx_t = 0;
     let mut tmp: idx_t = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int;
         while i < n {
             *p.offset(i as isize) = i;
@@ -1874,16 +1874,16 @@ pub unsafe extern "C" fn libmetis__iarray2csr(
         i += 1;
         i;
     }
-    i = 1 as libc::c_int;
+    i = 1;
     while i < range {
         let ref mut fresh7 = *ptr.offset(i as isize);
-        *fresh7 += *ptr.offset((i - 1 as libc::c_int) as isize);
+        *fresh7 += *ptr.offset((i - 1) as isize);
         i += 1;
         i;
     }
     i = range;
     while i > 0 as libc::c_int {
-        *ptr.offset(i as isize) = *ptr.offset((i - 1 as libc::c_int) as isize);
+        *ptr.offset(i as isize) = *ptr.offset((i - 1) as isize);
         i -= 1;
         i;
     }
@@ -1899,7 +1899,7 @@ pub unsafe extern "C" fn libmetis__iarray2csr(
     }
     i = range;
     while i > 0 as libc::c_int {
-        *ptr.offset(i as isize) = *ptr.offset((i - 1 as libc::c_int) as isize);
+        *ptr.offset(i as isize) = *ptr.offset((i - 1) as isize);
         i -= 1;
         i;
     }
@@ -1917,17 +1917,17 @@ pub unsafe extern "C" fn libmetis__isorti(mut n: size_t, mut base: *mut idx_t) {
         let mut _lo: *mut idx_t = _base;
         let mut _hi: *mut idx_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_1; 64] = [C2RustUnnamed_1 {
             _hi: 0 as *mut idx_t,
             _lo: 0 as *mut idx_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_1 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_1 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut idx_t = 0 as *mut idx_t;
             let mut _right_ptr: *mut idx_t = 0 as *mut idx_t;
             let mut _mid: *mut idx_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if *_mid < *_lo {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -1943,8 +1943,8 @@ pub unsafe extern "C" fn libmetis__isorti(mut n: size_t, mut base: *mut idx_t) {
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while *_left_ptr < *_mid {
                     _left_ptr = _left_ptr.offset(1);
@@ -2006,7 +2006,7 @@ pub unsafe extern "C" fn libmetis__isorti(mut n: size_t, mut base: *mut idx_t) {
     }
     let _end_ptr: *mut idx_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut idx_t = _base;
     let mut _run_ptr: *mut idx_t = 0 as *mut idx_t;
     let mut _thresh: *mut idx_t = 0 as *mut idx_t;
@@ -2014,7 +2014,7 @@ pub unsafe extern "C" fn libmetis__isorti(mut n: size_t, mut base: *mut idx_t) {
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if *_run_ptr < *_tmp_ptr {
             _tmp_ptr = _run_ptr;
@@ -2027,13 +2027,13 @@ pub unsafe extern "C" fn libmetis__isorti(mut n: size_t, mut base: *mut idx_t) {
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while *_run_ptr < *_tmp_ptr {
             _tmp_ptr = _tmp_ptr.offset(-1);
             _tmp_ptr;
@@ -2041,7 +2041,7 @@ pub unsafe extern "C" fn libmetis__isorti(mut n: size_t, mut base: *mut idx_t) {
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut idx_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut idx_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -2077,17 +2077,17 @@ pub unsafe extern "C" fn libmetis__isortd(mut n: size_t, mut base: *mut idx_t) {
         let mut _lo: *mut idx_t = _base;
         let mut _hi: *mut idx_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_2; 64] = [C2RustUnnamed_2 {
             _hi: 0 as *mut idx_t,
             _lo: 0 as *mut idx_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_2 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_2 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut idx_t = 0 as *mut idx_t;
             let mut _right_ptr: *mut idx_t = 0 as *mut idx_t;
             let mut _mid: *mut idx_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if *_mid > *_lo {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -2103,8 +2103,8 @@ pub unsafe extern "C" fn libmetis__isortd(mut n: size_t, mut base: *mut idx_t) {
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while *_left_ptr > *_mid {
                     _left_ptr = _left_ptr.offset(1);
@@ -2166,7 +2166,7 @@ pub unsafe extern "C" fn libmetis__isortd(mut n: size_t, mut base: *mut idx_t) {
     }
     let _end_ptr: *mut idx_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut idx_t = _base;
     let mut _run_ptr: *mut idx_t = 0 as *mut idx_t;
     let mut _thresh: *mut idx_t = 0 as *mut idx_t;
@@ -2174,7 +2174,7 @@ pub unsafe extern "C" fn libmetis__isortd(mut n: size_t, mut base: *mut idx_t) {
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if *_run_ptr > *_tmp_ptr {
             _tmp_ptr = _run_ptr;
@@ -2187,13 +2187,13 @@ pub unsafe extern "C" fn libmetis__isortd(mut n: size_t, mut base: *mut idx_t) {
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while *_run_ptr > *_tmp_ptr {
             _tmp_ptr = _tmp_ptr.offset(-1);
             _tmp_ptr;
@@ -2201,7 +2201,7 @@ pub unsafe extern "C" fn libmetis__isortd(mut n: size_t, mut base: *mut idx_t) {
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut idx_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut idx_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -2237,17 +2237,17 @@ pub unsafe extern "C" fn libmetis__rsorti(mut n: size_t, mut base: *mut real_t) 
         let mut _lo: *mut real_t = _base;
         let mut _hi: *mut real_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_3; 64] = [C2RustUnnamed_3 {
             _hi: 0 as *mut real_t,
             _lo: 0 as *mut real_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_3 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_3 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut real_t = 0 as *mut real_t;
             let mut _right_ptr: *mut real_t = 0 as *mut real_t;
             let mut _mid: *mut real_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if *_mid < *_lo {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -2263,8 +2263,8 @@ pub unsafe extern "C" fn libmetis__rsorti(mut n: size_t, mut base: *mut real_t) 
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while *_left_ptr < *_mid {
                     _left_ptr = _left_ptr.offset(1);
@@ -2326,7 +2326,7 @@ pub unsafe extern "C" fn libmetis__rsorti(mut n: size_t, mut base: *mut real_t) 
     }
     let _end_ptr: *mut real_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut real_t = _base;
     let mut _run_ptr: *mut real_t = 0 as *mut real_t;
     let mut _thresh: *mut real_t = 0 as *mut real_t;
@@ -2334,7 +2334,7 @@ pub unsafe extern "C" fn libmetis__rsorti(mut n: size_t, mut base: *mut real_t) 
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if *_run_ptr < *_tmp_ptr {
             _tmp_ptr = _run_ptr;
@@ -2347,13 +2347,13 @@ pub unsafe extern "C" fn libmetis__rsorti(mut n: size_t, mut base: *mut real_t) 
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while *_run_ptr < *_tmp_ptr {
             _tmp_ptr = _tmp_ptr.offset(-1);
             _tmp_ptr;
@@ -2361,7 +2361,7 @@ pub unsafe extern "C" fn libmetis__rsorti(mut n: size_t, mut base: *mut real_t) 
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut real_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut real_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -2397,17 +2397,17 @@ pub unsafe extern "C" fn libmetis__rsortd(mut n: size_t, mut base: *mut real_t) 
         let mut _lo: *mut real_t = _base;
         let mut _hi: *mut real_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_4; 64] = [C2RustUnnamed_4 {
             _hi: 0 as *mut real_t,
             _lo: 0 as *mut real_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_4 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_4 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut real_t = 0 as *mut real_t;
             let mut _right_ptr: *mut real_t = 0 as *mut real_t;
             let mut _mid: *mut real_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if *_mid > *_lo {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -2423,8 +2423,8 @@ pub unsafe extern "C" fn libmetis__rsortd(mut n: size_t, mut base: *mut real_t) 
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while *_left_ptr > *_mid {
                     _left_ptr = _left_ptr.offset(1);
@@ -2486,7 +2486,7 @@ pub unsafe extern "C" fn libmetis__rsortd(mut n: size_t, mut base: *mut real_t) 
     }
     let _end_ptr: *mut real_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut real_t = _base;
     let mut _run_ptr: *mut real_t = 0 as *mut real_t;
     let mut _thresh: *mut real_t = 0 as *mut real_t;
@@ -2494,7 +2494,7 @@ pub unsafe extern "C" fn libmetis__rsortd(mut n: size_t, mut base: *mut real_t) 
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if *_run_ptr > *_tmp_ptr {
             _tmp_ptr = _run_ptr;
@@ -2507,13 +2507,13 @@ pub unsafe extern "C" fn libmetis__rsortd(mut n: size_t, mut base: *mut real_t) 
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while *_run_ptr > *_tmp_ptr {
             _tmp_ptr = _tmp_ptr.offset(-1);
             _tmp_ptr;
@@ -2521,7 +2521,7 @@ pub unsafe extern "C" fn libmetis__rsortd(mut n: size_t, mut base: *mut real_t) 
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut real_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut real_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -2557,17 +2557,17 @@ pub unsafe extern "C" fn libmetis__ikvsorti(mut n: size_t, mut base: *mut ikv_t)
         let mut _lo: *mut ikv_t = _base;
         let mut _hi: *mut ikv_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_5; 64] = [C2RustUnnamed_5 {
             _hi: 0 as *mut ikv_t,
             _lo: 0 as *mut ikv_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_5 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_5 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut ikv_t = 0 as *mut ikv_t;
             let mut _right_ptr: *mut ikv_t = 0 as *mut ikv_t;
             let mut _mid: *mut ikv_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -2583,8 +2583,8 @@ pub unsafe extern "C" fn libmetis__ikvsorti(mut n: size_t, mut base: *mut ikv_t)
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while (*_left_ptr).key < (*_mid).key {
                     _left_ptr = _left_ptr.offset(1);
@@ -2646,7 +2646,7 @@ pub unsafe extern "C" fn libmetis__ikvsorti(mut n: size_t, mut base: *mut ikv_t)
     }
     let _end_ptr: *mut ikv_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut ikv_t = _base;
     let mut _run_ptr: *mut ikv_t = 0 as *mut ikv_t;
     let mut _thresh: *mut ikv_t = 0 as *mut ikv_t;
@@ -2654,7 +2654,7 @@ pub unsafe extern "C" fn libmetis__ikvsorti(mut n: size_t, mut base: *mut ikv_t)
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if (*_run_ptr).key < (*_tmp_ptr).key {
             _tmp_ptr = _run_ptr;
@@ -2667,13 +2667,13 @@ pub unsafe extern "C" fn libmetis__ikvsorti(mut n: size_t, mut base: *mut ikv_t)
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while (*_run_ptr).key < (*_tmp_ptr).key {
             _tmp_ptr = _tmp_ptr.offset(-1);
             _tmp_ptr;
@@ -2681,7 +2681,7 @@ pub unsafe extern "C" fn libmetis__ikvsorti(mut n: size_t, mut base: *mut ikv_t)
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut ikv_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut ikv_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -2717,17 +2717,17 @@ pub unsafe extern "C" fn libmetis__ikvsortii(mut n: size_t, mut base: *mut ikv_t
         let mut _lo: *mut ikv_t = _base;
         let mut _hi: *mut ikv_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_6; 64] = [C2RustUnnamed_6 {
             _hi: 0 as *mut ikv_t,
             _lo: 0 as *mut ikv_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_6 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_6 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut ikv_t = 0 as *mut ikv_t;
             let mut _right_ptr: *mut ikv_t = 0 as *mut ikv_t;
             let mut _mid: *mut ikv_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if (*_mid).key < (*_lo).key || (*_mid).key == (*_lo).key && (*_mid).val < (*_lo).val {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -2744,8 +2744,8 @@ pub unsafe extern "C" fn libmetis__ikvsortii(mut n: size_t, mut base: *mut ikv_t
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while (*_left_ptr).key < (*_mid).key
                     || (*_left_ptr).key == (*_mid).key && (*_left_ptr).val < (*_mid).val
@@ -2811,7 +2811,7 @@ pub unsafe extern "C" fn libmetis__ikvsortii(mut n: size_t, mut base: *mut ikv_t
     }
     let _end_ptr: *mut ikv_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut ikv_t = _base;
     let mut _run_ptr: *mut ikv_t = 0 as *mut ikv_t;
     let mut _thresh: *mut ikv_t = 0 as *mut ikv_t;
@@ -2819,7 +2819,7 @@ pub unsafe extern "C" fn libmetis__ikvsortii(mut n: size_t, mut base: *mut ikv_t
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if (*_run_ptr).key < (*_tmp_ptr).key
             || (*_run_ptr).key == (*_tmp_ptr).key && (*_run_ptr).val < (*_tmp_ptr).val
@@ -2834,13 +2834,13 @@ pub unsafe extern "C" fn libmetis__ikvsortii(mut n: size_t, mut base: *mut ikv_t
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while (*_run_ptr).key < (*_tmp_ptr).key
             || (*_run_ptr).key == (*_tmp_ptr).key && (*_run_ptr).val < (*_tmp_ptr).val
         {
@@ -2850,7 +2850,7 @@ pub unsafe extern "C" fn libmetis__ikvsortii(mut n: size_t, mut base: *mut ikv_t
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut ikv_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut ikv_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -2886,17 +2886,17 @@ pub unsafe extern "C" fn libmetis__ikvsortd(mut n: size_t, mut base: *mut ikv_t)
         let mut _lo: *mut ikv_t = _base;
         let mut _hi: *mut ikv_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed; 64] = [C2RustUnnamed {
             _hi: 0 as *mut ikv_t,
             _lo: 0 as *mut ikv_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut ikv_t = 0 as *mut ikv_t;
             let mut _right_ptr: *mut ikv_t = 0 as *mut ikv_t;
             let mut _mid: *mut ikv_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -2912,8 +2912,8 @@ pub unsafe extern "C" fn libmetis__ikvsortd(mut n: size_t, mut base: *mut ikv_t)
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while (*_left_ptr).key > (*_mid).key {
                     _left_ptr = _left_ptr.offset(1);
@@ -2975,7 +2975,7 @@ pub unsafe extern "C" fn libmetis__ikvsortd(mut n: size_t, mut base: *mut ikv_t)
     }
     let _end_ptr: *mut ikv_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut ikv_t = _base;
     let mut _run_ptr: *mut ikv_t = 0 as *mut ikv_t;
     let mut _thresh: *mut ikv_t = 0 as *mut ikv_t;
@@ -2983,7 +2983,7 @@ pub unsafe extern "C" fn libmetis__ikvsortd(mut n: size_t, mut base: *mut ikv_t)
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if (*_run_ptr).key > (*_tmp_ptr).key {
             _tmp_ptr = _run_ptr;
@@ -2996,13 +2996,13 @@ pub unsafe extern "C" fn libmetis__ikvsortd(mut n: size_t, mut base: *mut ikv_t)
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while (*_run_ptr).key > (*_tmp_ptr).key {
             _tmp_ptr = _tmp_ptr.offset(-1);
             _tmp_ptr;
@@ -3010,7 +3010,7 @@ pub unsafe extern "C" fn libmetis__ikvsortd(mut n: size_t, mut base: *mut ikv_t)
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut ikv_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut ikv_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -3046,17 +3046,17 @@ pub unsafe extern "C" fn libmetis__rkvsorti(mut n: size_t, mut base: *mut rkv_t)
         let mut _lo: *mut rkv_t = _base;
         let mut _hi: *mut rkv_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_7; 64] = [C2RustUnnamed_7 {
             _hi: 0 as *mut rkv_t,
             _lo: 0 as *mut rkv_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_7 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_7 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut rkv_t = 0 as *mut rkv_t;
             let mut _right_ptr: *mut rkv_t = 0 as *mut rkv_t;
             let mut _mid: *mut rkv_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -3072,8 +3072,8 @@ pub unsafe extern "C" fn libmetis__rkvsorti(mut n: size_t, mut base: *mut rkv_t)
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while (*_left_ptr).key < (*_mid).key {
                     _left_ptr = _left_ptr.offset(1);
@@ -3135,7 +3135,7 @@ pub unsafe extern "C" fn libmetis__rkvsorti(mut n: size_t, mut base: *mut rkv_t)
     }
     let _end_ptr: *mut rkv_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut rkv_t = _base;
     let mut _run_ptr: *mut rkv_t = 0 as *mut rkv_t;
     let mut _thresh: *mut rkv_t = 0 as *mut rkv_t;
@@ -3143,7 +3143,7 @@ pub unsafe extern "C" fn libmetis__rkvsorti(mut n: size_t, mut base: *mut rkv_t)
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if (*_run_ptr).key < (*_tmp_ptr).key {
             _tmp_ptr = _run_ptr;
@@ -3156,13 +3156,13 @@ pub unsafe extern "C" fn libmetis__rkvsorti(mut n: size_t, mut base: *mut rkv_t)
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while (*_run_ptr).key < (*_tmp_ptr).key {
             _tmp_ptr = _tmp_ptr.offset(-1);
             _tmp_ptr;
@@ -3170,7 +3170,7 @@ pub unsafe extern "C" fn libmetis__rkvsorti(mut n: size_t, mut base: *mut rkv_t)
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut rkv_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut rkv_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -3206,17 +3206,17 @@ pub unsafe extern "C" fn libmetis__rkvsortd(mut n: size_t, mut base: *mut rkv_t)
         let mut _lo: *mut rkv_t = _base;
         let mut _hi: *mut rkv_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_0; 64] = [C2RustUnnamed_0 {
             _hi: 0 as *mut rkv_t,
             _lo: 0 as *mut rkv_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_0 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_0 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut rkv_t = 0 as *mut rkv_t;
             let mut _right_ptr: *mut rkv_t = 0 as *mut rkv_t;
             let mut _mid: *mut rkv_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -3232,8 +3232,8 @@ pub unsafe extern "C" fn libmetis__rkvsortd(mut n: size_t, mut base: *mut rkv_t)
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while (*_left_ptr).key > (*_mid).key {
                     _left_ptr = _left_ptr.offset(1);
@@ -3295,7 +3295,7 @@ pub unsafe extern "C" fn libmetis__rkvsortd(mut n: size_t, mut base: *mut rkv_t)
     }
     let _end_ptr: *mut rkv_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut rkv_t = _base;
     let mut _run_ptr: *mut rkv_t = 0 as *mut rkv_t;
     let mut _thresh: *mut rkv_t = 0 as *mut rkv_t;
@@ -3303,7 +3303,7 @@ pub unsafe extern "C" fn libmetis__rkvsortd(mut n: size_t, mut base: *mut rkv_t)
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if (*_run_ptr).key > (*_tmp_ptr).key {
             _tmp_ptr = _run_ptr;
@@ -3316,13 +3316,13 @@ pub unsafe extern "C" fn libmetis__rkvsortd(mut n: size_t, mut base: *mut rkv_t)
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while (*_run_ptr).key > (*_tmp_ptr).key {
             _tmp_ptr = _tmp_ptr.offset(-1);
             _tmp_ptr;
@@ -3330,7 +3330,7 @@ pub unsafe extern "C" fn libmetis__rkvsortd(mut n: size_t, mut base: *mut rkv_t)
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut rkv_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut rkv_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {
@@ -3366,17 +3366,17 @@ pub unsafe extern "C" fn libmetis__uvwsorti(mut n: size_t, mut base: *mut uvw_t)
         let mut _lo: *mut uvw_t = _base;
         let mut _hi: *mut uvw_t = _lo
             .offset(_elems as isize)
-            .offset(-(1 as libc::c_int as isize));
+            .offset(-(1 as isize));
         let mut _stack: [C2RustUnnamed_8; 64] = [C2RustUnnamed_8 {
             _hi: 0 as *mut uvw_t,
             _lo: 0 as *mut uvw_t,
         }; 64];
-        let mut _top: *mut C2RustUnnamed_8 = _stack.as_mut_ptr().offset(1 as libc::c_int as isize);
+        let mut _top: *mut C2RustUnnamed_8 = _stack.as_mut_ptr().offset(1 as isize);
         while _stack.as_mut_ptr() < _top {
             let mut _left_ptr: *mut uvw_t = 0 as *mut uvw_t;
             let mut _right_ptr: *mut uvw_t = 0 as *mut uvw_t;
             let mut _mid: *mut uvw_t =
-                _lo.offset((_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize);
+                _lo.offset((_hi.offset_from(_lo) as i64 >> 1) as isize);
             if (*_mid).u < (*_lo).u || (*_mid).u == (*_lo).u && (*_mid).v < (*_lo).v {
                 _hold = *_mid;
                 *_mid = *_lo;
@@ -3392,8 +3392,8 @@ pub unsafe extern "C" fn libmetis__uvwsorti(mut n: size_t, mut base: *mut uvw_t)
                     *_lo = _hold;
                 }
             }
-            _left_ptr = _lo.offset(1 as libc::c_int as isize);
-            _right_ptr = _hi.offset(-(1 as libc::c_int as isize));
+            _left_ptr = _lo.offset(1 as isize);
+            _right_ptr = _hi.offset(-(1 as isize));
             loop {
                 while (*_left_ptr).u < (*_mid).u
                     || (*_left_ptr).u == (*_mid).u && (*_left_ptr).v < (*_mid).v
@@ -3459,7 +3459,7 @@ pub unsafe extern "C" fn libmetis__uvwsorti(mut n: size_t, mut base: *mut uvw_t)
     }
     let _end_ptr: *mut uvw_t = _base
         .offset(_elems as isize)
-        .offset(-(1 as libc::c_int as isize));
+        .offset(-(1 as isize));
     let mut _tmp_ptr: *mut uvw_t = _base;
     let mut _run_ptr: *mut uvw_t = 0 as *mut uvw_t;
     let mut _thresh: *mut uvw_t = 0 as *mut uvw_t;
@@ -3467,7 +3467,7 @@ pub unsafe extern "C" fn libmetis__uvwsorti(mut n: size_t, mut base: *mut uvw_t)
     if _thresh > _end_ptr {
         _thresh = _end_ptr;
     }
-    _run_ptr = _tmp_ptr.offset(1 as libc::c_int as isize);
+    _run_ptr = _tmp_ptr.offset(1 as isize);
     while _run_ptr <= _thresh {
         if (*_run_ptr).u < (*_tmp_ptr).u
             || (*_run_ptr).u == (*_tmp_ptr).u && (*_run_ptr).v < (*_tmp_ptr).v
@@ -3482,13 +3482,13 @@ pub unsafe extern "C" fn libmetis__uvwsorti(mut n: size_t, mut base: *mut uvw_t)
         *_tmp_ptr = *_base;
         *_base = _hold;
     }
-    _run_ptr = _base.offset(1 as libc::c_int as isize);
+    _run_ptr = _base.offset(1 as isize);
     loop {
         _run_ptr = _run_ptr.offset(1);
         if !(_run_ptr <= _end_ptr) {
             break;
         }
-        _tmp_ptr = _run_ptr.offset(-(1 as libc::c_int as isize));
+        _tmp_ptr = _run_ptr.offset(-(1 as isize));
         while (*_run_ptr).u < (*_tmp_ptr).u
             || (*_run_ptr).u == (*_tmp_ptr).u && (*_run_ptr).v < (*_tmp_ptr).v
         {
@@ -3498,7 +3498,7 @@ pub unsafe extern "C" fn libmetis__uvwsorti(mut n: size_t, mut base: *mut uvw_t)
         _tmp_ptr = _tmp_ptr.offset(1);
         _tmp_ptr;
         if _tmp_ptr != _run_ptr {
-            let mut _trav: *mut uvw_t = _run_ptr.offset(1 as libc::c_int as isize);
+            let mut _trav: *mut uvw_t = _run_ptr.offset(1 as isize);
             loop {
                 _trav = _trav.offset(-1);
                 if !(_trav >= _run_ptr) {

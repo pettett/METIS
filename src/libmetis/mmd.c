@@ -1,5 +1,5 @@
-/*
  * mmd.c
+/*
  *
  * **************************************************************
  * The following C function was developed from a FORTRAN subroutine

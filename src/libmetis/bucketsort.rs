@@ -105,16 +105,16 @@ pub unsafe extern "C" fn libmetis__BucketSortKeysInc(
         i += 1;
         i;
     }
-    i = 1 as libc::c_int;
-    while i < max + 1 as libc::c_int {
+    i = 1;
+    while i < max + 1 {
         let ref mut fresh1 = *counts.offset(i as isize);
-        *fresh1 += *counts.offset((i - 1 as libc::c_int) as isize);
+        *fresh1 += *counts.offset((i - 1) as isize);
         i += 1;
         i;
     }
-    i = max + 1 as libc::c_int;
+    i = max + 1;
     while i > 0 as libc::c_int {
-        *counts.offset(i as isize) = *counts.offset((i - 1 as libc::c_int) as isize);
+        *counts.offset(i as isize) = *counts.offset((i - 1) as isize);
         i -= 1;
         i;
     }

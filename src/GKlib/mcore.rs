@@ -169,21 +169,11 @@ pub unsafe extern "C" fn gk_mcoreMalloc(
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_mcorePush(mut mcore: *mut gk_mcore_t) {
-    gk_mcoreAdd(
-        mcore,
-        1 as libc::c_int,
-        0 as libc::c_int as size_t,
-        0 as *mut libc::c_void,
-    );
+    gk_mcoreAdd(mcore, 1, 0 as libc::c_int as size_t, 0 as *mut libc::c_void);
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_gkmcorePush(mut mcore: *mut gk_mcore_t) {
-    gk_gkmcoreAdd(
-        mcore,
-        1 as libc::c_int,
-        0 as libc::c_int as size_t,
-        0 as *mut libc::c_void,
-    );
+    gk_gkmcoreAdd(mcore, 1, 0 as libc::c_int as size_t, 0 as *mut libc::c_void);
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_mcorePop(mut mcore: *mut gk_mcore_t) {
@@ -374,9 +364,9 @@ pub unsafe extern "C" fn gk_gkmcoreAdd(
 #[no_mangle]
 pub unsafe extern "C" fn gk_mcoreDel(mut mcore: *mut gk_mcore_t, mut ptr: *mut libc::c_void) {
     let mut i: libc::c_int = 0;
-    i = ((*mcore).cmop).wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
+    i = ((*mcore).cmop).wrapping_sub(1 as u64) as libc::c_int;
     while i >= 0 as libc::c_int {
-        if (*((*mcore).mops).offset(i as isize)).type_0 == 1 as libc::c_int {
+        if (*((*mcore).mops).offset(i as isize)).type_0 == 1 {
             gk_errexit(
                 6 as libc::c_int,
                 b"Could not find pointer %p in mcore\n\0" as *const u8 as *const libc::c_char
@@ -411,9 +401,9 @@ pub unsafe extern "C" fn gk_mcoreDel(mut mcore: *mut gk_mcore_t, mut ptr: *mut l
 #[no_mangle]
 pub unsafe extern "C" fn gk_gkmcoreDel(mut mcore: *mut gk_mcore_t, mut ptr: *mut libc::c_void) {
     let mut i: libc::c_int = 0;
-    i = ((*mcore).cmop).wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
+    i = ((*mcore).cmop).wrapping_sub(1 as u64) as libc::c_int;
     while i >= 0 as libc::c_int {
-        if (*((*mcore).mops).offset(i as isize)).type_0 == 1 as libc::c_int {
+        if (*((*mcore).mops).offset(i as isize)).type_0 == 1 {
             gk_errexit(
                 6 as libc::c_int,
                 b"Could not find pointer %p in mcore\n\0" as *const u8 as *const libc::c_char

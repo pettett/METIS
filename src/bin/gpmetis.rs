@@ -77,9 +77,9 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
             i;
         }
     }
-    if (*params).iptype == -(1 as libc::c_int) {
+    if (*params).iptype == -(1) {
         if (*params).ptype == METIS_PTYPE_RB as libc::c_int {
-            if (*graph).ncon == 1 as libc::c_int {
+            if (*graph).ncon == 1 {
                 (*params).iptype = METIS_IPTYPE_GROW as libc::c_int;
             } else {
                 (*params).iptype = METIS_IPTYPE_RANDOM as libc::c_int;
@@ -111,7 +111,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
             status = METIS_PartGraphRecursive(
                 &mut (*graph).nvtxs,
                 &mut (*graph).ncon,
-                (*graph).xadj,
+                &mut (*graph).xadj,
                 (*graph).adjncy,
                 (*graph).vwgt,
                 (*graph).vsize,
@@ -128,7 +128,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
             status = METIS_PartGraphKway(
                 &mut (*graph).nvtxs,
                 &mut (*graph).ncon,
-                (*graph).xadj,
+                &mut (*graph).xadj,
                 (*graph).adjncy,
                 (*graph).vwgt,
                 (*graph).vsize,
@@ -181,11 +181,11 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
 #[no_mangle]
 pub unsafe extern "C" fn GPPrintInfo(mut params: *mut params_t, mut graph: *mut graph_t) {
     let mut i: idx_t = 0;
-    if (*params).ufactor == -(1 as libc::c_int) {
+    if (*params).ufactor == -(1) {
         if (*params).ptype == METIS_PTYPE_KWAY as libc::c_int {
             (*params).ufactor = 30 as libc::c_int;
-        } else if (*graph).ncon == 1 as libc::c_int {
-            (*params).ufactor = 1 as libc::c_int;
+        } else if (*graph).ncon == 1 {
+            (*params).ufactor = 1;
         } else {
             (*params).ufactor = 10 as libc::c_int;
         }
@@ -224,7 +224,7 @@ pub unsafe extern "C" fn GPPrintInfo(mut params: *mut params_t, mut graph: *mut 
         (*graph).nedges / 2 as libc::c_int,
         (*params).nparts,
     );
-    if (*graph).ncon > 1 as libc::c_int {
+    if (*graph).ncon > 1 {
         printf(
             b" Balancing constraints: %d\n\0" as *const u8 as *const libc::c_char,
             (*graph).ncon,

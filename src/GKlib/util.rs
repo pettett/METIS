@@ -18,7 +18,7 @@ pub unsafe extern "C" fn gk_RandomPermute(
     let mut u: gk_idx_t = 0;
     let mut v: gk_idx_t = 0;
     let mut tmp: libc::c_int = 0;
-    if flag == 1 as libc::c_int {
+    if flag == 1 {
         i = 0 as libc::c_int as gk_idx_t;
         while (i as u64) < n {
             *p.offset(i as isize) = i as libc::c_int;
@@ -29,9 +29,11 @@ pub unsafe extern "C" fn gk_RandomPermute(
     i = 0 as libc::c_int as gk_idx_t;
     while (i as u64) < n.wrapping_div(2 as libc::c_int as u64) {
         v = (1.0f64 / (2147483647 as libc::c_int as libc::c_double + 1.0f64)
-            * n as libc::c_double * rand() as libc::c_double) as libc::c_int as gk_idx_t;
+            * n as libc::c_double
+            * rand() as libc::c_double) as libc::c_int as gk_idx_t;
         u = (1.0f64 / (2147483647 as libc::c_int as libc::c_double + 1.0f64)
-            * n as libc::c_double * rand() as libc::c_double) as libc::c_int as gk_idx_t;
+            * n as libc::c_double
+            * rand() as libc::c_double) as libc::c_int as gk_idx_t;
         tmp = *p.offset(v as isize);
         *p.offset(v as isize) = *p.offset(u as isize);
         *p.offset(u as isize) = tmp;
@@ -48,11 +50,7 @@ pub unsafe extern "C" fn gk_array2csr(
     mut ind: *mut libc::c_int,
 ) {
     let mut i: gk_idx_t = 0;
-    gk_iset(
-        range.wrapping_add(1 as libc::c_int as u64),
-        0 as libc::c_int,
-        ptr,
-    );
+    gk_iset(range.wrapping_add(1 as u64), 0 as libc::c_int, ptr);
     i = 0 as libc::c_int as gk_idx_t;
     while (i as u64) < n {
         let ref mut fresh0 = *ptr.offset(*array.offset(i as isize) as isize);
@@ -61,19 +59,15 @@ pub unsafe extern "C" fn gk_array2csr(
         i += 1;
         i;
     }
-    i = 1 as libc::c_int as gk_idx_t;
+    i = 1 as gk_idx_t;
     while (i as u64) < range {
-        *ptr.offset(i as isize)
-            += *ptr.offset((i - 1 as libc::c_int as i64) as isize);
+        *ptr.offset(i as isize) += *ptr.offset((i - 1 as i64) as isize);
         i += 1;
         i;
     }
     i = range as gk_idx_t;
     while i > 0 as libc::c_int as i64 {
-        *ptr
-            .offset(
-                i as isize,
-            ) = *ptr.offset((i - 1 as libc::c_int as i64) as isize);
+        *ptr.offset(i as isize) = *ptr.offset((i - 1 as i64) as isize);
         i -= 1;
         i;
     }
@@ -89,10 +83,7 @@ pub unsafe extern "C" fn gk_array2csr(
     }
     i = range as gk_idx_t;
     while i > 0 as libc::c_int as i64 {
-        *ptr
-            .offset(
-                i as isize,
-            ) = *ptr.offset((i - 1 as libc::c_int as i64) as isize);
+        *ptr.offset(i as isize) = *ptr.offset((i - 1 as i64) as isize);
         i -= 1;
         i;
     }
@@ -101,17 +92,17 @@ pub unsafe extern "C" fn gk_array2csr(
 #[no_mangle]
 pub unsafe extern "C" fn gk_log2(mut a: libc::c_int) -> libc::c_int {
     let mut i: gk_idx_t = 0;
-    i = 1 as libc::c_int as gk_idx_t;
-    while a > 1 as libc::c_int {
+    i = 1 as gk_idx_t;
+    while a > 1 {
         i += 1;
         i;
-        a = a >> 1 as libc::c_int;
+        a = a >> 1;
     }
-    return (i - 1 as libc::c_int as i64) as libc::c_int;
+    return (i - 1 as i64) as libc::c_int;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_ispow2(mut a: libc::c_int) -> libc::c_int {
-    return (a == (1 as libc::c_int) << gk_log2(a)) as libc::c_int;
+    return (a == (1) << gk_log2(a)) as libc::c_int;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_flog2(mut a: libc::c_float) -> libc::c_float {

@@ -93,7 +93,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"ctype\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_CTYPE as libc::c_int,
         };
@@ -102,7 +102,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"iptype\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_IPTYPE as libc::c_int,
         };
@@ -111,7 +111,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"rtype\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_RTYPE as libc::c_int,
         };
@@ -120,7 +120,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"ufactor\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_UFACTOR as libc::c_int,
         };
@@ -129,7 +129,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"pfactor\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_PFACTOR as libc::c_int,
         };
@@ -174,7 +174,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"niter\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_NITER as libc::c_int,
         };
@@ -183,7 +183,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"nseps\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_NSEPS as libc::c_int,
         };
@@ -192,7 +192,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"seed\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_SEED as libc::c_int,
         };
@@ -201,7 +201,7 @@ static mut long_options: [gk_option; 15] = [
     {
         let mut init = gk_option {
             name: b"dbglvl\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_DBGLVL as libc::c_int,
         };
@@ -813,17 +813,17 @@ pub unsafe extern "C" fn parse_cmdline(
     (*params).rtype = METIS_RTYPE_SEP1SIDED as libc::c_int;
     (*params).ufactor = 200 as libc::c_int;
     (*params).pfactor = 0 as libc::c_int;
-    (*params).compress = 1 as libc::c_int;
+    (*params).compress = 1;
     (*params).ccorder = 0 as libc::c_int;
     (*params).no2hop = 0 as libc::c_int;
     (*params).nooutput = 0 as libc::c_int;
-    (*params).wgtflag = 1 as libc::c_int;
-    (*params).nseps = 1 as libc::c_int;
+    (*params).wgtflag = 1;
+    (*params).nseps = 1;
     (*params).niter = 10 as libc::c_int;
-    (*params).seed = -(1 as libc::c_int);
+    (*params).seed = -(1);
     (*params).dbglvl = 0 as libc::c_int;
     (*params).filename = 0 as *mut libc::c_char;
-    (*params).nparts = 1 as libc::c_int;
+    (*params).nparts = 1;
     (*params).iotimer = 0.0f64 as real_t;
     (*params).parttimer = 0.0f64 as real_t;
     (*params).reporttimer = 0.0f64 as real_t;
@@ -835,14 +835,14 @@ pub unsafe extern "C" fn parse_cmdline(
             long_options.as_mut_ptr(),
             &mut option_index,
         );
-        if !(c != -(1 as libc::c_int)) {
+        if !(c != -(1)) {
             break;
         }
         match c {
             2 => {
                 if !gk_optarg.is_null() {
                     (*params).ctype = gk_GetStringID(ctype_options.as_mut_ptr(), gk_optarg);
-                    if (*params).ctype == -(1 as libc::c_int) {
+                    if (*params).ctype == -(1) {
                         errexit(
                             b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
                                 as *mut libc::c_char,
@@ -855,7 +855,7 @@ pub unsafe extern "C" fn parse_cmdline(
             3 => {
                 if !gk_optarg.is_null() {
                     (*params).iptype = gk_GetStringID(iptype_options.as_mut_ptr(), gk_optarg);
-                    if (*params).iptype == -(1 as libc::c_int) {
+                    if (*params).iptype == -(1) {
                         errexit(
                             b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
                                 as *mut libc::c_char,
@@ -868,7 +868,7 @@ pub unsafe extern "C" fn parse_cmdline(
             4 => {
                 if !gk_optarg.is_null() {
                     (*params).rtype = gk_GetStringID(rtype_options.as_mut_ptr(), gk_optarg);
-                    if (*params).rtype == -(1 as libc::c_int) {
+                    if (*params).rtype == -(1) {
                         errexit(
                             b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
                                 as *mut libc::c_char,
@@ -892,13 +892,13 @@ pub unsafe extern "C" fn parse_cmdline(
                 (*params).compress = 0 as libc::c_int;
             }
             13 => {
-                (*params).ccorder = 1 as libc::c_int;
+                (*params).ccorder = 1;
             }
             9 => {
-                (*params).no2hop = 1 as libc::c_int;
+                (*params).no2hop = 1;
             }
             21 => {
-                (*params).nooutput = 1 as libc::c_int;
+                (*params).nooutput = 1;
             }
             15 => {
                 if !gk_optarg.is_null() {
@@ -941,7 +941,7 @@ pub unsafe extern "C" fn parse_cmdline(
             }
         }
     }
-    if argc - gk_optind != 1 as libc::c_int {
+    if argc - gk_optind != 1 {
         printf(b"Missing parameters.\0" as *const u8 as *const libc::c_char);
         i = 0 as libc::c_int;
         while strlen((shorthelpstr[i as usize]).as_mut_ptr()) > 0 as libc::c_int as u64 {

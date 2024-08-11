@@ -108,7 +108,6 @@ pub unsafe extern "C" fn libmetis__Compute2WayNodePartitionParams(
     let mut j: idx_t = 0;
     let mut nvtxs: idx_t = 0;
     let mut nbnd: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -120,14 +119,14 @@ pub unsafe extern "C" fn libmetis__Compute2WayNodePartitionParams(
     let mut me: idx_t = 0;
     let mut other: idx_t = 0;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vwgt = (*graph).vwgt;
     adjncy = (*graph).adjncy;
     where_0 = (*graph).where_0;
     rinfo = (*graph).nrinfo;
     pwgts = libmetis__iset(3 as libc::c_int as size_t, 0 as libc::c_int, (*graph).pwgts);
     bndind = (*graph).bndind;
-    bndptr = libmetis__iset(nvtxs as size_t, -(1 as libc::c_int), (*graph).bndptr);
+    bndptr = libmetis__iset(nvtxs as size_t, -(1), (*graph).bndptr);
     nbnd = 0 as libc::c_int;
     i = 0 as libc::c_int;
     while i < nvtxs {
@@ -140,11 +139,11 @@ pub unsafe extern "C" fn libmetis__Compute2WayNodePartitionParams(
             nbnd = nbnd + 1;
             *bndptr.offset(i as isize) = fresh1;
             edegrees = ((*rinfo.offset(i as isize)).edegrees).as_mut_ptr();
-            let ref mut fresh2 = *edegrees.offset(1 as libc::c_int as isize);
+            let ref mut fresh2 = *edegrees.offset(1 as isize);
             *fresh2 = 0 as libc::c_int;
             *edegrees.offset(0 as libc::c_int as isize) = *fresh2;
-            j = *xadj.offset(i as isize);
-            while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+            j = xadj[i as usize];
+            while j < xadj[(i + 1) as usize] {
                 other = *where_0.offset(*adjncy.offset(j as isize) as isize);
                 if other != 2 as libc::c_int {
                     let ref mut fresh3 = *edegrees.offset(other as isize);

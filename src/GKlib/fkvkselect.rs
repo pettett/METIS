@@ -25,9 +25,9 @@ pub unsafe extern "C" fn gk_dfkvkselect(
         return n as libc::c_int;
     }
     lo = 0 as libc::c_int;
-    hi = n.wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
+    hi = n.wrapping_sub(1 as u64) as libc::c_int;
     while lo < hi {
-        mid = lo + (hi - lo >> 1 as libc::c_int);
+        mid = lo + (hi - lo >> 1);
         if (*cand.offset(lo as isize)).key < (*cand.offset(mid as isize)).key {
             mid = lo;
         }
@@ -41,7 +41,7 @@ pub unsafe extern "C" fn gk_dfkvkselect(
         *cand.offset(mid as isize) = *cand.offset(hi as isize);
         *cand.offset(hi as isize) = stmp;
         pivot = (*cand.offset(hi as isize)).key;
-        i = lo - 1 as libc::c_int;
+        i = lo - 1;
         j = lo;
         while j < hi {
             if (*cand.offset(j as isize)).key >= pivot {
@@ -60,12 +60,12 @@ pub unsafe extern "C" fn gk_dfkvkselect(
         *cand.offset(i as isize) = *cand.offset(hi as isize);
         *cand.offset(hi as isize) = stmp;
         if i > topk {
-            hi = i - 1 as libc::c_int;
+            hi = i - 1;
         } else {
             if !(i < topk) {
                 break;
             }
-            lo = i + 1 as libc::c_int;
+            lo = i + 1;
         }
     }
     return topk;
@@ -87,9 +87,9 @@ pub unsafe extern "C" fn gk_ifkvkselect(
         return n as libc::c_int;
     }
     lo = 0 as libc::c_int;
-    hi = n.wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
+    hi = n.wrapping_sub(1 as u64) as libc::c_int;
     while lo < hi {
-        mid = lo + (hi - lo >> 1 as libc::c_int);
+        mid = lo + (hi - lo >> 1);
         if (*cand.offset(lo as isize)).key > (*cand.offset(mid as isize)).key {
             mid = lo;
         }
@@ -103,7 +103,7 @@ pub unsafe extern "C" fn gk_ifkvkselect(
         *cand.offset(mid as isize) = *cand.offset(hi as isize);
         *cand.offset(hi as isize) = stmp;
         pivot = (*cand.offset(hi as isize)).key;
-        i = lo - 1 as libc::c_int;
+        i = lo - 1;
         j = lo;
         while j < hi {
             if (*cand.offset(j as isize)).key <= pivot {
@@ -122,12 +122,12 @@ pub unsafe extern "C" fn gk_ifkvkselect(
         *cand.offset(i as isize) = *cand.offset(hi as isize);
         *cand.offset(hi as isize) = stmp;
         if i > topk {
-            hi = i - 1 as libc::c_int;
+            hi = i - 1;
         } else {
             if !(i < topk) {
                 break;
             }
-            lo = i + 1 as libc::c_int;
+            lo = i + 1;
         }
     }
     return topk;

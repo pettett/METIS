@@ -118,7 +118,7 @@ static mut long_options: [gk_option; 5] = [
     {
         let mut init = gk_option {
             name: b"gtype\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_GTYPE as libc::c_int,
         };
@@ -127,7 +127,7 @@ static mut long_options: [gk_option; 5] = [
     {
         let mut init = gk_option {
             name: b"ncommon\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_NCOMMON as libc::c_int,
         };
@@ -136,7 +136,7 @@ static mut long_options: [gk_option; 5] = [
     {
         let mut init = gk_option {
             name: b"dbglvl\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_DBGLVL as libc::c_int,
         };
@@ -381,7 +381,7 @@ pub unsafe extern "C" fn parse_cmdline(
         ::core::mem::size_of::<params_t>() as u64,
     );
     (*params).gtype = METIS_GTYPE_DUAL as libc::c_int;
-    (*params).ncommon = 1 as libc::c_int;
+    (*params).ncommon = 1;
     (*params).dbglvl = 0 as libc::c_int;
     (*params).filename = 0 as *mut libc::c_char;
     (*params).outfile = 0 as *mut libc::c_char;
@@ -396,14 +396,14 @@ pub unsafe extern "C" fn parse_cmdline(
             long_options.as_mut_ptr(),
             &mut option_index,
         );
-        if !(c != -(1 as libc::c_int)) {
+        if !(c != -(1)) {
             break;
         }
         match c {
             23 => {
                 if !gk_optarg.is_null() {
                     (*params).gtype = gk_GetStringID(gtype_options.as_mut_ptr(), gk_optarg);
-                    if (*params).gtype == -(1 as libc::c_int) {
+                    if (*params).gtype == -(1) {
                         errexit(
                             b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
                                 as *mut libc::c_char,
@@ -417,7 +417,7 @@ pub unsafe extern "C" fn parse_cmdline(
                 if !gk_optarg.is_null() {
                     (*params).ncommon = atoi(gk_optarg);
                 }
-                if (*params).ncommon < 1 as libc::c_int {
+                if (*params).ncommon < 1 {
                     errexit(
                         b"The -ncommon option should specify a number >= 1.\n\0" as *const u8
                             as *const libc::c_char as *mut libc::c_char,

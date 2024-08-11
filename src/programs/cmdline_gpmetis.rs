@@ -100,7 +100,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"ptype\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_PTYPE as libc::c_int,
         };
@@ -109,7 +109,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"objtype\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_OBJTYPE as libc::c_int,
         };
@@ -118,7 +118,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"ctype\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_CTYPE as libc::c_int,
         };
@@ -127,7 +127,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"iptype\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_IPTYPE as libc::c_int,
         };
@@ -172,7 +172,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"ufactor\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_UFACTOR as libc::c_int,
         };
@@ -181,7 +181,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"niter\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_NITER as libc::c_int,
         };
@@ -190,7 +190,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"ncuts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_NCUTS as libc::c_int,
         };
@@ -199,7 +199,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"tpwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_TPWGTS as libc::c_int,
         };
@@ -208,7 +208,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"ubvec\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_UBVEC as libc::c_int,
         };
@@ -217,7 +217,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"seed\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_SEED as libc::c_int,
         };
@@ -226,7 +226,7 @@ static mut long_options: [gk_option; 17] = [
     {
         let mut init = gk_option {
             name: b"dbglvl\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-            has_arg: 1 as libc::c_int,
+            has_arg: 1,
             flag: 0 as *const libc::c_int as *mut libc::c_int,
             val: METIS_OPTION_DBGLVL as libc::c_int,
         };
@@ -986,23 +986,23 @@ pub unsafe extern "C" fn parse_cmdline(
     (*params).ptype = METIS_PTYPE_KWAY as libc::c_int;
     (*params).objtype = METIS_OBJTYPE_CUT as libc::c_int;
     (*params).ctype = METIS_CTYPE_SHEM as libc::c_int;
-    (*params).iptype = -(1 as libc::c_int);
-    (*params).rtype = -(1 as libc::c_int);
+    (*params).iptype = -(1);
+    (*params).rtype = -(1);
     (*params).no2hop = 0 as libc::c_int;
     (*params).minconn = 0 as libc::c_int;
     (*params).contig = 0 as libc::c_int;
     (*params).nooutput = 0 as libc::c_int;
     (*params).wgtflag = 3 as libc::c_int;
-    (*params).ncuts = 1 as libc::c_int;
+    (*params).ncuts = 1;
     (*params).niter = 10 as libc::c_int;
     (*params).dbglvl = 0 as libc::c_int;
     (*params).balance = 0 as libc::c_int;
-    (*params).seed = -(1 as libc::c_int);
+    (*params).seed = -(1);
     (*params).dbglvl = 0 as libc::c_int;
     (*params).tpwgtsfile = 0 as *mut libc::c_char;
     (*params).filename = 0 as *mut libc::c_char;
-    (*params).nparts = 1 as libc::c_int;
-    (*params).ufactor = -(1 as libc::c_int);
+    (*params).nparts = 1;
+    (*params).ufactor = -(1);
     (*params).ubvecstr = 0 as *mut libc::c_char;
     (*params).ubvec = 0 as *mut real_t;
     (*params).iotimer = 0.0f64 as real_t;
@@ -1016,14 +1016,14 @@ pub unsafe extern "C" fn parse_cmdline(
             long_options.as_mut_ptr(),
             &mut option_index,
         );
-        if !(c != -(1 as libc::c_int)) {
+        if !(c != -(1)) {
             break;
         }
         match c {
             0 => {
                 if !gk_optarg.is_null() {
                     (*params).ptype = gk_GetStringID(ptype_options.as_mut_ptr(), gk_optarg);
-                    if (*params).ptype == -(1 as libc::c_int) {
+                    if (*params).ptype == -(1) {
                         errexit(
                             b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
                                 as *mut libc::c_char,
@@ -1036,7 +1036,7 @@ pub unsafe extern "C" fn parse_cmdline(
             1 => {
                 if !gk_optarg.is_null() {
                     (*params).objtype = gk_GetStringID(objtype_options.as_mut_ptr(), gk_optarg);
-                    if (*params).objtype == -(1 as libc::c_int) {
+                    if (*params).objtype == -(1) {
                         errexit(
                             b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
                                 as *mut libc::c_char,
@@ -1049,7 +1049,7 @@ pub unsafe extern "C" fn parse_cmdline(
             2 => {
                 if !gk_optarg.is_null() {
                     (*params).ctype = gk_GetStringID(ctype_options.as_mut_ptr(), gk_optarg);
-                    if (*params).ctype == -(1 as libc::c_int) {
+                    if (*params).ctype == -(1) {
                         errexit(
                             b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
                                 as *mut libc::c_char,
@@ -1062,7 +1062,7 @@ pub unsafe extern "C" fn parse_cmdline(
             3 => {
                 if !gk_optarg.is_null() {
                     (*params).iptype = gk_GetStringID(iptype_options.as_mut_ptr(), gk_optarg);
-                    if (*params).iptype == -(1 as libc::c_int) {
+                    if (*params).iptype == -(1) {
                         errexit(
                             b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
                                 as *mut libc::c_char,
@@ -1073,19 +1073,19 @@ pub unsafe extern "C" fn parse_cmdline(
                 }
             }
             9 => {
-                (*params).no2hop = 1 as libc::c_int;
+                (*params).no2hop = 1;
             }
             11 => {
-                (*params).contig = 1 as libc::c_int;
+                (*params).contig = 1;
             }
             10 => {
-                (*params).minconn = 1 as libc::c_int;
+                (*params).minconn = 1;
             }
             21 => {
-                (*params).nooutput = 1 as libc::c_int;
+                (*params).nooutput = 1;
             }
             22 => {
-                (*params).balance = 1 as libc::c_int;
+                (*params).balance = 1;
             }
             19 => {
                 if !gk_optarg.is_null() {

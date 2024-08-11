@@ -5,20 +5,20 @@ use super::structure::*;
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__Change2CNumbering(
     mut nvtxs: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
 ) {
     let mut i: idx_t = 0;
     i = 0 as libc::c_int;
     while i <= nvtxs {
-        let ref mut fresh0 = *xadj.offset(i as isize);
+        let ref mut fresh0 = xadj[i as usize];
         *fresh0 -= 1;
         *fresh0;
         i += 1;
         i;
     }
     i = 0 as libc::c_int;
-    while i < *xadj.offset(nvtxs as isize) {
+    while i < xadj[(nvtxs as usize)] {
         let ref mut fresh1 = *adjncy.offset(i as isize);
         *fresh1 -= 1;
         *fresh1;
@@ -29,7 +29,7 @@ pub unsafe extern "C" fn libmetis__Change2CNumbering(
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__Change2FNumbering(
     mut nvtxs: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut vector: *mut idx_t,
 ) {
@@ -43,7 +43,7 @@ pub unsafe extern "C" fn libmetis__Change2FNumbering(
         i;
     }
     i = 0 as libc::c_int;
-    while i < *xadj.offset(nvtxs as isize) {
+    while i < xadj[nvtxs as usize] {
         let ref mut fresh3 = *adjncy.offset(i as isize);
         *fresh3 += 1;
         *fresh3;
@@ -52,7 +52,7 @@ pub unsafe extern "C" fn libmetis__Change2FNumbering(
     }
     i = 0 as libc::c_int;
     while i <= nvtxs {
-        let ref mut fresh4 = *xadj.offset(i as isize);
+        let ref mut fresh4 = xadj[i as usize];
         *fresh4 += 1;
         *fresh4;
         i += 1;
@@ -62,12 +62,12 @@ pub unsafe extern "C" fn libmetis__Change2FNumbering(
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__Change2FNumbering2(
     mut nvtxs: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
 ) {
     let mut i: idx_t = 0;
     let mut nedges: idx_t = 0;
-    nedges = *xadj.offset(nvtxs as isize);
+    nedges = xadj[nvtxs as usize];
     i = 0 as libc::c_int;
     while i < nedges {
         let ref mut fresh5 = *adjncy.offset(i as isize);
@@ -78,7 +78,7 @@ pub unsafe extern "C" fn libmetis__Change2FNumbering2(
     }
     i = 0 as libc::c_int;
     while i <= nvtxs {
-        let ref mut fresh6 = *xadj.offset(i as isize);
+        let ref mut fresh6 = xadj[i as usize];
         *fresh6 += 1;
         *fresh6;
         i += 1;
@@ -88,7 +88,7 @@ pub unsafe extern "C" fn libmetis__Change2FNumbering2(
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__Change2FNumberingOrder(
     mut nvtxs: idx_t,
-    mut xadj: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
     mut adjncy: *mut idx_t,
     mut v1: *mut idx_t,
     mut v2: *mut idx_t,
@@ -106,7 +106,7 @@ pub unsafe extern "C" fn libmetis__Change2FNumberingOrder(
         i += 1;
         i;
     }
-    nedges = *xadj.offset(nvtxs as isize);
+    nedges = xadj[nvtxs as usize];
     i = 0 as libc::c_int;
     while i < nedges {
         let ref mut fresh9 = *adjncy.offset(i as isize);
@@ -117,7 +117,7 @@ pub unsafe extern "C" fn libmetis__Change2FNumberingOrder(
     }
     i = 0 as libc::c_int;
     while i <= nvtxs {
-        let ref mut fresh10 = *xadj.offset(i as isize);
+        let ref mut fresh10 = xadj[i as usize];
         *fresh10 += 1;
         *fresh10;
         i += 1;
@@ -154,8 +154,8 @@ pub unsafe extern "C" fn libmetis__ChangeMesh2FNumbering(
     mut ptr: *mut idx_t,
     mut ind: *mut idx_t,
     mut nvtxs: idx_t,
-    mut xadj: *mut idx_t,
-    mut adjncy: *mut idx_t,
+    mut xadj: &mut Vec<idx_t>,
+    mut adjncy: &mut Vec<idx_t>,
 ) {
     let mut i: idx_t = 0;
     i = 0 as libc::c_int;
@@ -175,8 +175,8 @@ pub unsafe extern "C" fn libmetis__ChangeMesh2FNumbering(
         i;
     }
     i = 0 as libc::c_int;
-    while i < *xadj.offset(nvtxs as isize) {
-        let ref mut fresh15 = *adjncy.offset(i as isize);
+    while i < xadj[nvtxs as usize] {
+        let ref mut fresh15 = adjncy[(i as usize)];
         *fresh15 += 1;
         *fresh15;
         i += 1;
@@ -184,7 +184,7 @@ pub unsafe extern "C" fn libmetis__ChangeMesh2FNumbering(
     }
     i = 0 as libc::c_int;
     while i <= nvtxs {
-        let ref mut fresh16 = *xadj.offset(i as isize);
+        let ref mut fresh16 = xadj[i as usize];
         *fresh16 += 1;
         *fresh16;
         i += 1;

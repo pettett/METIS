@@ -25,12 +25,11 @@ pub unsafe extern "C" fn ComputeAccuracy(
     P = 0 as libc::c_int;
     i = 0 as libc::c_int;
     while i < n {
-        P
-            += if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
-                1 as libc::c_int
-            } else {
-                0 as libc::c_int
-            };
+        P += if (*list.offset(i as isize)).val == 1 as i64 {
+            1
+        } else {
+            0 as libc::c_int
+        };
         i += 1;
         i;
     }
@@ -39,7 +38,7 @@ pub unsafe extern "C" fn ComputeAccuracy(
     TP = FN;
     i = 0 as libc::c_int;
     while i < n {
-        if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
+        if (*list.offset(i as isize)).val == 1 as i64 {
             TP += 1;
             TP;
         } else {
@@ -75,17 +74,15 @@ pub unsafe extern "C" fn ComputeROCn(
     FPprev = TPprev;
     TP = FPprev;
     FP = TP;
-    prev = (*list.offset(0 as libc::c_int as isize)).key
-        - 1 as libc::c_int as libc::c_float;
+    prev = (*list.offset(0 as libc::c_int as isize)).key - 1 as libc::c_float;
     P = 0 as libc::c_int;
     i = 0 as libc::c_int;
     while i < n {
-        P
-            += if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
-                1 as libc::c_int
-            } else {
-                0 as libc::c_int
-            };
+        P += if (*list.offset(i as isize)).val == 1 as i64 {
+            1
+        } else {
+            0 as libc::c_int
+        };
         i += 1;
         i;
     }
@@ -97,7 +94,7 @@ pub unsafe extern "C" fn ComputeROCn(
             FPprev = FP;
             TPprev = TP;
         }
-        if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
+        if (*list.offset(i as isize)).val == 1 as i64 {
             TP += 1;
             TP;
         } else {
@@ -129,7 +126,7 @@ pub unsafe extern "C" fn ComputeMedianRFP(
     P = N;
     i = 0 as libc::c_int;
     while i < n {
-        if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
+        if (*list.offset(i as isize)).val == 1 as i64 {
             P += 1;
             P;
         } else {
@@ -142,8 +139,8 @@ pub unsafe extern "C" fn ComputeMedianRFP(
     TP = 0 as libc::c_int;
     FP = TP;
     i = 0 as libc::c_int;
-    while i < n && TP < (P + 1 as libc::c_int) / 2 as libc::c_int {
-        if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
+    while i < n && TP < (P + 1) / 2 as libc::c_int {
+        if (*list.offset(i as isize)).val == 1 as i64 {
             TP += 1;
             TP;
         } else {
@@ -180,11 +177,9 @@ pub unsafe extern "C" fn ComputeStdDev(
     let mut stdDev: libc::c_float = 0 as libc::c_int as libc::c_float;
     i = 0 as libc::c_int;
     while i < n {
-        stdDev
-            += (*values.offset(i as isize) - mean) * (*values.offset(i as isize) - mean);
+        stdDev += (*values.offset(i as isize) - mean) * (*values.offset(i as isize) - mean);
         i += 1;
         i;
     }
-    return sqrt(1.0f64 * stdDev as libc::c_double / n as libc::c_double)
-        as libc::c_float;
+    return sqrt(1.0f64 * stdDev as libc::c_double / n as libc::c_double) as libc::c_float;
 }

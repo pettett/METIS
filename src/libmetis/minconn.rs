@@ -21,7 +21,7 @@ pub unsafe extern "C" fn libmetis__ComputeSubDomainGraph(
     let mut nparts: idx_t = 0;
     let mut nvtxs: idx_t = 0;
     let mut nnbrs: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -32,14 +32,14 @@ pub unsafe extern "C" fn libmetis__ComputeSubDomainGraph(
     let mut vadwgts: *mut idx_t = 0 as *mut idx_t;
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     where_0 = (*graph).where_0;
     nparts = (*ctrl).nparts;
     vadids = (*ctrl).pvec1;
     vadwgts = libmetis__iset(nparts as size_t, 0 as libc::c_int, (*ctrl).pvec2);
-    pptr = libmetis__iwspacemalloc(ctrl, nparts + 1 as libc::c_int);
+    pptr = libmetis__iwspacemalloc(ctrl, nparts + 1);
     pind = libmetis__iwspacemalloc(ctrl, nvtxs);
     libmetis__iarray2csr(nvtxs, nparts, where_0, pptr, pind);
     pid = 0 as libc::c_int;
@@ -51,7 +51,7 @@ pub unsafe extern "C" fn libmetis__ComputeSubDomainGraph(
                 rinfo = (*graph).ckrinfo;
                 nads = 0 as libc::c_int;
                 ii = *pptr.offset(pid as isize);
-                while ii < *pptr.offset((pid + 1 as libc::c_int) as isize) {
+                while ii < *pptr.offset((pid + 1) as isize) {
                     i = *pind.offset(ii as isize);
                     if (*rinfo.offset(i as isize)).ed > 0 as libc::c_int {
                         nnbrs = (*rinfo.offset(i as isize)).nnbrs;
@@ -80,7 +80,7 @@ pub unsafe extern "C" fn libmetis__ComputeSubDomainGraph(
                 rinfo_0 = (*graph).vkrinfo;
                 nads = 0 as libc::c_int;
                 ii = *pptr.offset(pid as isize);
-                while ii < *pptr.offset((pid + 1 as libc::c_int) as isize) {
+                while ii < *pptr.offset((pid + 1) as isize) {
                     i = *pind.offset(ii as isize);
                     if (*rinfo_0.offset(i as isize)).ned > 0 as libc::c_int {
                         nnbrs = (*rinfo_0.offset(i as isize)).nnbrs;
@@ -177,7 +177,7 @@ pub unsafe extern "C" fn libmetis__UpdateEdgeSubDomainGraph(
         if j == nads {
             if *((*ctrl).maxnads).offset(u as isize) == nads {
                 *((*ctrl).maxnads).offset(u as isize) =
-                    2 as libc::c_int * (nads + 1 as libc::c_int);
+                    2 as libc::c_int * (nads + 1);
                 let ref mut fresh7 = *((*ctrl).adids).offset(u as isize);
                 *fresh7 = libmetis__irealloc(
                     *((*ctrl).adids).offset(u as isize),
@@ -208,12 +208,12 @@ pub unsafe extern "C" fn libmetis__UpdateEdgeSubDomainGraph(
             }
         } else if *(*((*ctrl).adwgts).offset(u as isize)).offset(j as isize) == 0 as libc::c_int {
             *(*((*ctrl).adids).offset(u as isize)).offset(j as isize) =
-                *(*((*ctrl).adids).offset(u as isize)).offset((nads - 1 as libc::c_int) as isize);
+                *(*((*ctrl).adids).offset(u as isize)).offset((nads - 1) as isize);
             *(*((*ctrl).adwgts).offset(u as isize)).offset(j as isize) =
-                *(*((*ctrl).adwgts).offset(u as isize)).offset((nads - 1 as libc::c_int) as isize);
+                *(*((*ctrl).adwgts).offset(u as isize)).offset((nads - 1) as isize);
             nads -= 1;
             nads;
-            if !r_maxndoms.is_null() && nads + 1 as libc::c_int == *r_maxndoms {
+            if !r_maxndoms.is_null() && nads + 1 == *r_maxndoms {
                 *r_maxndoms = *((*ctrl).nads)
                     .offset(libmetis__iargmax((*ctrl).nparts as size_t, (*ctrl).nads) as isize);
             }
@@ -257,7 +257,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
     let mut min: idx_t = 0;
     let mut move_0: idx_t = 0;
     let mut cpwgt: *mut idx_t = 0 as *mut idx_t;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut vwgt: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
@@ -289,7 +289,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
     libmetis__wspacepush(ctrl);
     nvtxs = (*graph).nvtxs;
     ncon = (*graph).ncon;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     vwgt = (*graph).vwgt;
     adjwgt = if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
@@ -312,7 +312,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
     );
     cand = libmetis__ikvwspacemalloc(ctrl, nparts);
     cand2 = libmetis__ikvwspacemalloc(ctrl, nparts);
-    pptr = libmetis__iwspacemalloc(ctrl, nparts + 1 as libc::c_int);
+    pptr = libmetis__iwspacemalloc(ctrl, nparts + 1);
     pind = libmetis__iwspacemalloc(ctrl, nvtxs);
     libmetis__iarray2csr(nvtxs, nparts, where_0, pptr, pind);
     if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint {
@@ -324,7 +324,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
         );
         pmarker = libmetis__iset(
             nparts as size_t,
-            -(1 as libc::c_int),
+            -(1),
             libmetis__iwspacemalloc(ctrl, nparts),
         );
     }
@@ -338,7 +338,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
     while i < nparts {
         j = 0 as libc::c_int;
         while j < ncon {
-            *maxpwgt.offset((i * ncon + j) as isize) = ((if ncon == 1 as libc::c_int {
+            *maxpwgt.offset((i * ncon + j) as isize) = ((if ncon == 1 {
                 1.25f64
             } else {
                 1.025f64
@@ -355,7 +355,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
     }
     libmetis__ipqInit(&mut queue, nparts as size_t);
     loop {
-        total = libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t);
+        total = libmetis__isum(nparts as size_t, nads, 1 as size_t);
         avg = total / nparts;
         max = *nads.offset(libmetis__iargmax(nparts as size_t, nads) as isize);
         if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint != 0 {
@@ -383,13 +383,13 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
         move_0 = 0 as libc::c_int;
         loop {
             me = libmetis__ipqGetTop(&mut queue);
-            if !(me != -(1 as libc::c_int)) {
+            if !(me != -(1)) {
                 break;
             }
             totalout = libmetis__isum(
                 *nads.offset(me as isize) as size_t,
                 *adwgts.offset(me as isize),
-                1 as libc::c_int as size_t,
+                1 as size_t,
             );
             ncand2 = 0 as libc::c_int;
             i = 0 as libc::c_int;
@@ -422,7 +422,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                 );
             }
             libmetis__ikvsorti(ncand2 as size_t, cand2);
-            target2 = -(1 as libc::c_int);
+            target2 = -(1);
             target = target2;
             scheme = 0 as libc::c_int;
             while scheme < 2 as libc::c_int {
@@ -438,10 +438,10 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                     }
                     nind = 0 as libc::c_int;
                     ii = *pptr.offset(pid_from as isize);
-                    while ii < *pptr.offset((pid_from + 1 as libc::c_int) as isize) {
+                    while ii < *pptr.offset((pid_from + 1) as isize) {
                         i = *pind.offset(ii as isize);
-                        j = *xadj.offset(i as isize);
-                        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                        j = xadj[i as usize];
+                        while j < xadj[(i + 1) as usize] {
                             if *where_0.offset(*adjncy.offset(j as isize) as isize) == pid_to {
                                 let fresh10 = nind;
                                 nind = nind + 1;
@@ -462,14 +462,14 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                         i = *ind.offset(ii as isize);
                         libmetis__iaxpy(
                             ncon as size_t,
-                            1 as libc::c_int,
+                            1,
                             vwgt.offset((i * ncon) as isize),
-                            1 as libc::c_int as size_t,
+                            1 as size_t,
                             cpwgt,
-                            1 as libc::c_int as size_t,
+                            1 as size_t,
                         );
-                        j = *xadj.offset(i as isize);
-                        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+                        j = xadj[i as usize];
+                        while j < xadj[(i + 1) as usize] {
                             k = *where_0.offset(*adjncy.offset(j as isize) as isize);
                             if !(k == pid_from) {
                                 if *otherpmat.offset(k as isize) == 0 as libc::c_int {
@@ -481,7 +481,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                 *fresh12 += if !adjwgt.is_null() {
                                     *adjwgt.offset(j as isize)
                                 } else {
-                                    1 as libc::c_int
+                                    1
                                 };
                             }
                             j += 1;
@@ -507,7 +507,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                 as *const libc::c_char,
                             *mypmat.offset(other as isize),
                             other,
-                            libmetis__isum(ncon as size_t, cpwgt, 1 as libc::c_int as size_t),
+                            libmetis__isum(ncon as size_t, cpwgt, 1 as size_t),
                             nind,
                         );
                     }
@@ -518,7 +518,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                         if *mypmat.offset(k as isize) > 0 as libc::c_int {
                             if libmetis__ivecaxpylez(
                                 ncon,
-                                1 as libc::c_int,
+                                1,
                                 cpwgt,
                                 pwgts.offset((k * ncon) as isize),
                                 maxpwgt.offset((k * ncon) as isize),
@@ -539,7 +539,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                 while j < nparts {
                                     if *otherpmat.offset(j as isize) > 0 as libc::c_int
                                         && *kpmat.offset(j as isize) == 0 as libc::c_int
-                                        && *nads.offset(j as isize) + 1 as libc::c_int
+                                        && *nads.offset(j as isize) + 1
                                             >= *nads.offset(me as isize)
                                     {
                                         break;
@@ -573,7 +573,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                         );
                                     }
                                     if *nads.offset(k as isize) + nadd < *nads.offset(me as isize) {
-                                        if target2 == -(1 as libc::c_int)
+                                        if target2 == -(1)
                                             || *nads.offset(target2 as isize) + bestnadd
                                                 > *nads.offset(k as isize) + nadd
                                             || *nads.offset(target2 as isize) + bestnadd
@@ -603,7 +603,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                         }
                         match current_block_132 {
                             13253659531982233645 => {
-                                if target != -(1 as libc::c_int) {
+                                if target != -(1) {
                                     break;
                                 }
                             }
@@ -619,10 +619,10 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                         i += 1;
                         i;
                     }
-                    if target == -(1 as libc::c_int) && target2 != -(1 as libc::c_int) {
+                    if target == -(1) && target2 != -(1) {
                         target = target2;
                     }
-                    if target != -(1 as libc::c_int) {
+                    if target != -(1) {
                         if (*ctrl).dbglvl as libc::c_uint
                             & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint
                             != 0
@@ -634,14 +634,14 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                 target,
                             );
                         }
-                        move_0 = 1 as libc::c_int;
+                        move_0 = 1;
                         break;
                     } else {
                         min += 1;
                         min;
                     }
                 }
-                if target != -(1 as libc::c_int) {
+                if target != -(1) {
                     break;
                 }
                 scheme += 1;
@@ -654,7 +654,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                 i += 1;
                 i;
             }
-            if target != -(1 as libc::c_int) {
+            if target != -(1) {
                 match (*ctrl).objtype as libc::c_uint {
                     0 => {
                         libmetis__MoveGroupMinConnForCut(ctrl, graph, target, nind, ind);
@@ -701,7 +701,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
     let mut nbnd: idx_t = 0;
     let mut from: idx_t = 0;
     let mut me: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -710,7 +710,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
     let mut myrinfo: *mut ckrinfo_t = 0 as *mut ckrinfo_t;
     let mut mynbrs: *mut cnbr_t = 0 as *mut cnbr_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     where_0 = (*graph).where_0;
@@ -725,11 +725,10 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
         i = *ind.offset(nind as isize);
         from = *where_0.offset(i as isize);
         myrinfo = ((*graph).ckrinfo).offset(i as isize);
-        if (*myrinfo).inbr == -(1 as libc::c_int) {
+        if (*myrinfo).inbr == -(1) {
             (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                 ctrl,
-                *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
-                    + 1 as libc::c_int,
+                xadj[(i + 1) as usize] - xadj[i as usize] + 1,
             );
             (*myrinfo).nnbrs = 0 as libc::c_int;
         }
@@ -750,19 +749,19 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
         }
         libmetis__iaxpy(
             (*graph).ncon as size_t,
-            1 as libc::c_int,
+            1,
             ((*graph).vwgt).offset((i * (*graph).ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
             ((*graph).pwgts).offset((to * (*graph).ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
         );
         libmetis__iaxpy(
             (*graph).ncon as size_t,
-            -(1 as libc::c_int),
+            -(1),
             ((*graph).vwgt).offset((i * (*graph).ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
             ((*graph).pwgts).offset((from * (*graph).ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
         );
         (*graph).mincut -= (*mynbrs.offset(k as isize)).ed - (*myrinfo).id;
         libmetis__UpdateEdgeSubDomainGraph(
@@ -783,16 +782,16 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
         } else {
             (*mynbrs.offset(k as isize)).pid = from;
         }
-        if 1 as libc::c_int == 1 as libc::c_int {
-            if *bndptr.offset(i as isize) != -(1 as libc::c_int)
+        if 1 == 1 {
+            if *bndptr.offset(i as isize) != -(1)
                 && (*myrinfo).ed - (*myrinfo).id < 0 as libc::c_int
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(i as isize) as isize) = *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(i as isize);
-                *bndptr.offset(i as isize) = -(1 as libc::c_int);
+                *bndptr.offset(i as isize) = -(1);
             }
-            if *bndptr.offset(i as isize) == -(1 as libc::c_int)
+            if *bndptr.offset(i as isize) == -(1)
                 && (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
             {
                 *bndind.offset(nbnd as isize) = i;
@@ -801,15 +800,15 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
                 *bndptr.offset(i as isize) = fresh13;
             }
         } else {
-            if *bndptr.offset(i as isize) != -(1 as libc::c_int)
+            if *bndptr.offset(i as isize) != -(1)
                 && (*myrinfo).ed <= 0 as libc::c_int
             {
                 nbnd -= 1;
                 *bndind.offset(*bndptr.offset(i as isize) as isize) = *bndind.offset(nbnd as isize);
                 *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(i as isize);
-                *bndptr.offset(i as isize) = -(1 as libc::c_int);
+                *bndptr.offset(i as isize) = -(1);
             }
-            if *bndptr.offset(i as isize) == -(1 as libc::c_int) && (*myrinfo).ed > 0 as libc::c_int
+            if *bndptr.offset(i as isize) == -(1) && (*myrinfo).ed > 0 as libc::c_int
             {
                 *bndind.offset(nbnd as isize) = i;
                 let fresh14 = nbnd;
@@ -817,18 +816,17 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
                 *bndptr.offset(i as isize) = fresh14;
             }
         }
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             ii = *adjncy.offset(j as isize);
             me = *where_0.offset(ii as isize);
             myrinfo = ((*graph).ckrinfo).offset(ii as isize);
             let mut k_0: idx_t = 0;
             let mut mynbrs_0: *mut cnbr_t = 0 as *mut cnbr_t;
-            if (*myrinfo).inbr == -(1 as libc::c_int) {
+            if (*myrinfo).inbr == -(1) {
                 (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                     ctrl,
-                    *xadj.offset((ii + 1 as libc::c_int) as isize) - *xadj.offset(ii as isize)
-                        + 1 as libc::c_int,
+                    xadj[((ii + 1) as usize)] - xadj[(ii as usize)] + 1,
                 );
                 (*myrinfo).nnbrs = 0 as libc::c_int;
             }
@@ -836,9 +834,9 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
             if me == from {
                 (*myrinfo).ed += *adjwgt.offset(j as isize);
                 (*myrinfo).id -= *adjwgt.offset(j as isize);
-                if 1 as libc::c_int == 1 as libc::c_int {
+                if 1 == 1 {
                     if (*myrinfo).ed - (*myrinfo).id >= 0 as libc::c_int
-                        && *bndptr.offset(ii as isize) == -(1 as libc::c_int)
+                        && *bndptr.offset(ii as isize) == -(1)
                     {
                         *bndind.offset(nbnd as isize) = ii;
                         let fresh15 = nbnd;
@@ -846,7 +844,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
                         *bndptr.offset(ii as isize) = fresh15;
                     }
                 } else if (*myrinfo).ed > 0 as libc::c_int
-                    && *bndptr.offset(ii as isize) == -(1 as libc::c_int)
+                    && *bndptr.offset(ii as isize) == -(1)
                 {
                     *bndind.offset(nbnd as isize) = ii;
                     let fresh16 = nbnd;
@@ -856,26 +854,26 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
             } else if me == to {
                 (*myrinfo).id += *adjwgt.offset(j as isize);
                 (*myrinfo).ed -= *adjwgt.offset(j as isize);
-                if 1 as libc::c_int == 1 as libc::c_int {
+                if 1 == 1 {
                     if (*myrinfo).ed - (*myrinfo).id < 0 as libc::c_int
-                        && *bndptr.offset(ii as isize) != -(1 as libc::c_int)
+                        && *bndptr.offset(ii as isize) != -(1)
                     {
                         nbnd -= 1;
                         *bndind.offset(*bndptr.offset(ii as isize) as isize) =
                             *bndind.offset(nbnd as isize);
                         *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                             *bndptr.offset(ii as isize);
-                        *bndptr.offset(ii as isize) = -(1 as libc::c_int);
+                        *bndptr.offset(ii as isize) = -(1);
                     }
                 } else if (*myrinfo).ed <= 0 as libc::c_int
-                    && *bndptr.offset(ii as isize) != -(1 as libc::c_int)
+                    && *bndptr.offset(ii as isize) != -(1)
                 {
                     nbnd -= 1;
                     *bndind.offset(*bndptr.offset(ii as isize) as isize) =
                         *bndind.offset(nbnd as isize);
                     *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
                         *bndptr.offset(ii as isize);
-                    *bndptr.offset(ii as isize) = -(1 as libc::c_int);
+                    *bndptr.offset(ii as isize) = -(1);
                 }
             }
             if me != from {
@@ -961,7 +959,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
     let mut other: idx_t = 0;
     let mut xgain: idx_t = 0;
     let mut ewgt: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut vsize: *mut idx_t = 0 as *mut idx_t;
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut where_0: *mut idx_t = 0 as *mut idx_t;
@@ -970,7 +968,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
     let mut mynbrs: *mut vnbr_t = 0 as *mut vnbr_t;
     let mut onbrs: *mut vnbr_t = 0 as *mut vnbr_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     vsize = (*graph).vsize;
     adjncy = (*graph).adjncy;
     where_0 = (*graph).where_0;
@@ -982,11 +980,10 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
         i = *ind.offset(nind as isize);
         from = *where_0.offset(i as isize);
         myrinfo = ((*graph).vkrinfo).offset(i as isize);
-        if (*myrinfo).inbr == -(1 as libc::c_int) {
+        if (*myrinfo).inbr == -(1) {
             (*myrinfo).inbr = libmetis__vnbrpoolGetNext(
                 ctrl,
-                *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
-                    + 1 as libc::c_int,
+                xadj[(i + 1) as usize] - xadj[i as usize] + 1,
             );
             (*myrinfo).nnbrs = 0 as libc::c_int;
         }
@@ -1008,8 +1005,8 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
             if (*myrinfo).nid > 0 as libc::c_int {
                 xgain -= *vsize.offset(i as isize);
             }
-            j = *xadj.offset(i as isize);
-            while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+            j = xadj[i as usize];
+            while j < xadj[(i + 1) as usize] {
                 ii = *adjncy.offset(j as isize);
                 other = *where_0.offset(ii as isize);
                 orinfo = ((*graph).vkrinfo).offset(ii as isize);
@@ -1041,7 +1038,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
                     l = 0 as libc::c_int;
                     while l < (*orinfo).nnbrs {
                         if (*onbrs.offset(l as isize)).pid == from
-                            && (*onbrs.offset(l as isize)).ned == 1 as libc::c_int
+                            && (*onbrs.offset(l as isize)).ned == 1
                         {
                             xgain += *vsize.offset(ii as isize);
                             break;
@@ -1065,33 +1062,33 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
         *where_0.offset(i as isize) = to;
         libmetis__iaxpy(
             (*graph).ncon as size_t,
-            1 as libc::c_int,
+            1,
             ((*graph).vwgt).offset((i * (*graph).ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
             ((*graph).pwgts).offset((to * (*graph).ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
         );
         libmetis__iaxpy(
             (*graph).ncon as size_t,
-            -(1 as libc::c_int),
+            -(1),
             ((*graph).vwgt).offset((i * (*graph).ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
             ((*graph).pwgts).offset((from * (*graph).ncon) as isize),
-            1 as libc::c_int as size_t,
+            1 as size_t,
         );
         libmetis__UpdateEdgeSubDomainGraph(ctrl, from, to, ewgt, 0 as *mut idx_t);
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             me = *where_0.offset(*adjncy.offset(j as isize) as isize);
             if me != from && me != to {
                 libmetis__UpdateEdgeSubDomainGraph(
                     ctrl,
                     from,
                     me,
-                    -(1 as libc::c_int),
+                    -(1),
                     0 as *mut idx_t,
                 );
-                libmetis__UpdateEdgeSubDomainGraph(ctrl, to, me, 1 as libc::c_int, 0 as *mut idx_t);
+                libmetis__UpdateEdgeSubDomainGraph(ctrl, to, me, 1, 0 as *mut idx_t);
             }
             j += 1;
             j;
@@ -1107,7 +1104,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
             0 as *mut idx_t,
             0 as *mut idx_t,
             0 as *mut idx_t,
-            1 as libc::c_int,
+            1,
             vmarker,
             pmarker,
             modind,
@@ -1127,12 +1124,12 @@ pub unsafe extern "C" fn libmetis__PrintSubDomainGraph(
     let mut nvtxs: idx_t = 0;
     let mut total: idx_t = 0;
     let mut max: idx_t = 0;
-    let mut xadj: *mut idx_t = 0 as *mut idx_t;
+
     let mut adjncy: *mut idx_t = 0 as *mut idx_t;
     let mut adjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut pmat: *mut idx_t = 0 as *mut idx_t;
     nvtxs = (*graph).nvtxs;
-    xadj = (*graph).xadj;
+    let mut xadj = &mut (*graph).xadj;
     adjncy = (*graph).adjncy;
     adjwgt = (*graph).adjwgt;
     pmat = libmetis__ismalloc(
@@ -1143,8 +1140,8 @@ pub unsafe extern "C" fn libmetis__PrintSubDomainGraph(
     i = 0 as libc::c_int;
     while i < nvtxs {
         me = *where_0.offset(i as isize);
-        j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
+        j = xadj[i as usize];
+        while j < xadj[(i + 1) as usize] {
             k = *adjncy.offset(j as isize);
             if *where_0.offset(k as isize) != me {
                 let ref mut fresh19 =

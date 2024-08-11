@@ -171,7 +171,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
         0 as libc::c_int,
         ::core::mem::size_of::<params_t>() as u64,
     );
-    params.filename = gk_strdup(*argv.offset(1 as libc::c_int as isize));
+    params.filename = gk_strdup(*argv.offset(1 as isize));
     graph = ReadGraph(&mut params);
     if (*graph).nvtxs == 0 as libc::c_int {
         printf(b"Empty graph!\n\0" as *const u8 as *const libc::c_char);
@@ -214,7 +214,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
         b"Checking Graph... ---------------------------------------------------\n\0" as *const u8
             as *const libc::c_char,
     );
-    if libmetis__CheckGraph(graph, 1 as libc::c_int, 1 as libc::c_int) != 0 {
+    if libmetis__CheckGraph(graph, 1, 1) != 0 {
         printf(b"   The format of the graph is correct!\n\0" as *const u8 as *const libc::c_char);
     } else {
         printf(b"   The format of the graph is incorrect!\n\0" as *const u8 as *const libc::c_char);
