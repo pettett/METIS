@@ -1,18 +1,15 @@
 use ::libc;
+
+use crate::GKlib::error::{__jmp_buf_tag, gk_jbufs, GK_CUR_JBUFS};
+
+use super::sfm::mesh_t;
 extern "C" {
-    fn memset(
-        _: *mut libc::c_void,
-        _: libc::c_int,
-        _: libc::c_ulong,
-    ) -> *mut libc::c_void;
-    fn malloc(_: libc::c_ulong) -> *mut libc::c_void;
+    fn memset(_: *mut libc::c_void, _: libc::c_int, _: u64) -> *mut libc::c_void;
+    fn malloc(_: u64) -> *mut libc::c_void;
     fn free(_: *mut libc::c_void);
     fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
     fn _setjmp(_: *mut __jmp_buf_tag) -> libc::c_int;
-    #[thread_local]
-    static mut gk_cur_jbufs: libc::c_int;
-    #[thread_local]
-    static mut gk_jbufs: [jmp_buf; 0];
+
     fn gk_malloc_init() -> libc::c_int;
     fn gk_malloc_cleanup(showstats: libc::c_int);
     fn gk_malloc(nbytes: size_t, msg: *mut libc::c_char) -> *mut libc::c_void;
@@ -36,37 +33,20 @@ extern "C" {
 }
 pub type __int32_t = libc::c_int;
 pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct __sigset_t {
-    pub __val: [libc::c_ulong; 16],
+    pub __val: [u64; 16],
 }
-pub type __jmp_buf = [libc::c_long; 8];
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct __jmp_buf_tag {
-    pub __jmpbuf: __jmp_buf,
-    pub __mask_was_saved: libc::c_int,
-    pub __saved_mask: __sigset_t,
-}
-pub type jmp_buf = [__jmp_buf_tag; 1];
+
 pub type idx_t = int32_t;
 pub const METIS_ERROR_MEMORY: C2RustUnnamed = -3;
 pub type C2RustUnnamed = libc::c_int;
 pub const METIS_ERROR: C2RustUnnamed = -4;
 pub const METIS_ERROR_INPUT: C2RustUnnamed = -2;
 pub const METIS_OK: C2RustUnnamed = 1;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct mesh_t {
-    pub ne: idx_t,
-    pub nn: idx_t,
-    pub ncon: idx_t,
-    pub eptr: *mut idx_t,
-    pub eind: *mut idx_t,
-    pub ewgt: *mut idx_t,
-}
+
 #[no_mangle]
 pub unsafe extern "C" fn METIS_MeshToDual(
     mut ne: *mut idx_t,
@@ -84,9 +64,7 @@ pub unsafe extern "C" fn METIS_MeshToDual(
         return METIS_ERROR_MEMORY as libc::c_int;
     }
     gk_sigtrap();
-    sigrval = _setjmp(
-        (*gk_jbufs.as_mut_ptr().offset(gk_cur_jbufs as isize)).as_mut_ptr(),
-    );
+    sigrval = _setjmp((*gk_jbufs.as_mut_ptr().offset(GK_CUR_JBUFS as isize)).as_mut_ptr());
     if !(sigrval != 0 as libc::c_int) {
         if *numflag == 1 as libc::c_int {
             libmetis__ChangeMesh2CNumbering(*ne, eptr, eind);
@@ -129,9 +107,7 @@ pub unsafe extern "C" fn METIS_MeshToNodal(
         return METIS_ERROR_MEMORY as libc::c_int;
     }
     gk_sigtrap();
-    sigrval = _setjmp(
-        (*gk_jbufs.as_mut_ptr().offset(gk_cur_jbufs as isize)).as_mut_ptr(),
-    );
+    sigrval = _setjmp((*gk_jbufs.as_mut_ptr().offset(GK_CUR_JBUFS as isize)).as_mut_ptr());
     if !(sigrval != 0 as libc::c_int) {
         if *numflag == 1 as libc::c_int {
             libmetis__ChangeMesh2CNumbering(*ne, eptr, eind);
@@ -188,13 +164,11 @@ pub unsafe extern "C" fn libmetis__CreateGraphDual(
     nptr = libmetis__ismalloc(
         (nn + 1 as libc::c_int) as size_t,
         0 as libc::c_int,
-        b"CreateGraphDual: nptr\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"CreateGraphDual: nptr\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     nind = libmetis__imalloc(
         *eptr.offset(ne as isize) as size_t,
-        b"CreateGraphDual: nind\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"CreateGraphDual: nind\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     i = 0 as libc::c_int;
     while i < ne {
@@ -245,14 +219,13 @@ pub unsafe extern "C" fn libmetis__CreateGraphDual(
     }
     *nptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int;
     xadj = malloc(
-        ((ne + 1 as libc::c_int) as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<idx_t>() as libc::c_ulong),
+        ((ne + 1 as libc::c_int) as u64).wrapping_mul(::core::mem::size_of::<idx_t>() as u64),
     ) as *mut idx_t;
     if xadj.is_null() {
         gk_errexit(
             6 as libc::c_int,
-            b"***Failed to allocate memory for xadj.\n\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"***Failed to allocate memory for xadj.\n\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         );
     }
     *r_xadj = xadj;
@@ -260,20 +233,15 @@ pub unsafe extern "C" fn libmetis__CreateGraphDual(
     marker = libmetis__ismalloc(
         ne as size_t,
         0 as libc::c_int,
-        b"CreateGraphDual: marker\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"CreateGraphDual: marker\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     nbrs = libmetis__imalloc(
         ne as size_t,
-        b"CreateGraphDual: nbrs\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"CreateGraphDual: nbrs\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     i = 0 as libc::c_int;
     while i < ne {
-        *xadj
-            .offset(
-                i as isize,
-            ) = libmetis__FindCommonElements(
+        *xadj.offset(i as isize) = libmetis__FindCommonElements(
             i,
             *eptr.offset((i + 1 as libc::c_int) as isize) - *eptr.offset(i as isize),
             eind.offset(*eptr.offset(i as isize) as isize),
@@ -302,16 +270,15 @@ pub unsafe extern "C" fn libmetis__CreateGraphDual(
     }
     *xadj.offset(0 as libc::c_int as isize) = 0 as libc::c_int;
     adjncy = malloc(
-        (*xadj.offset(ne as isize) as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<idx_t>() as libc::c_ulong),
+        (*xadj.offset(ne as isize) as u64).wrapping_mul(::core::mem::size_of::<idx_t>() as u64),
     ) as *mut idx_t;
     if adjncy.is_null() {
         free(xadj as *mut libc::c_void);
         *r_xadj = 0 as *mut idx_t;
         gk_errexit(
             6 as libc::c_int,
-            b"***Failed to allocate memory for adjncy.\n\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"***Failed to allocate memory for adjncy.\n\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         );
     }
     *r_adjncy = adjncy;
@@ -406,10 +373,12 @@ pub unsafe extern "C" fn libmetis__FindCommonElements(
     while i < k {
         l = *nbrs.offset(i as isize);
         overlap = *marker.offset(l as isize);
-        if overlap >= ncommon || overlap >= elen - 1 as libc::c_int
+        if overlap >= ncommon
+            || overlap >= elen - 1 as libc::c_int
             || overlap
                 >= *eptr.offset((l + 1 as libc::c_int) as isize)
-                    - *eptr.offset(l as isize) - 1 as libc::c_int
+                    - *eptr.offset(l as isize)
+                    - 1 as libc::c_int
         {
             let fresh10 = j;
             j = j + 1;
@@ -442,13 +411,11 @@ pub unsafe extern "C" fn libmetis__CreateGraphNodal(
     nptr = libmetis__ismalloc(
         (nn + 1 as libc::c_int) as size_t,
         0 as libc::c_int,
-        b"CreateGraphNodal: nptr\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"CreateGraphNodal: nptr\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     nind = libmetis__imalloc(
         *eptr.offset(ne as isize) as size_t,
-        b"CreateGraphNodal: nind\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"CreateGraphNodal: nind\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     i = 0 as libc::c_int;
     while i < ne {
@@ -499,14 +466,13 @@ pub unsafe extern "C" fn libmetis__CreateGraphNodal(
     }
     *nptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int;
     xadj = malloc(
-        ((nn + 1 as libc::c_int) as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<idx_t>() as libc::c_ulong),
+        ((nn + 1 as libc::c_int) as u64).wrapping_mul(::core::mem::size_of::<idx_t>() as u64),
     ) as *mut idx_t;
     if xadj.is_null() {
         gk_errexit(
             6 as libc::c_int,
-            b"***Failed to allocate memory for xadj.\n\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"***Failed to allocate memory for xadj.\n\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         );
     }
     *r_xadj = xadj;
@@ -514,20 +480,15 @@ pub unsafe extern "C" fn libmetis__CreateGraphNodal(
     marker = libmetis__ismalloc(
         nn as size_t,
         0 as libc::c_int,
-        b"CreateGraphNodal: marker\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"CreateGraphNodal: marker\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     nbrs = libmetis__imalloc(
         nn as size_t,
-        b"CreateGraphNodal: nbrs\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"CreateGraphNodal: nbrs\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     i = 0 as libc::c_int;
     while i < nn {
-        *xadj
-            .offset(
-                i as isize,
-            ) = libmetis__FindCommonNodes(
+        *xadj.offset(i as isize) = libmetis__FindCommonNodes(
             i,
             *nptr.offset((i + 1 as libc::c_int) as isize) - *nptr.offset(i as isize),
             nind.offset(*nptr.offset(i as isize) as isize),
@@ -554,16 +515,15 @@ pub unsafe extern "C" fn libmetis__CreateGraphNodal(
     }
     *xadj.offset(0 as libc::c_int as isize) = 0 as libc::c_int;
     adjncy = malloc(
-        (*xadj.offset(nn as isize) as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<idx_t>() as libc::c_ulong),
+        (*xadj.offset(nn as isize) as u64).wrapping_mul(::core::mem::size_of::<idx_t>() as u64),
     ) as *mut idx_t;
     if adjncy.is_null() {
         free(xadj as *mut libc::c_void);
         *r_xadj = 0 as *mut idx_t;
         gk_errexit(
             6 as libc::c_int,
-            b"***Failed to allocate memory for adjncy.\n\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"***Failed to allocate memory for adjncy.\n\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         );
     }
     *r_adjncy = adjncy;
@@ -653,7 +613,7 @@ pub unsafe extern "C" fn libmetis__FindCommonNodes(
 pub unsafe extern "C" fn libmetis__CreateMesh() -> *mut mesh_t {
     let mut mesh: *mut mesh_t = 0 as *mut mesh_t;
     mesh = gk_malloc(
-        ::core::mem::size_of::<mesh_t>() as libc::c_ulong,
+        ::core::mem::size_of::<mesh_t>() as u64,
         b"CreateMesh: mesh\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut mesh_t;
     libmetis__InitMesh(mesh);
@@ -664,7 +624,7 @@ pub unsafe extern "C" fn libmetis__InitMesh(mut mesh: *mut mesh_t) {
     memset(
         mesh as *mut libc::c_void,
         0 as libc::c_int,
-        ::core::mem::size_of::<mesh_t>() as libc::c_ulong,
+        ::core::mem::size_of::<mesh_t>() as u64,
     );
 }
 #[no_mangle]

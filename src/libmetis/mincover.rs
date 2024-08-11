@@ -1,15 +1,12 @@
+use crate::GKlib::memory::gk_free;
+
+use super::{
+    auxapi::*, contig::*, fortran::*, gklib::*, graph::*, kwayrefine::*, options::*, structure::*,
+    util::*, wspace::*,
+};
 use ::libc;
-extern "C" {
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
-    fn libmetis__imalloc(n: size_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__ismalloc(n: size_t, ival: idx_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn abs(_: libc::c_int) -> libc::c_int;
-}
-pub type __int32_t = libc::c_int;
-pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
-pub type idx_t = int32_t;
+use libc::{abs, printf};
+
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__MinCover(
     mut xadj: *mut idx_t,
@@ -119,10 +116,8 @@ pub unsafe extern "C" fn libmetis__MinCover(
                             let fresh3 = rptr;
                             rptr = rptr + 1;
                             *queue.offset(fresh3 as isize) = *mate.offset(col as isize);
-                            *level
-                                .offset(
-                                    *mate.offset(col as isize) as isize,
-                                ) = *level.offset(row as isize) + 1 as libc::c_int;
+                            *level.offset(*mate.offset(col as isize) as isize) =
+                                *level.offset(row as isize) + 1 as libc::c_int;
                         }
                     }
                     j += 1;
@@ -219,8 +214,7 @@ pub unsafe extern "C" fn libmetis__MinCover_Decompose(
     let mut card: [idx_t; 10] = [0; 10];
     where_0 = libmetis__imalloc(
         bsize as size_t,
-        b"MinCover_Decompose: where\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"MinCover_Decompose: where\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     i = 0 as libc::c_int;
     while i < 10 as libc::c_int {
@@ -265,11 +259,9 @@ pub unsafe extern "C" fn libmetis__MinCover_Decompose(
     if abs(
         card[1 as libc::c_int as usize] + card[2 as libc::c_int as usize]
             - card[6 as libc::c_int as usize],
-    )
-        < abs(
-            card[1 as libc::c_int as usize] - card[5 as libc::c_int as usize]
-                - card[6 as libc::c_int as usize],
-        )
+    ) < abs(card[1 as libc::c_int as usize]
+        - card[5 as libc::c_int as usize]
+        - card[6 as libc::c_int as usize])
     {
         i = 0 as libc::c_int;
         while i < bsize {

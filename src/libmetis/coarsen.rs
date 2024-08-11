@@ -1,258 +1,24 @@
+use crate::GKlib::{error::gk_errexit, timers::gk_CPUSeconds};
+
+use super::{
+    auxapi::*,
+    bucketsort::libmetis__BucketSortKeysInc,
+    contig::*,
+    fortran::*,
+    gklib::*,
+    graph::*,
+    kwayrefine::*,
+    mcutil::{libmetis__BetterVBalance, libmetis__ivecaxpylez, libmetis__ivecle},
+    options::*,
+    structure::*,
+    timing::*,
+    util::*,
+    wspace::*,
+};
 use ::libc;
-extern "C" {
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn gk_errexit(signum: libc::c_int, _: *mut libc::c_char, _: ...);
-    fn gk_CPUSeconds() -> libc::c_double;
-    fn libmetis__isum(n: size_t, x: *mut idx_t, incx: size_t) -> idx_t;
-    fn libmetis__iaxpy(
-        n: size_t,
-        alpha: idx_t,
-        x: *mut idx_t,
-        incx: size_t,
-        y: *mut idx_t,
-        incy: size_t,
-    ) -> *mut idx_t;
-    fn libmetis__imalloc(n: size_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__irealloc(
-        ptr: *mut idx_t,
-        n: size_t,
-        msg: *mut libc::c_char,
-    ) -> *mut idx_t;
-    fn libmetis__iset(n: size_t, val: idx_t, x: *mut idx_t) -> *mut idx_t;
-    fn libmetis__icopy(n: size_t, a: *mut idx_t, b: *mut idx_t) -> *mut idx_t;
-    fn libmetis__rmalloc(n: size_t, msg: *mut libc::c_char) -> *mut real_t;
-    fn libmetis__irandArrayPermute(
-        n: idx_t,
-        p: *mut idx_t,
-        nshuffles: idx_t,
-        flag: libc::c_int,
-    );
-    fn libmetis__ikvsorti(n: size_t, base: *mut ikv_t);
-    fn libmetis__BucketSortKeysInc(
-        ctrl: *mut ctrl_t,
-        n: idx_t,
-        max: idx_t,
-        keys: *mut idx_t,
-        tperm: *mut idx_t,
-        perm: *mut idx_t,
-    );
-    fn libmetis__wspacepop(ctrl: *mut ctrl_t);
-    fn libmetis__iwspacemalloc(_: *mut ctrl_t, _: idx_t) -> *mut idx_t;
-    fn libmetis__CreateGraph() -> *mut graph_t;
-    fn libmetis__wspacepush(ctrl: *mut ctrl_t);
-    fn libmetis__ikvwspacemalloc(_: *mut ctrl_t, _: idx_t) -> *mut ikv_t;
-    fn libmetis__ivecaxpylez(
-        n: idx_t,
-        a: idx_t,
-        x: *mut idx_t,
-        y: *mut idx_t,
-        z: *mut idx_t,
-    ) -> libc::c_int;
-    fn libmetis__BetterVBalance(
-        ncon: idx_t,
-        itvwgt: *mut real_t,
-        v_vwgt: *mut idx_t,
-        u1_vwgt: *mut idx_t,
-        u2_vwgt: *mut idx_t,
-    ) -> libc::c_int;
-    fn libmetis__ivecle(n: idx_t, x: *mut idx_t, z: *mut idx_t) -> libc::c_int;
-}
-pub type __int32_t = libc::c_int;
-pub type __ssize_t = libc::c_long;
-pub type int32_t = __int32_t;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mop_t {
-    pub type_0: libc::c_int,
-    pub nbytes: ssize_t,
-    pub ptr: *mut libc::c_void,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mcore_t {
-    pub coresize: size_t,
-    pub corecpos: size_t,
-    pub core: *mut libc::c_void,
-    pub nmops: size_t,
-    pub cmop: size_t,
-    pub mops: *mut gk_mop_t,
-    pub num_callocs: size_t,
-    pub num_hallocs: size_t,
-    pub size_callocs: size_t,
-    pub size_hallocs: size_t,
-    pub cur_callocs: size_t,
-    pub cur_hallocs: size_t,
-    pub max_callocs: size_t,
-    pub max_hallocs: size_t,
-}
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-pub type moptype_et = libc::c_uint;
-pub const METIS_OP_OMETIS: moptype_et = 2;
-pub const METIS_OP_KMETIS: moptype_et = 1;
-pub const METIS_OP_PMETIS: moptype_et = 0;
-pub type mctype_et = libc::c_uint;
-pub const METIS_CTYPE_SHEM: mctype_et = 1;
-pub const METIS_CTYPE_RM: mctype_et = 0;
-pub type miptype_et = libc::c_uint;
-pub const METIS_IPTYPE_METISRB: miptype_et = 4;
-pub const METIS_IPTYPE_NODE: miptype_et = 3;
-pub const METIS_IPTYPE_EDGE: miptype_et = 2;
-pub const METIS_IPTYPE_RANDOM: miptype_et = 1;
-pub const METIS_IPTYPE_GROW: miptype_et = 0;
-pub type mrtype_et = libc::c_uint;
-pub const METIS_RTYPE_SEP1SIDED: mrtype_et = 3;
-pub const METIS_RTYPE_SEP2SIDED: mrtype_et = 2;
-pub const METIS_RTYPE_GREEDY: mrtype_et = 1;
-pub const METIS_RTYPE_FM: mrtype_et = 0;
-pub type mdbglvl_et = libc::c_uint;
-pub const METIS_DBG_MEMORY: mdbglvl_et = 2048;
-pub const METIS_DBG_CONTIGINFO: mdbglvl_et = 256;
-pub const METIS_DBG_CONNINFO: mdbglvl_et = 128;
-pub const METIS_DBG_SEPINFO: mdbglvl_et = 64;
-pub const METIS_DBG_MOVEINFO: mdbglvl_et = 32;
-pub const METIS_DBG_IPART: mdbglvl_et = 16;
-pub const METIS_DBG_REFINE: mdbglvl_et = 8;
-pub const METIS_DBG_COARSEN: mdbglvl_et = 4;
-pub const METIS_DBG_TIME: mdbglvl_et = 2;
-pub const METIS_DBG_INFO: mdbglvl_et = 1;
-pub type mobjtype_et = libc::c_uint;
-pub const METIS_OBJTYPE_NODE: mobjtype_et = 2;
-pub const METIS_OBJTYPE_VOL: mobjtype_et = 1;
-pub const METIS_OBJTYPE_CUT: mobjtype_et = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ikv_t {
-    pub key: idx_t,
-    pub val: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct cnbr_t {
-    pub pid: idx_t,
-    pub ed: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vnbr_t {
-    pub pid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ctrl_t {
-    pub optype: moptype_et,
-    pub objtype: mobjtype_et,
-    pub dbglvl: mdbglvl_et,
-    pub ctype: mctype_et,
-    pub iptype: miptype_et,
-    pub rtype: mrtype_et,
-    pub CoarsenTo: idx_t,
-    pub nIparts: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub seed: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub numflag: idx_t,
-    pub maxvwgt: *mut idx_t,
-    pub ncon: idx_t,
-    pub nparts: idx_t,
-    pub pfactor: real_t,
-    pub ubfactors: *mut real_t,
-    pub tpwgts: *mut real_t,
-    pub pijbm: *mut real_t,
-    pub cfactor: real_t,
-    pub TotalTmr: libc::c_double,
-    pub InitPartTmr: libc::c_double,
-    pub MatchTmr: libc::c_double,
-    pub ContractTmr: libc::c_double,
-    pub CoarsenTmr: libc::c_double,
-    pub UncoarsenTmr: libc::c_double,
-    pub RefTmr: libc::c_double,
-    pub ProjectTmr: libc::c_double,
-    pub SplitTmr: libc::c_double,
-    pub Aux1Tmr: libc::c_double,
-    pub Aux2Tmr: libc::c_double,
-    pub Aux3Tmr: libc::c_double,
-    pub mcore: *mut gk_mcore_t,
-    pub nbrpoolsize: size_t,
-    pub nbrpoolcpos: size_t,
-    pub nbrpoolreallocs: size_t,
-    pub cnbrpool: *mut cnbr_t,
-    pub vnbrpool: *mut vnbr_t,
-    pub maxnads: *mut idx_t,
-    pub nads: *mut idx_t,
-    pub adids: *mut *mut idx_t,
-    pub adwgts: *mut *mut idx_t,
-    pub pvec1: *mut idx_t,
-    pub pvec2: *mut idx_t,
-}
+use libc::printf;
+
+use super::structure::*;
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__CoarsenGraph(
     mut ctrl: *mut ctrl_t,
@@ -261,9 +27,7 @@ pub unsafe extern "C" fn libmetis__CoarsenGraph(
     let mut i: idx_t = 0;
     let mut eqewgts: idx_t = 0;
     let mut level: idx_t = 0 as libc::c_int;
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).CoarsenTmr -= gk_CPUSeconds();
     }
     eqewgts = 1 as libc::c_int;
@@ -281,23 +45,18 @@ pub unsafe extern "C" fn libmetis__CoarsenGraph(
     }
     i = 0 as libc::c_int;
     while i < (*graph).ncon {
-        *((*ctrl).maxvwgt)
-            .offset(
-                i as isize,
-            ) = (1.5f64 * *((*graph).tvwgt).offset(i as isize) as libc::c_double
-            / (*ctrl).CoarsenTo as libc::c_double) as idx_t;
+        *((*ctrl).maxvwgt).offset(i as isize) =
+            (1.5f64 * *((*graph).tvwgt).offset(i as isize) as libc::c_double
+                / (*ctrl).CoarsenTo as libc::c_double) as idx_t;
         i += 1;
         i;
     }
     loop {
-        if (*ctrl).dbglvl as libc::c_uint
-            & METIS_DBG_COARSEN as libc::c_int as libc::c_uint != 0
-        {
+        if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_COARSEN as libc::c_int as libc::c_uint != 0 {
             libmetis__PrintCGraphStats(ctrl, graph);
         }
         if ((*graph).cmap).is_null() {
-            (*graph)
-                .cmap = libmetis__imalloc(
+            (*graph).cmap = libmetis__imalloc(
                 (*graph).nvtxs as size_t,
                 b"CoarsenGraph: graph->cmap\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
@@ -335,14 +94,10 @@ pub unsafe extern "C" fn libmetis__CoarsenGraph(
             break;
         }
     }
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_COARSEN as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_COARSEN as libc::c_int as libc::c_uint != 0 {
         libmetis__PrintCGraphStats(ctrl, graph);
     }
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).CoarsenTmr += gk_CPUSeconds();
     }
     return graph;
@@ -356,9 +111,7 @@ pub unsafe extern "C" fn CoarsenGraphNlevels(
     let mut i: idx_t = 0;
     let mut eqewgts: idx_t = 0;
     let mut level: idx_t = 0;
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).CoarsenTmr -= gk_CPUSeconds();
     }
     eqewgts = 1 as libc::c_int;
@@ -376,24 +129,19 @@ pub unsafe extern "C" fn CoarsenGraphNlevels(
     }
     i = 0 as libc::c_int;
     while i < (*graph).ncon {
-        *((*ctrl).maxvwgt)
-            .offset(
-                i as isize,
-            ) = (1.5f64 * *((*graph).tvwgt).offset(i as isize) as libc::c_double
-            / (*ctrl).CoarsenTo as libc::c_double) as idx_t;
+        *((*ctrl).maxvwgt).offset(i as isize) =
+            (1.5f64 * *((*graph).tvwgt).offset(i as isize) as libc::c_double
+                / (*ctrl).CoarsenTo as libc::c_double) as idx_t;
         i += 1;
         i;
     }
     level = 0 as libc::c_int;
     while level < nlevels {
-        if (*ctrl).dbglvl as libc::c_uint
-            & METIS_DBG_COARSEN as libc::c_int as libc::c_uint != 0
-        {
+        if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_COARSEN as libc::c_int as libc::c_uint != 0 {
             libmetis__PrintCGraphStats(ctrl, graph);
         }
         if ((*graph).cmap).is_null() {
-            (*graph)
-                .cmap = libmetis__imalloc(
+            (*graph).cmap = libmetis__imalloc(
                 (*graph).nvtxs as size_t,
                 b"CoarsenGraph: graph->cmap\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
@@ -431,14 +179,10 @@ pub unsafe extern "C" fn CoarsenGraphNlevels(
         level += 1;
         level;
     }
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_COARSEN as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_COARSEN as libc::c_int as libc::c_uint != 0 {
         libmetis__PrintCGraphStats(ctrl, graph);
     }
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).CoarsenTmr += gk_CPUSeconds();
     }
     return graph;
@@ -470,9 +214,7 @@ pub unsafe extern "C" fn libmetis__Match_RM(
     let mut perm: *mut idx_t = 0 as *mut idx_t;
     let mut nunmatched: size_t = 0 as libc::c_int as size_t;
     libmetis__wspacepush(ctrl);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).MatchTmr -= gk_CPUSeconds();
     }
     nvtxs = (*graph).nvtxs;
@@ -504,9 +246,7 @@ pub unsafe extern "C" fn libmetis__Match_RM(
                 libmetis__ivecle(ncon, vwgt.offset((i * ncon) as isize), maxvwgt)
             } != 0
             {
-                if *xadj.offset(i as isize)
-                    == *xadj.offset((i + 1 as libc::c_int) as isize)
-                {
+                if *xadj.offset(i as isize) == *xadj.offset((i + 1 as libc::c_int) as isize) {
                     last_unmatched = (if pi >= last_unmatched {
                         pi
                     } else {
@@ -593,9 +333,7 @@ pub unsafe extern "C" fn libmetis__Match_RM(
         pi += 1;
         pi;
     }
-    if (*ctrl).no2hop == 0
-        && nunmatched as libc::c_double > 0.10f64 * nvtxs as libc::c_double
-    {
+    if (*ctrl).no2hop == 0 && nunmatched as libc::c_double > 0.10f64 * nvtxs as libc::c_double {
         cnvtxs = libmetis__Match_2Hop(ctrl, graph, perm, match_0, cnvtxs, nunmatched);
     }
     cnvtxs = 0 as libc::c_int;
@@ -616,9 +354,7 @@ pub unsafe extern "C" fn libmetis__Match_RM(
         i += 1;
         i;
     }
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).MatchTmr += gk_CPUSeconds();
     }
     libmetis__CreateCoarseGraph(ctrl, graph, cnvtxs, match_0);
@@ -656,9 +392,7 @@ pub unsafe extern "C" fn libmetis__Match_SHEM(
     let mut tperm: *mut idx_t = 0 as *mut idx_t;
     let mut nunmatched: size_t = 0 as libc::c_int as size_t;
     libmetis__wspacepush(ctrl);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).MatchTmr -= gk_CPUSeconds();
     }
     nvtxs = (*graph).nvtxs;
@@ -677,26 +411,17 @@ pub unsafe extern "C" fn libmetis__Match_SHEM(
     perm = libmetis__iwspacemalloc(ctrl, nvtxs);
     tperm = libmetis__iwspacemalloc(ctrl, nvtxs);
     degrees = libmetis__iwspacemalloc(ctrl, nvtxs);
-    libmetis__irandArrayPermute(
-        nvtxs,
-        tperm,
-        nvtxs / 8 as libc::c_int,
-        1 as libc::c_int,
-    );
-    avgdegree = (0.7f64 * (*xadj.offset(nvtxs as isize) / nvtxs) as libc::c_double)
-        as idx_t;
+    libmetis__irandArrayPermute(nvtxs, tperm, nvtxs / 8 as libc::c_int, 1 as libc::c_int);
+    avgdegree = (0.7f64 * (*xadj.offset(nvtxs as isize) / nvtxs) as libc::c_double) as idx_t;
     i = 0 as libc::c_int;
     while i < nvtxs {
-        *degrees
-            .offset(
-                i as isize,
-            ) = if *xadj.offset((i + 1 as libc::c_int) as isize)
-            - *xadj.offset(i as isize) > avgdegree
-        {
-            avgdegree
-        } else {
-            *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
-        };
+        *degrees.offset(i as isize) =
+            if *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize) > avgdegree
+            {
+                avgdegree
+            } else {
+                *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
+            };
         i += 1;
         i;
     }
@@ -716,9 +441,7 @@ pub unsafe extern "C" fn libmetis__Match_SHEM(
                 libmetis__ivecle(ncon, vwgt.offset((i * ncon) as isize), maxvwgt)
             } != 0
             {
-                if *xadj.offset(i as isize)
-                    == *xadj.offset((i + 1 as libc::c_int) as isize)
-                {
+                if *xadj.offset(i as isize) == *xadj.offset((i + 1 as libc::c_int) as isize) {
                     last_unmatched = (if pi >= last_unmatched {
                         pi
                     } else {
@@ -813,9 +536,7 @@ pub unsafe extern "C" fn libmetis__Match_SHEM(
         pi += 1;
         pi;
     }
-    if (*ctrl).no2hop == 0
-        && nunmatched as libc::c_double > 0.10f64 * nvtxs as libc::c_double
-    {
+    if (*ctrl).no2hop == 0 && nunmatched as libc::c_double > 0.10f64 * nvtxs as libc::c_double {
         cnvtxs = libmetis__Match_2Hop(ctrl, graph, perm, match_0, cnvtxs, nunmatched);
     }
     cnvtxs = 0 as libc::c_int;
@@ -836,9 +557,7 @@ pub unsafe extern "C" fn libmetis__Match_SHEM(
         i += 1;
         i;
     }
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).MatchTmr += gk_CPUSeconds();
     }
     libmetis__CreateCoarseGraph(ctrl, graph, cnvtxs, match_0);
@@ -872,8 +591,7 @@ pub unsafe extern "C" fn libmetis__Match_2Hop(
         &mut nunmatched,
         64 as libc::c_int as size_t,
     );
-    if nunmatched as libc::c_double > 1.5f64 * 0.10f64 * (*graph).nvtxs as libc::c_double
-    {
+    if nunmatched as libc::c_double > 1.5f64 * 0.10f64 * (*graph).nvtxs as libc::c_double {
         cnvtxs = libmetis__Match_2HopAny(
             ctrl,
             graph,
@@ -884,8 +602,7 @@ pub unsafe extern "C" fn libmetis__Match_2Hop(
             3 as libc::c_int as size_t,
         );
     }
-    if nunmatched as libc::c_double > 2.0f64 * 0.10f64 * (*graph).nvtxs as libc::c_double
-    {
+    if nunmatched as libc::c_double > 2.0f64 * 0.10f64 * (*graph).nvtxs as libc::c_double {
         cnvtxs = libmetis__Match_2HopAny(
             ctrl,
             graph,
@@ -921,9 +638,7 @@ pub unsafe extern "C" fn libmetis__Match_2HopAny(
     let mut rowind: *mut idx_t = 0 as *mut idx_t;
     let mut cmap: *mut idx_t = 0 as *mut idx_t;
     let mut nunmatched: size_t = 0;
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).Aux3Tmr -= gk_CPUSeconds();
     }
     nvtxs = (*graph).nvtxs;
@@ -940,13 +655,12 @@ pub unsafe extern "C" fn libmetis__Match_2HopAny(
     i = 0 as libc::c_int;
     while i < nvtxs {
         if *match_0.offset(i as isize) == -(1 as libc::c_int)
-            && ((*xadj.offset((i + 1 as libc::c_int) as isize)
-                - *xadj.offset(i as isize)) as libc::c_ulong) < maxdegree
+            && ((*xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)) as u64)
+                < maxdegree
         {
             j = *xadj.offset(i as isize);
             while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
-                let ref mut fresh10 = *colptr
-                    .offset(*adjncy.offset(j as isize) as isize);
+                let ref mut fresh10 = *colptr.offset(*adjncy.offset(j as isize) as isize);
                 *fresh10 += 1;
                 *fresh10;
                 j += 1;
@@ -975,13 +689,12 @@ pub unsafe extern "C" fn libmetis__Match_2HopAny(
     while pi < nvtxs {
         i = *perm.offset(pi as isize);
         if *match_0.offset(i as isize) == -(1 as libc::c_int)
-            && ((*xadj.offset((i + 1 as libc::c_int) as isize)
-                - *xadj.offset(i as isize)) as libc::c_ulong) < maxdegree
+            && ((*xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)) as u64)
+                < maxdegree
         {
             j = *xadj.offset(i as isize);
             while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
-                let ref mut fresh12 = *colptr
-                    .offset(*adjncy.offset(j as isize) as isize);
+                let ref mut fresh12 = *colptr.offset(*adjncy.offset(j as isize) as isize);
                 let fresh13 = *fresh12;
                 *fresh12 = *fresh12 + 1;
                 *rowind.offset(fresh13 as isize) = i;
@@ -1008,9 +721,7 @@ pub unsafe extern "C" fn libmetis__Match_2HopAny(
             jj = *colptr.offset((i + 1 as libc::c_int) as isize);
             j = *colptr.offset(i as isize);
             while j < jj {
-                if *match_0.offset(*rowind.offset(j as isize) as isize)
-                    == -(1 as libc::c_int)
-                {
+                if *match_0.offset(*rowind.offset(j as isize) as isize) == -(1 as libc::c_int) {
                     jj -= 1;
                     jj;
                     while jj > j {
@@ -1019,21 +730,16 @@ pub unsafe extern "C" fn libmetis__Match_2HopAny(
                         {
                             let fresh14 = cnvtxs;
                             cnvtxs = cnvtxs + 1;
-                            let ref mut fresh15 = *cmap
-                                .offset(*rowind.offset(jj as isize) as isize);
+                            let ref mut fresh15 =
+                                *cmap.offset(*rowind.offset(jj as isize) as isize);
                             *fresh15 = fresh14;
                             *cmap.offset(*rowind.offset(j as isize) as isize) = *fresh15;
-                            *match_0
-                                .offset(
-                                    *rowind.offset(j as isize) as isize,
-                                ) = *rowind.offset(jj as isize);
-                            *match_0
-                                .offset(
-                                    *rowind.offset(jj as isize) as isize,
-                                ) = *rowind.offset(j as isize);
-                            nunmatched = (nunmatched as libc::c_ulong)
-                                .wrapping_sub(2 as libc::c_int as libc::c_ulong) as size_t
-                                as size_t;
+                            *match_0.offset(*rowind.offset(j as isize) as isize) =
+                                *rowind.offset(jj as isize);
+                            *match_0.offset(*rowind.offset(jj as isize) as isize) =
+                                *rowind.offset(j as isize);
+                            nunmatched = (nunmatched as u64).wrapping_sub(2 as libc::c_int as u64)
+                                as size_t as size_t;
                             break;
                         } else {
                             jj -= 1;
@@ -1049,9 +755,7 @@ pub unsafe extern "C" fn libmetis__Match_2HopAny(
         pi;
     }
     libmetis__wspacepop(ctrl);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).Aux3Tmr += gk_CPUSeconds();
     }
     *r_nunmatched = nunmatched;
@@ -1084,9 +788,7 @@ pub unsafe extern "C" fn libmetis__Match_2HopAll(
     let mut keys: *mut ikv_t = 0 as *mut ikv_t;
     let mut nunmatched: size_t = 0;
     let mut ncand: size_t = 0;
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).Aux3Tmr -= gk_CPUSeconds();
     }
     nvtxs = (*graph).nvtxs;
@@ -1094,17 +796,17 @@ pub unsafe extern "C" fn libmetis__Match_2HopAll(
     adjncy = (*graph).adjncy;
     cmap = (*graph).cmap;
     nunmatched = *r_nunmatched;
-    mask = (2147483647 as libc::c_int as libc::c_ulong).wrapping_div(maxdegree) as idx_t;
+    mask = (2147483647 as libc::c_int as u64).wrapping_div(maxdegree) as idx_t;
     libmetis__wspacepush(ctrl);
     keys = libmetis__ikvwspacemalloc(ctrl, nunmatched as idx_t);
     ncand = 0 as libc::c_int as size_t;
     pi = 0 as libc::c_int;
     while pi < nvtxs {
         i = *perm.offset(pi as isize);
-        idegree = *xadj.offset((i + 1 as libc::c_int) as isize)
-            - *xadj.offset(i as isize);
+        idegree = *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize);
         if *match_0.offset(i as isize) == -(1 as libc::c_int)
-            && idegree > 1 as libc::c_int && (idegree as libc::c_ulong) < maxdegree
+            && idegree > 1 as libc::c_int
+            && (idegree as u64) < maxdegree
         {
             k = 0 as libc::c_int;
             j = *xadj.offset(i as isize);
@@ -1114,10 +816,10 @@ pub unsafe extern "C" fn libmetis__Match_2HopAll(
                 j;
             }
             (*keys.offset(ncand as isize)).val = i;
-            (*keys.offset(ncand as isize))
-                .key = ((k % mask) as libc::c_ulong)
+            (*keys.offset(ncand as isize)).key = ((k % mask) as u64)
                 .wrapping_mul(maxdegree)
-                .wrapping_add(idegree as libc::c_ulong) as idx_t;
+                .wrapping_add(idegree as u64)
+                as idx_t;
             ncand = ncand.wrapping_add(1);
             ncand;
         }
@@ -1131,7 +833,7 @@ pub unsafe extern "C" fn libmetis__Match_2HopAll(
         libmetis__iwspacemalloc(ctrl, nvtxs),
     );
     pi = 0 as libc::c_int;
-    while (pi as libc::c_ulong) < ncand {
+    while (pi as u64) < ncand {
         i = (*keys.offset(pi as isize)).val;
         if !(*match_0.offset(i as isize) != -(1 as libc::c_int)) {
             j = *xadj.offset(i as isize);
@@ -1141,17 +843,14 @@ pub unsafe extern "C" fn libmetis__Match_2HopAll(
                 j;
             }
             pk = pi + 1 as libc::c_int;
-            while (pk as libc::c_ulong) < ncand {
+            while (pk as u64) < ncand {
                 k = (*keys.offset(pk as isize)).val;
                 if !(*match_0.offset(k as isize) != -(1 as libc::c_int)) {
-                    if (*keys.offset(pi as isize)).key != (*keys.offset(pk as isize)).key
-                    {
+                    if (*keys.offset(pi as isize)).key != (*keys.offset(pk as isize)).key {
                         break;
                     }
-                    if *xadj.offset((i + 1 as libc::c_int) as isize)
-                        - *xadj.offset(i as isize)
-                        != *xadj.offset((k + 1 as libc::c_int) as isize)
-                            - *xadj.offset(k as isize)
+                    if *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
+                        != *xadj.offset((k + 1 as libc::c_int) as isize) - *xadj.offset(k as isize)
                     {
                         break;
                     }
@@ -1171,9 +870,8 @@ pub unsafe extern "C" fn libmetis__Match_2HopAll(
                         *cmap.offset(i as isize) = *fresh17;
                         *match_0.offset(i as isize) = k;
                         *match_0.offset(k as isize) = i;
-                        nunmatched = (nunmatched as libc::c_ulong)
-                            .wrapping_sub(2 as libc::c_int as libc::c_ulong) as size_t
-                            as size_t;
+                        nunmatched = (nunmatched as u64).wrapping_sub(2 as libc::c_int as u64)
+                            as size_t as size_t;
                         break;
                     }
                 }
@@ -1185,9 +883,7 @@ pub unsafe extern "C" fn libmetis__Match_2HopAll(
         pi;
     }
     libmetis__wspacepop(ctrl);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).Aux3Tmr += gk_CPUSeconds();
     }
     *r_nunmatched = nunmatched;
@@ -1258,8 +954,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraph(
     let mut cadjncy: *mut idx_t = 0 as *mut idx_t;
     let mut cadjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut cgraph: *mut graph_t = 0 as *mut graph_t;
-    dovsize = if (*ctrl).objtype as libc::c_uint
-        == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
+    dovsize = if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
     {
         1 as libc::c_int
     } else {
@@ -1286,9 +981,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraph(
         v;
     }
     libmetis__wspacepush(ctrl);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).ContractTmr -= gk_CPUSeconds();
     }
     ncon = (*graph).ncon;
@@ -1420,8 +1113,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraph(
                             *cadjncy.offset(nedges as isize) = k;
                             let fresh27 = nedges;
                             nedges = nedges + 1;
-                            *cadjwgt
-                                .offset(fresh27 as isize) = *adjwgt.offset(j as isize);
+                            *cadjwgt.offset(fresh27 as isize) = *adjwgt.offset(j as isize);
                         }
                     }
                     j += 1;
@@ -1438,9 +1130,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraph(
                         jj;
                     }
                 }
-                if jj >= 0 as libc::c_int && jj < nedges
-                    && *cadjncy.offset(jj as isize) == cnvtxs
-                {
+                if jj >= 0 as libc::c_int && jj < nedges && *cadjncy.offset(jj as isize) == cnvtxs {
                     nedges -= 1;
                     *cadjncy.offset(jj as isize) = *cadjncy.offset(nedges as isize);
                     *cadjwgt.offset(jj as isize) = *cadjwgt.offset(nedges as isize);
@@ -1448,10 +1138,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraph(
             }
             j = 0 as libc::c_int;
             while j < nedges {
-                *htable
-                    .offset(
-                        (*cadjncy.offset(j as isize) & mask) as isize,
-                    ) = -(1 as libc::c_int);
+                *htable.offset((*cadjncy.offset(j as isize) & mask) as isize) = -(1 as libc::c_int);
                 j += 1;
                 j;
             }
@@ -1468,18 +1155,12 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraph(
     (*cgraph).nedges = cnedges;
     j = 0 as libc::c_int;
     while j < ncon {
-        *((*cgraph).tvwgt)
-            .offset(
-                j as isize,
-            ) = libmetis__isum(
+        *((*cgraph).tvwgt).offset(j as isize) = libmetis__isum(
             (*cgraph).nvtxs as size_t,
             ((*cgraph).vwgt).offset(j as isize),
             ncon as size_t,
         );
-        *((*cgraph).invtvwgt)
-            .offset(
-                j as isize,
-            ) = (1.0f64
+        *((*cgraph).invtvwgt).offset(j as isize) = (1.0f64
             / (if *((*cgraph).tvwgt).offset(j as isize) > 0 as libc::c_int {
                 *((*cgraph).tvwgt).offset(j as isize)
             } else {
@@ -1489,9 +1170,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraph(
         j;
     }
     libmetis__ReAdjustMemory(ctrl, graph, cgraph);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).ContractTmr += gk_CPUSeconds();
     }
     libmetis__wspacepop(ctrl);
@@ -1529,16 +1208,13 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphNoMask(
     let mut cadjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut cgraph: *mut graph_t = 0 as *mut graph_t;
     libmetis__wspacepush(ctrl);
-    dovsize = if (*ctrl).objtype as libc::c_uint
-        == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
+    dovsize = if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
     {
         1 as libc::c_int
     } else {
         0 as libc::c_int
     };
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).ContractTmr -= gk_CPUSeconds();
     }
     nvtxs = (*graph).nvtxs;
@@ -1646,8 +1322,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphNoMask(
             }
             j = 0 as libc::c_int;
             while j < nedges {
-                *htable
-                    .offset(*cadjncy.offset(j as isize) as isize) = -(1 as libc::c_int);
+                *htable.offset(*cadjncy.offset(j as isize) as isize) = -(1 as libc::c_int);
                 j += 1;
                 j;
             }
@@ -1663,18 +1338,12 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphNoMask(
     (*cgraph).nedges = cnedges;
     j = 0 as libc::c_int;
     while j < ncon {
-        *((*cgraph).tvwgt)
-            .offset(
-                j as isize,
-            ) = libmetis__isum(
+        *((*cgraph).tvwgt).offset(j as isize) = libmetis__isum(
             (*cgraph).nvtxs as size_t,
             ((*cgraph).vwgt).offset(j as isize),
             ncon as size_t,
         );
-        *((*cgraph).invtvwgt)
-            .offset(
-                j as isize,
-            ) = (1.0f64
+        *((*cgraph).invtvwgt).offset(j as isize) = (1.0f64
             / (if *((*cgraph).tvwgt).offset(j as isize) > 0 as libc::c_int {
                 *((*cgraph).tvwgt).offset(j as isize)
             } else {
@@ -1684,9 +1353,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphNoMask(
         j;
     }
     libmetis__ReAdjustMemory(ctrl, graph, cgraph);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).ContractTmr += gk_CPUSeconds();
     }
     libmetis__wspacepop(ctrl);
@@ -1730,13 +1397,10 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphPerm(
     let mut cadjwgt: *mut idx_t = 0 as *mut idx_t;
     let mut cgraph: *mut graph_t = 0 as *mut graph_t;
     libmetis__wspacepush(ctrl);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).ContractTmr -= gk_CPUSeconds();
     }
-    dovsize = if (*ctrl).objtype as libc::c_uint
-        == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
+    dovsize = if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
     {
         1 as libc::c_int
     } else {
@@ -1871,8 +1535,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphPerm(
                             *cadjncy.offset(nedges as isize) = k;
                             let fresh43 = nedges;
                             nedges = nedges + 1;
-                            *cadjwgt
-                                .offset(fresh43 as isize) = *adjwgt.offset(j as isize);
+                            *cadjwgt.offset(fresh43 as isize) = *adjwgt.offset(j as isize);
                         }
                     }
                     j += 1;
@@ -1897,10 +1560,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphPerm(
             }
             j = 0 as libc::c_int;
             while j < nedges {
-                *htable
-                    .offset(
-                        (*cadjncy.offset(j as isize) & mask) as isize,
-                    ) = -(1 as libc::c_int);
+                *htable.offset((*cadjncy.offset(j as isize) & mask) as isize) = -(1 as libc::c_int);
                 j += 1;
                 j;
             }
@@ -1917,18 +1577,12 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphPerm(
     (*cgraph).nedges = cnedges;
     i = 0 as libc::c_int;
     while i < ncon {
-        *((*cgraph).tvwgt)
-            .offset(
-                i as isize,
-            ) = libmetis__isum(
+        *((*cgraph).tvwgt).offset(i as isize) = libmetis__isum(
             (*cgraph).nvtxs as size_t,
             ((*cgraph).vwgt).offset(i as isize),
             ncon as size_t,
         );
-        *((*cgraph).invtvwgt)
-            .offset(
-                i as isize,
-            ) = (1.0f64
+        *((*cgraph).invtvwgt).offset(i as isize) = (1.0f64
             / (if *((*cgraph).tvwgt).offset(i as isize) > 0 as libc::c_int {
                 *((*cgraph).tvwgt).offset(i as isize)
             } else {
@@ -1938,9 +1592,7 @@ pub unsafe extern "C" fn libmetis__CreateCoarseGraphPerm(
         i;
     }
     libmetis__ReAdjustMemory(ctrl, graph, cgraph);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_TIME as libc::c_int as libc::c_uint != 0 {
         (*ctrl).ContractTmr += gk_CPUSeconds();
     }
     libmetis__wspacepop(ctrl);
@@ -1957,48 +1609,34 @@ pub unsafe extern "C" fn libmetis__SetupCoarseGraph(
     (*cgraph).ncon = (*graph).ncon;
     (*cgraph).finer = graph;
     (*graph).coarser = cgraph;
-    (*cgraph)
-        .xadj = libmetis__imalloc(
+    (*cgraph).xadj = libmetis__imalloc(
         (cnvtxs + 1 as libc::c_int) as size_t,
-        b"SetupCoarseGraph: xadj\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"SetupCoarseGraph: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*cgraph)
-        .adjncy = libmetis__imalloc(
+    (*cgraph).adjncy = libmetis__imalloc(
         (*graph).nedges as size_t,
-        b"SetupCoarseGraph: adjncy\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"SetupCoarseGraph: adjncy\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*cgraph)
-        .adjwgt = libmetis__imalloc(
+    (*cgraph).adjwgt = libmetis__imalloc(
         (*graph).nedges as size_t,
-        b"SetupCoarseGraph: adjwgt\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"SetupCoarseGraph: adjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*cgraph)
-        .vwgt = libmetis__imalloc(
+    (*cgraph).vwgt = libmetis__imalloc(
         ((*cgraph).ncon * cnvtxs) as size_t,
-        b"SetupCoarseGraph: vwgt\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"SetupCoarseGraph: vwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*cgraph)
-        .tvwgt = libmetis__imalloc(
+    (*cgraph).tvwgt = libmetis__imalloc(
         (*cgraph).ncon as size_t,
-        b"SetupCoarseGraph: tvwgt\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"SetupCoarseGraph: tvwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
-    (*cgraph)
-        .invtvwgt = libmetis__rmalloc(
+    (*cgraph).invtvwgt = libmetis__rmalloc(
         (*cgraph).ncon as size_t,
-        b"SetupCoarseGraph: invtvwgt\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"SetupCoarseGraph: invtvwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     if dovsize != 0 {
-        (*cgraph)
-            .vsize = libmetis__imalloc(
+        (*cgraph).vsize = libmetis__imalloc(
             cnvtxs as size_t,
-            b"SetupCoarseGraph: vsize\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"SetupCoarseGraph: vsize\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
     return cgraph;
@@ -2010,22 +1648,17 @@ pub unsafe extern "C" fn libmetis__ReAdjustMemory(
     mut cgraph: *mut graph_t,
 ) {
     if (*cgraph).nedges > 10000 as libc::c_int
-        && ((*cgraph).nedges as libc::c_double)
-            < 0.9f64 * (*graph).nedges as libc::c_double
+        && ((*cgraph).nedges as libc::c_double) < 0.9f64 * (*graph).nedges as libc::c_double
     {
-        (*cgraph)
-            .adjncy = libmetis__irealloc(
+        (*cgraph).adjncy = libmetis__irealloc(
             (*cgraph).adjncy,
             (*cgraph).nedges as size_t,
-            b"ReAdjustMemory: adjncy\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"ReAdjustMemory: adjncy\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
-        (*cgraph)
-            .adjwgt = libmetis__irealloc(
+        (*cgraph).adjwgt = libmetis__irealloc(
             (*cgraph).adjwgt,
             (*cgraph).nedges as size_t,
-            b"ReAdjustMemory: adjwgt\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"ReAdjustMemory: adjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
 }

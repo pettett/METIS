@@ -3,12 +3,12 @@ extern "C" {
     fn strcmp(_: *const libc::c_char, _: *const libc::c_char) -> libc::c_int;
 }
 pub type __int32_t = libc::c_int;
-pub type __int64_t = libc::c_long;
-pub type __ssize_t = libc::c_long;
+pub type __int64_t = i64;
+pub type __ssize_t = i64;
 pub type int32_t = __int32_t;
 pub type int64_t = __int64_t;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 pub type gk_idx_t = ssize_t;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -237,10 +237,10 @@ pub unsafe extern "C" fn gk_csorti(mut n: size_t, mut base: *mut libc::c_char) {
     let _base: *mut libc::c_char = base;
     let _elems: size_t = n;
     let mut _hold: libc::c_char = 0;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut libc::c_char = _base;
         let mut _hi: *mut libc::c_char = _lo
             .offset(_elems as isize)
@@ -257,7 +257,7 @@ pub unsafe extern "C" fn gk_csorti(mut n: size_t, mut base: *mut libc::c_char) {
             let mut _right_ptr: *mut libc::c_char = 0 as *mut libc::c_char;
             let mut _mid: *mut libc::c_char = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid as libc::c_int) < *_lo as libc::c_int {
                 _hold = *_mid;
@@ -309,11 +309,11 @@ pub unsafe extern "C" fn gk_csorti(mut n: size_t, mut base: *mut libc::c_char) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -322,12 +322,12 @@ pub unsafe extern "C" fn gk_csorti(mut n: size_t, mut base: *mut libc::c_char) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -410,10 +410,10 @@ pub unsafe extern "C" fn gk_csortd(mut n: size_t, mut base: *mut libc::c_char) {
     let _base: *mut libc::c_char = base;
     let _elems: size_t = n;
     let mut _hold: libc::c_char = 0;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut libc::c_char = _base;
         let mut _hi: *mut libc::c_char = _lo
             .offset(_elems as isize)
@@ -430,7 +430,7 @@ pub unsafe extern "C" fn gk_csortd(mut n: size_t, mut base: *mut libc::c_char) {
             let mut _right_ptr: *mut libc::c_char = 0 as *mut libc::c_char;
             let mut _mid: *mut libc::c_char = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid as libc::c_int > *_lo as libc::c_int {
                 _hold = *_mid;
@@ -482,11 +482,11 @@ pub unsafe extern "C" fn gk_csortd(mut n: size_t, mut base: *mut libc::c_char) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -495,12 +495,12 @@ pub unsafe extern "C" fn gk_csortd(mut n: size_t, mut base: *mut libc::c_char) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -583,10 +583,10 @@ pub unsafe extern "C" fn gk_isorti(mut n: size_t, mut base: *mut libc::c_int) {
     let _base: *mut libc::c_int = base;
     let _elems: size_t = n;
     let mut _hold: libc::c_int = 0;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut libc::c_int = _base;
         let mut _hi: *mut libc::c_int = _lo
             .offset(_elems as isize)
@@ -603,7 +603,7 @@ pub unsafe extern "C" fn gk_isorti(mut n: size_t, mut base: *mut libc::c_int) {
             let mut _right_ptr: *mut libc::c_int = 0 as *mut libc::c_int;
             let mut _mid: *mut libc::c_int = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid < *_lo {
                 _hold = *_mid;
@@ -655,11 +655,11 @@ pub unsafe extern "C" fn gk_isorti(mut n: size_t, mut base: *mut libc::c_int) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -668,12 +668,12 @@ pub unsafe extern "C" fn gk_isorti(mut n: size_t, mut base: *mut libc::c_int) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -755,10 +755,10 @@ pub unsafe extern "C" fn gk_isortd(mut n: size_t, mut base: *mut libc::c_int) {
     let _base: *mut libc::c_int = base;
     let _elems: size_t = n;
     let mut _hold: libc::c_int = 0;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut libc::c_int = _base;
         let mut _hi: *mut libc::c_int = _lo
             .offset(_elems as isize)
@@ -775,7 +775,7 @@ pub unsafe extern "C" fn gk_isortd(mut n: size_t, mut base: *mut libc::c_int) {
             let mut _right_ptr: *mut libc::c_int = 0 as *mut libc::c_int;
             let mut _mid: *mut libc::c_int = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid > *_lo {
                 _hold = *_mid;
@@ -827,11 +827,11 @@ pub unsafe extern "C" fn gk_isortd(mut n: size_t, mut base: *mut libc::c_int) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -840,12 +840,12 @@ pub unsafe extern "C" fn gk_isortd(mut n: size_t, mut base: *mut libc::c_int) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -927,10 +927,10 @@ pub unsafe extern "C" fn gk_fsorti(mut n: size_t, mut base: *mut libc::c_float) 
     let _base: *mut libc::c_float = base;
     let _elems: size_t = n;
     let mut _hold: libc::c_float = 0.;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut libc::c_float = _base;
         let mut _hi: *mut libc::c_float = _lo
             .offset(_elems as isize)
@@ -947,7 +947,7 @@ pub unsafe extern "C" fn gk_fsorti(mut n: size_t, mut base: *mut libc::c_float) 
             let mut _right_ptr: *mut libc::c_float = 0 as *mut libc::c_float;
             let mut _mid: *mut libc::c_float = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid < *_lo {
                 _hold = *_mid;
@@ -999,11 +999,11 @@ pub unsafe extern "C" fn gk_fsorti(mut n: size_t, mut base: *mut libc::c_float) 
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -1012,12 +1012,12 @@ pub unsafe extern "C" fn gk_fsorti(mut n: size_t, mut base: *mut libc::c_float) 
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -1100,10 +1100,10 @@ pub unsafe extern "C" fn gk_fsortd(mut n: size_t, mut base: *mut libc::c_float) 
     let _base: *mut libc::c_float = base;
     let _elems: size_t = n;
     let mut _hold: libc::c_float = 0.;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut libc::c_float = _base;
         let mut _hi: *mut libc::c_float = _lo
             .offset(_elems as isize)
@@ -1120,7 +1120,7 @@ pub unsafe extern "C" fn gk_fsortd(mut n: size_t, mut base: *mut libc::c_float) 
             let mut _right_ptr: *mut libc::c_float = 0 as *mut libc::c_float;
             let mut _mid: *mut libc::c_float = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid > *_lo {
                 _hold = *_mid;
@@ -1172,11 +1172,11 @@ pub unsafe extern "C" fn gk_fsortd(mut n: size_t, mut base: *mut libc::c_float) 
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -1185,12 +1185,12 @@ pub unsafe extern "C" fn gk_fsortd(mut n: size_t, mut base: *mut libc::c_float) 
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -1273,10 +1273,10 @@ pub unsafe extern "C" fn gk_dsorti(mut n: size_t, mut base: *mut libc::c_double)
     let _base: *mut libc::c_double = base;
     let _elems: size_t = n;
     let mut _hold: libc::c_double = 0.;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut libc::c_double = _base;
         let mut _hi: *mut libc::c_double = _lo
             .offset(_elems as isize)
@@ -1293,7 +1293,7 @@ pub unsafe extern "C" fn gk_dsorti(mut n: size_t, mut base: *mut libc::c_double)
             let mut _right_ptr: *mut libc::c_double = 0 as *mut libc::c_double;
             let mut _mid: *mut libc::c_double = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid < *_lo {
                 _hold = *_mid;
@@ -1345,11 +1345,11 @@ pub unsafe extern "C" fn gk_dsorti(mut n: size_t, mut base: *mut libc::c_double)
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -1358,12 +1358,12 @@ pub unsafe extern "C" fn gk_dsorti(mut n: size_t, mut base: *mut libc::c_double)
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -1446,10 +1446,10 @@ pub unsafe extern "C" fn gk_dsortd(mut n: size_t, mut base: *mut libc::c_double)
     let _base: *mut libc::c_double = base;
     let _elems: size_t = n;
     let mut _hold: libc::c_double = 0.;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut libc::c_double = _base;
         let mut _hi: *mut libc::c_double = _lo
             .offset(_elems as isize)
@@ -1466,7 +1466,7 @@ pub unsafe extern "C" fn gk_dsortd(mut n: size_t, mut base: *mut libc::c_double)
             let mut _right_ptr: *mut libc::c_double = 0 as *mut libc::c_double;
             let mut _mid: *mut libc::c_double = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid > *_lo {
                 _hold = *_mid;
@@ -1518,11 +1518,11 @@ pub unsafe extern "C" fn gk_dsortd(mut n: size_t, mut base: *mut libc::c_double)
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -1531,12 +1531,12 @@ pub unsafe extern "C" fn gk_dsortd(mut n: size_t, mut base: *mut libc::c_double)
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -1619,10 +1619,10 @@ pub unsafe extern "C" fn gk_idxsorti(mut n: size_t, mut base: *mut gk_idx_t) {
     let _base: *mut gk_idx_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_idx_t = 0;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_idx_t = _base;
         let mut _hi: *mut gk_idx_t = _lo
             .offset(_elems as isize)
@@ -1639,7 +1639,7 @@ pub unsafe extern "C" fn gk_idxsorti(mut n: size_t, mut base: *mut gk_idx_t) {
             let mut _right_ptr: *mut gk_idx_t = 0 as *mut gk_idx_t;
             let mut _mid: *mut gk_idx_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid < *_lo {
                 _hold = *_mid;
@@ -1691,11 +1691,11 @@ pub unsafe extern "C" fn gk_idxsorti(mut n: size_t, mut base: *mut gk_idx_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -1704,12 +1704,12 @@ pub unsafe extern "C" fn gk_idxsorti(mut n: size_t, mut base: *mut gk_idx_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -1791,10 +1791,10 @@ pub unsafe extern "C" fn gk_idxsortd(mut n: size_t, mut base: *mut gk_idx_t) {
     let _base: *mut gk_idx_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_idx_t = 0;
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_idx_t = _base;
         let mut _hi: *mut gk_idx_t = _lo
             .offset(_elems as isize)
@@ -1811,7 +1811,7 @@ pub unsafe extern "C" fn gk_idxsortd(mut n: size_t, mut base: *mut gk_idx_t) {
             let mut _right_ptr: *mut gk_idx_t = 0 as *mut gk_idx_t;
             let mut _mid: *mut gk_idx_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if *_mid > *_lo {
                 _hold = *_mid;
@@ -1863,11 +1863,11 @@ pub unsafe extern "C" fn gk_idxsortd(mut n: size_t, mut base: *mut gk_idx_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -1876,12 +1876,12 @@ pub unsafe extern "C" fn gk_idxsortd(mut n: size_t, mut base: *mut gk_idx_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -1963,10 +1963,10 @@ pub unsafe extern "C" fn gk_ckvsorti(mut n: size_t, mut base: *mut gk_ckv_t) {
     let _base: *mut gk_ckv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_ckv_t = gk_ckv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_ckv_t = _base;
         let mut _hi: *mut gk_ckv_t = _lo
             .offset(_elems as isize)
@@ -1983,7 +1983,7 @@ pub unsafe extern "C" fn gk_ckvsorti(mut n: size_t, mut base: *mut gk_ckv_t) {
             let mut _right_ptr: *mut gk_ckv_t = 0 as *mut gk_ckv_t;
             let mut _mid: *mut gk_ckv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if ((*_mid).key as libc::c_int) < (*_lo).key as libc::c_int {
                 _hold = *_mid;
@@ -2035,11 +2035,11 @@ pub unsafe extern "C" fn gk_ckvsorti(mut n: size_t, mut base: *mut gk_ckv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -2048,12 +2048,12 @@ pub unsafe extern "C" fn gk_ckvsorti(mut n: size_t, mut base: *mut gk_ckv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -2135,10 +2135,10 @@ pub unsafe extern "C" fn gk_ckvsortd(mut n: size_t, mut base: *mut gk_ckv_t) {
     let _base: *mut gk_ckv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_ckv_t = gk_ckv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_ckv_t = _base;
         let mut _hi: *mut gk_ckv_t = _lo
             .offset(_elems as isize)
@@ -2155,7 +2155,7 @@ pub unsafe extern "C" fn gk_ckvsortd(mut n: size_t, mut base: *mut gk_ckv_t) {
             let mut _right_ptr: *mut gk_ckv_t = 0 as *mut gk_ckv_t;
             let mut _mid: *mut gk_ckv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key as libc::c_int > (*_lo).key as libc::c_int {
                 _hold = *_mid;
@@ -2207,11 +2207,11 @@ pub unsafe extern "C" fn gk_ckvsortd(mut n: size_t, mut base: *mut gk_ckv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -2220,12 +2220,12 @@ pub unsafe extern "C" fn gk_ckvsortd(mut n: size_t, mut base: *mut gk_ckv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -2307,10 +2307,10 @@ pub unsafe extern "C" fn gk_ikvsorti(mut n: size_t, mut base: *mut gk_ikv_t) {
     let _base: *mut gk_ikv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_ikv_t = gk_ikv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_ikv_t = _base;
         let mut _hi: *mut gk_ikv_t = _lo
             .offset(_elems as isize)
@@ -2327,7 +2327,7 @@ pub unsafe extern "C" fn gk_ikvsorti(mut n: size_t, mut base: *mut gk_ikv_t) {
             let mut _right_ptr: *mut gk_ikv_t = 0 as *mut gk_ikv_t;
             let mut _mid: *mut gk_ikv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
@@ -2379,11 +2379,11 @@ pub unsafe extern "C" fn gk_ikvsorti(mut n: size_t, mut base: *mut gk_ikv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -2392,12 +2392,12 @@ pub unsafe extern "C" fn gk_ikvsorti(mut n: size_t, mut base: *mut gk_ikv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -2479,10 +2479,10 @@ pub unsafe extern "C" fn gk_ikvsortd(mut n: size_t, mut base: *mut gk_ikv_t) {
     let _base: *mut gk_ikv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_ikv_t = gk_ikv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_ikv_t = _base;
         let mut _hi: *mut gk_ikv_t = _lo
             .offset(_elems as isize)
@@ -2499,7 +2499,7 @@ pub unsafe extern "C" fn gk_ikvsortd(mut n: size_t, mut base: *mut gk_ikv_t) {
             let mut _right_ptr: *mut gk_ikv_t = 0 as *mut gk_ikv_t;
             let mut _mid: *mut gk_ikv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
@@ -2551,11 +2551,11 @@ pub unsafe extern "C" fn gk_ikvsortd(mut n: size_t, mut base: *mut gk_ikv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -2564,12 +2564,12 @@ pub unsafe extern "C" fn gk_ikvsortd(mut n: size_t, mut base: *mut gk_ikv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -2651,10 +2651,10 @@ pub unsafe extern "C" fn gk_i32kvsorti(mut n: size_t, mut base: *mut gk_i32kv_t)
     let _base: *mut gk_i32kv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_i32kv_t = gk_i32kv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_i32kv_t = _base;
         let mut _hi: *mut gk_i32kv_t = _lo
             .offset(_elems as isize)
@@ -2671,7 +2671,7 @@ pub unsafe extern "C" fn gk_i32kvsorti(mut n: size_t, mut base: *mut gk_i32kv_t)
             let mut _right_ptr: *mut gk_i32kv_t = 0 as *mut gk_i32kv_t;
             let mut _mid: *mut gk_i32kv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
@@ -2723,11 +2723,11 @@ pub unsafe extern "C" fn gk_i32kvsorti(mut n: size_t, mut base: *mut gk_i32kv_t)
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -2736,12 +2736,12 @@ pub unsafe extern "C" fn gk_i32kvsorti(mut n: size_t, mut base: *mut gk_i32kv_t)
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -2823,10 +2823,10 @@ pub unsafe extern "C" fn gk_i32kvsortd(mut n: size_t, mut base: *mut gk_i32kv_t)
     let _base: *mut gk_i32kv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_i32kv_t = gk_i32kv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_i32kv_t = _base;
         let mut _hi: *mut gk_i32kv_t = _lo
             .offset(_elems as isize)
@@ -2843,7 +2843,7 @@ pub unsafe extern "C" fn gk_i32kvsortd(mut n: size_t, mut base: *mut gk_i32kv_t)
             let mut _right_ptr: *mut gk_i32kv_t = 0 as *mut gk_i32kv_t;
             let mut _mid: *mut gk_i32kv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
@@ -2895,11 +2895,11 @@ pub unsafe extern "C" fn gk_i32kvsortd(mut n: size_t, mut base: *mut gk_i32kv_t)
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -2908,12 +2908,12 @@ pub unsafe extern "C" fn gk_i32kvsortd(mut n: size_t, mut base: *mut gk_i32kv_t)
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -2995,10 +2995,10 @@ pub unsafe extern "C" fn gk_i64kvsorti(mut n: size_t, mut base: *mut gk_i64kv_t)
     let _base: *mut gk_i64kv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_i64kv_t = gk_i64kv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_i64kv_t = _base;
         let mut _hi: *mut gk_i64kv_t = _lo
             .offset(_elems as isize)
@@ -3015,7 +3015,7 @@ pub unsafe extern "C" fn gk_i64kvsorti(mut n: size_t, mut base: *mut gk_i64kv_t)
             let mut _right_ptr: *mut gk_i64kv_t = 0 as *mut gk_i64kv_t;
             let mut _mid: *mut gk_i64kv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
@@ -3067,11 +3067,11 @@ pub unsafe extern "C" fn gk_i64kvsorti(mut n: size_t, mut base: *mut gk_i64kv_t)
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -3080,12 +3080,12 @@ pub unsafe extern "C" fn gk_i64kvsorti(mut n: size_t, mut base: *mut gk_i64kv_t)
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -3167,10 +3167,10 @@ pub unsafe extern "C" fn gk_i64kvsortd(mut n: size_t, mut base: *mut gk_i64kv_t)
     let _base: *mut gk_i64kv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_i64kv_t = gk_i64kv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_i64kv_t = _base;
         let mut _hi: *mut gk_i64kv_t = _lo
             .offset(_elems as isize)
@@ -3187,7 +3187,7 @@ pub unsafe extern "C" fn gk_i64kvsortd(mut n: size_t, mut base: *mut gk_i64kv_t)
             let mut _right_ptr: *mut gk_i64kv_t = 0 as *mut gk_i64kv_t;
             let mut _mid: *mut gk_i64kv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
@@ -3239,11 +3239,11 @@ pub unsafe extern "C" fn gk_i64kvsortd(mut n: size_t, mut base: *mut gk_i64kv_t)
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -3252,12 +3252,12 @@ pub unsafe extern "C" fn gk_i64kvsortd(mut n: size_t, mut base: *mut gk_i64kv_t)
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -3339,10 +3339,10 @@ pub unsafe extern "C" fn gk_zkvsorti(mut n: size_t, mut base: *mut gk_zkv_t) {
     let _base: *mut gk_zkv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_zkv_t = gk_zkv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_zkv_t = _base;
         let mut _hi: *mut gk_zkv_t = _lo
             .offset(_elems as isize)
@@ -3359,7 +3359,7 @@ pub unsafe extern "C" fn gk_zkvsorti(mut n: size_t, mut base: *mut gk_zkv_t) {
             let mut _right_ptr: *mut gk_zkv_t = 0 as *mut gk_zkv_t;
             let mut _mid: *mut gk_zkv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
@@ -3411,11 +3411,11 @@ pub unsafe extern "C" fn gk_zkvsorti(mut n: size_t, mut base: *mut gk_zkv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -3424,12 +3424,12 @@ pub unsafe extern "C" fn gk_zkvsorti(mut n: size_t, mut base: *mut gk_zkv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -3511,10 +3511,10 @@ pub unsafe extern "C" fn gk_zkvsortd(mut n: size_t, mut base: *mut gk_zkv_t) {
     let _base: *mut gk_zkv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_zkv_t = gk_zkv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_zkv_t = _base;
         let mut _hi: *mut gk_zkv_t = _lo
             .offset(_elems as isize)
@@ -3531,7 +3531,7 @@ pub unsafe extern "C" fn gk_zkvsortd(mut n: size_t, mut base: *mut gk_zkv_t) {
             let mut _right_ptr: *mut gk_zkv_t = 0 as *mut gk_zkv_t;
             let mut _mid: *mut gk_zkv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
@@ -3583,11 +3583,11 @@ pub unsafe extern "C" fn gk_zkvsortd(mut n: size_t, mut base: *mut gk_zkv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -3596,12 +3596,12 @@ pub unsafe extern "C" fn gk_zkvsortd(mut n: size_t, mut base: *mut gk_zkv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -3683,10 +3683,10 @@ pub unsafe extern "C" fn gk_fkvsorti(mut n: size_t, mut base: *mut gk_fkv_t) {
     let _base: *mut gk_fkv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_fkv_t = gk_fkv_t { key: 0., val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_fkv_t = _base;
         let mut _hi: *mut gk_fkv_t = _lo
             .offset(_elems as isize)
@@ -3703,7 +3703,7 @@ pub unsafe extern "C" fn gk_fkvsorti(mut n: size_t, mut base: *mut gk_fkv_t) {
             let mut _right_ptr: *mut gk_fkv_t = 0 as *mut gk_fkv_t;
             let mut _mid: *mut gk_fkv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
@@ -3755,11 +3755,11 @@ pub unsafe extern "C" fn gk_fkvsorti(mut n: size_t, mut base: *mut gk_fkv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -3768,12 +3768,12 @@ pub unsafe extern "C" fn gk_fkvsorti(mut n: size_t, mut base: *mut gk_fkv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -3855,10 +3855,10 @@ pub unsafe extern "C" fn gk_fkvsortd(mut n: size_t, mut base: *mut gk_fkv_t) {
     let _base: *mut gk_fkv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_fkv_t = gk_fkv_t { key: 0., val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_fkv_t = _base;
         let mut _hi: *mut gk_fkv_t = _lo
             .offset(_elems as isize)
@@ -3875,7 +3875,7 @@ pub unsafe extern "C" fn gk_fkvsortd(mut n: size_t, mut base: *mut gk_fkv_t) {
             let mut _right_ptr: *mut gk_fkv_t = 0 as *mut gk_fkv_t;
             let mut _mid: *mut gk_fkv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
@@ -3927,11 +3927,11 @@ pub unsafe extern "C" fn gk_fkvsortd(mut n: size_t, mut base: *mut gk_fkv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -3940,12 +3940,12 @@ pub unsafe extern "C" fn gk_fkvsortd(mut n: size_t, mut base: *mut gk_fkv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -4027,10 +4027,10 @@ pub unsafe extern "C" fn gk_dkvsorti(mut n: size_t, mut base: *mut gk_dkv_t) {
     let _base: *mut gk_dkv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_dkv_t = gk_dkv_t { key: 0., val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_dkv_t = _base;
         let mut _hi: *mut gk_dkv_t = _lo
             .offset(_elems as isize)
@@ -4047,7 +4047,7 @@ pub unsafe extern "C" fn gk_dkvsorti(mut n: size_t, mut base: *mut gk_dkv_t) {
             let mut _right_ptr: *mut gk_dkv_t = 0 as *mut gk_dkv_t;
             let mut _mid: *mut gk_dkv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
@@ -4099,11 +4099,11 @@ pub unsafe extern "C" fn gk_dkvsorti(mut n: size_t, mut base: *mut gk_dkv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -4112,12 +4112,12 @@ pub unsafe extern "C" fn gk_dkvsorti(mut n: size_t, mut base: *mut gk_dkv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -4199,10 +4199,10 @@ pub unsafe extern "C" fn gk_dkvsortd(mut n: size_t, mut base: *mut gk_dkv_t) {
     let _base: *mut gk_dkv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_dkv_t = gk_dkv_t { key: 0., val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_dkv_t = _base;
         let mut _hi: *mut gk_dkv_t = _lo
             .offset(_elems as isize)
@@ -4219,7 +4219,7 @@ pub unsafe extern "C" fn gk_dkvsortd(mut n: size_t, mut base: *mut gk_dkv_t) {
             let mut _right_ptr: *mut gk_dkv_t = 0 as *mut gk_dkv_t;
             let mut _mid: *mut gk_dkv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
@@ -4271,11 +4271,11 @@ pub unsafe extern "C" fn gk_dkvsortd(mut n: size_t, mut base: *mut gk_dkv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -4284,12 +4284,12 @@ pub unsafe extern "C" fn gk_dkvsortd(mut n: size_t, mut base: *mut gk_dkv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -4374,10 +4374,10 @@ pub unsafe extern "C" fn gk_skvsorti(mut n: size_t, mut base: *mut gk_skv_t) {
         key: 0 as *mut libc::c_char,
         val: 0,
     };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_skv_t = _base;
         let mut _hi: *mut gk_skv_t = _lo
             .offset(_elems as isize)
@@ -4394,7 +4394,7 @@ pub unsafe extern "C" fn gk_skvsorti(mut n: size_t, mut base: *mut gk_skv_t) {
             let mut _right_ptr: *mut gk_skv_t = 0 as *mut gk_skv_t;
             let mut _mid: *mut gk_skv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if strcmp((*_mid).key, (*_lo).key) < 0 as libc::c_int {
                 _hold = *_mid;
@@ -4446,11 +4446,11 @@ pub unsafe extern "C" fn gk_skvsorti(mut n: size_t, mut base: *mut gk_skv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -4459,12 +4459,12 @@ pub unsafe extern "C" fn gk_skvsorti(mut n: size_t, mut base: *mut gk_skv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -4549,10 +4549,10 @@ pub unsafe extern "C" fn gk_skvsortd(mut n: size_t, mut base: *mut gk_skv_t) {
         key: 0 as *mut libc::c_char,
         val: 0,
     };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_skv_t = _base;
         let mut _hi: *mut gk_skv_t = _lo
             .offset(_elems as isize)
@@ -4569,7 +4569,7 @@ pub unsafe extern "C" fn gk_skvsortd(mut n: size_t, mut base: *mut gk_skv_t) {
             let mut _right_ptr: *mut gk_skv_t = 0 as *mut gk_skv_t;
             let mut _mid: *mut gk_skv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if strcmp((*_mid).key, (*_lo).key) > 0 as libc::c_int {
                 _hold = *_mid;
@@ -4621,11 +4621,11 @@ pub unsafe extern "C" fn gk_skvsortd(mut n: size_t, mut base: *mut gk_skv_t) {
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -4634,12 +4634,12 @@ pub unsafe extern "C" fn gk_skvsortd(mut n: size_t, mut base: *mut gk_skv_t) {
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -4721,10 +4721,10 @@ pub unsafe extern "C" fn gk_idxkvsorti(mut n: size_t, mut base: *mut gk_idxkv_t)
     let _base: *mut gk_idxkv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_idxkv_t = gk_idxkv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_idxkv_t = _base;
         let mut _hi: *mut gk_idxkv_t = _lo
             .offset(_elems as isize)
@@ -4741,7 +4741,7 @@ pub unsafe extern "C" fn gk_idxkvsorti(mut n: size_t, mut base: *mut gk_idxkv_t)
             let mut _right_ptr: *mut gk_idxkv_t = 0 as *mut gk_idxkv_t;
             let mut _mid: *mut gk_idxkv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key < (*_lo).key {
                 _hold = *_mid;
@@ -4793,11 +4793,11 @@ pub unsafe extern "C" fn gk_idxkvsorti(mut n: size_t, mut base: *mut gk_idxkv_t)
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -4806,12 +4806,12 @@ pub unsafe extern "C" fn gk_idxkvsorti(mut n: size_t, mut base: *mut gk_idxkv_t)
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;
@@ -4893,10 +4893,10 @@ pub unsafe extern "C" fn gk_idxkvsortd(mut n: size_t, mut base: *mut gk_idxkv_t)
     let _base: *mut gk_idxkv_t = base;
     let _elems: size_t = n;
     let mut _hold: gk_idxkv_t = gk_idxkv_t { key: 0, val: 0 };
-    if _elems == 0 as libc::c_int as libc::c_ulong {
+    if _elems == 0 as libc::c_int as u64 {
         return;
     }
-    if _elems > 4 as libc::c_int as libc::c_ulong {
+    if _elems > 4 as libc::c_int as u64 {
         let mut _lo: *mut gk_idxkv_t = _base;
         let mut _hi: *mut gk_idxkv_t = _lo
             .offset(_elems as isize)
@@ -4913,7 +4913,7 @@ pub unsafe extern "C" fn gk_idxkvsortd(mut n: size_t, mut base: *mut gk_idxkv_t)
             let mut _right_ptr: *mut gk_idxkv_t = 0 as *mut gk_idxkv_t;
             let mut _mid: *mut gk_idxkv_t = _lo
                 .offset(
-                    (_hi.offset_from(_lo) as libc::c_long >> 1 as libc::c_int) as isize,
+                    (_hi.offset_from(_lo) as i64 >> 1 as libc::c_int) as isize,
                 );
             if (*_mid).key > (*_lo).key {
                 _hold = *_mid;
@@ -4965,11 +4965,11 @@ pub unsafe extern "C" fn gk_idxkvsortd(mut n: size_t, mut base: *mut gk_idxkv_t)
                     break;
                 }
             }
-            if _right_ptr.offset_from(_lo) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            if _right_ptr.offset_from(_lo) as i64
+                <= 4 as libc::c_int as i64
             {
-                if _hi.offset_from(_left_ptr) as libc::c_long
-                    <= 4 as libc::c_int as libc::c_long
+                if _hi.offset_from(_left_ptr) as i64
+                    <= 4 as libc::c_int as i64
                 {
                     _top = _top.offset(-1);
                     _top;
@@ -4978,12 +4978,12 @@ pub unsafe extern "C" fn gk_idxkvsortd(mut n: size_t, mut base: *mut gk_idxkv_t)
                 } else {
                     _lo = _left_ptr;
                 }
-            } else if _hi.offset_from(_left_ptr) as libc::c_long
-                <= 4 as libc::c_int as libc::c_long
+            } else if _hi.offset_from(_left_ptr) as i64
+                <= 4 as libc::c_int as i64
             {
                 _hi = _right_ptr;
-            } else if _right_ptr.offset_from(_lo) as libc::c_long
-                > _hi.offset_from(_left_ptr) as libc::c_long
+            } else if _right_ptr.offset_from(_lo) as i64
+                > _hi.offset_from(_left_ptr) as i64
             {
                 (*_top)._lo = _lo;
                 (*_top)._hi = _right_ptr;

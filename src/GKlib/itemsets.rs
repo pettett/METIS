@@ -24,10 +24,10 @@ extern "C" {
     fn gk_csr_CreateIndex(mat: *mut gk_csr_t, what: libc::c_int);
 }
 pub type __int32_t = libc::c_int;
-pub type __ssize_t = libc::c_long;
+pub type __ssize_t = i64;
 pub type int32_t = __int32_t;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct gk_ikv_t {
@@ -197,7 +197,7 @@ pub unsafe extern "C" fn itemsets_find_frequent_itemsets(
     let mut i: ssize_t = 0;
     let mut cmat: *mut gk_csr_t = 0 as *mut gk_csr_t;
     i = 0 as libc::c_int as ssize_t;
-    while i < (*mat).ncols as libc::c_long {
+    while i < (*mat).ncols as i64 {
         *prefix.offset(preflen as isize) = *((*mat).colids).offset(i as isize);
         if preflen + 1 as libc::c_int >= (*params).minlen {
             (Some(((*params).callback).expect("non-null function pointer")))
@@ -207,7 +207,7 @@ pub unsafe extern "C" fn itemsets_find_frequent_itemsets(
                 (*params).stateptr,
                 preflen + 1 as libc::c_int,
                 prefix,
-                (*((*mat).colptr).offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                (*((*mat).colptr).offset((i + 1 as libc::c_int as i64) as isize)
                     - *((*mat).colptr).offset(i as isize)) as libc::c_int,
                 ((*mat).colind).offset(*((*mat).colptr).offset(i as isize) as isize),
             );
@@ -259,7 +259,7 @@ pub unsafe extern "C" fn itemsets_project_matrix(
     cand = (*params).cand;
     pmat = gk_csr_Create();
     pnrows = (if cid == -(1 as libc::c_int) {
-        nrows as libc::c_long
+        nrows as i64
     } else {
         *colptr.offset((cid + 1 as libc::c_int) as isize) - *colptr.offset(cid as isize)
     }) as libc::c_int;
@@ -277,16 +277,16 @@ pub unsafe extern "C" fn itemsets_project_matrix(
     pncols = 0 as libc::c_int;
     pnnz = 0 as libc::c_int as ssize_t;
     i = (cid + 1 as libc::c_int) as ssize_t;
-    while i < ncols as libc::c_long {
+    while i < ncols as i64 {
         k = 0 as libc::c_int as ssize_t;
         j = *colptr.offset(i as isize);
-        while j < *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
-            k += *rmarker.offset(*colind.offset(j as isize) as isize) as libc::c_long;
+        while j < *colptr.offset((i + 1 as libc::c_int as i64) as isize) {
+            k += *rmarker.offset(*colind.offset(j as isize) as isize) as i64;
             j += 1;
             j;
         }
-        if k >= (*params).minfreq as libc::c_long
-            && k <= (*params).maxfreq as libc::c_long
+        if k >= (*params).minfreq as i64
+            && k <= (*params).maxfreq as i64
         {
             (*cand.offset(pncols as isize)).val = i;
             let fresh0 = pncols;
@@ -320,10 +320,10 @@ pub unsafe extern "C" fn itemsets_project_matrix(
     *pcolptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
     pnnz = 0 as libc::c_int as ssize_t;
     ii = 0 as libc::c_int as ssize_t;
-    while ii < pncols as libc::c_long {
+    while ii < pncols as i64 {
         i = (*cand.offset(ii as isize)).val;
         j = *colptr.offset(i as isize);
-        while j < *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+        while j < *colptr.offset((i + 1 as libc::c_int as i64) as isize) {
             if *rmarker.offset(*colind.offset(j as isize) as isize) != 0 {
                 let fresh1 = pnnz;
                 pnnz = pnnz + 1;
@@ -333,7 +333,7 @@ pub unsafe extern "C" fn itemsets_project_matrix(
             j;
         }
         *pcolids.offset(ii as isize) = *colids.offset(i as isize);
-        *pcolptr.offset((ii + 1 as libc::c_int as libc::c_long) as isize) = pnnz;
+        *pcolptr.offset((ii + 1 as libc::c_int as i64) as isize) = pnnz;
         ii += 1;
         ii;
     }

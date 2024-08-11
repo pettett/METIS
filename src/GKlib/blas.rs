@@ -20,12 +20,12 @@ extern "C" {
     fn gk_idxkvmalloc(n: size_t, msg: *mut libc::c_char) -> *mut gk_idxkv_t;
 }
 pub type __int32_t = libc::c_int;
-pub type __int64_t = libc::c_long;
-pub type __ssize_t = libc::c_long;
+pub type __int64_t = i64;
+pub type __ssize_t = i64;
 pub type int32_t = __int32_t;
 pub type int64_t = __int64_t;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 pub type gk_idx_t = ssize_t;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -132,7 +132,7 @@ pub unsafe extern "C" fn gk_cargmax_n(
         i;
     }
     gk_ckvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as libc::c_ulong) as isize))
+    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize))
         .val as size_t;
     gk_free(
         &mut cand as *mut *mut gk_ckv_t as *mut libc::c_void as *mut *mut libc::c_void,
@@ -152,7 +152,7 @@ pub unsafe extern "C" fn gk_cincset(
         *x
             .offset(
                 i as isize,
-            ) = (baseval as libc::c_ulong).wrapping_add(i) as libc::c_char;
+            ) = (baseval as u64).wrapping_add(i) as libc::c_char;
         i = i.wrapping_add(1);
         i;
     }
@@ -165,7 +165,7 @@ pub unsafe extern "C" fn gk_cmax(
 ) -> libc::c_char {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as libc::c_char;
     }
     i = 1 as libc::c_int as size_t;
@@ -189,7 +189,7 @@ pub unsafe extern "C" fn gk_cmin(
 ) -> libc::c_char {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as libc::c_char;
     }
     i = 1 as libc::c_int as size_t;
@@ -336,7 +336,7 @@ pub unsafe extern "C" fn gk_iargmax_n(
         i;
     }
     gk_ikvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as libc::c_ulong) as isize))
+    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize))
         .val as size_t;
     gk_free(
         &mut cand as *mut *mut gk_ikv_t as *mut libc::c_void as *mut *mut libc::c_void,
@@ -398,7 +398,7 @@ pub unsafe extern "C" fn gk_iaxpy(
 pub unsafe extern "C" fn gk_imin(mut n: size_t, mut x: *mut libc::c_int) -> libc::c_int {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int;
     }
     i = 1 as libc::c_int as size_t;
@@ -413,7 +413,7 @@ pub unsafe extern "C" fn gk_imin(mut n: size_t, mut x: *mut libc::c_int) -> libc
 pub unsafe extern "C" fn gk_imax(mut n: size_t, mut x: *mut libc::c_int) -> libc::c_int {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int;
     }
     i = 1 as libc::c_int as size_t;
@@ -436,7 +436,7 @@ pub unsafe extern "C" fn gk_iincset(
         *x
             .offset(
                 i as isize,
-            ) = (baseval as libc::c_ulong).wrapping_add(i) as libc::c_int;
+            ) = (baseval as u64).wrapping_add(i) as libc::c_int;
         i = i.wrapping_add(1);
         i;
     }
@@ -545,7 +545,7 @@ pub unsafe extern "C" fn gk_i32argmax_n(
         i;
     }
     gk_i32kvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as libc::c_ulong) as isize))
+    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize))
         .val as size_t;
     gk_free(
         &mut cand as *mut *mut gk_i32kv_t as *mut libc::c_void as *mut *mut libc::c_void,
@@ -562,7 +562,7 @@ pub unsafe extern "C" fn gk_i32incset(
     let mut i: size_t = 0;
     i = 0 as libc::c_int as size_t;
     while i < n {
-        *x.offset(i as isize) = (baseval as libc::c_ulong).wrapping_add(i) as int32_t;
+        *x.offset(i as isize) = (baseval as u64).wrapping_add(i) as int32_t;
         i = i.wrapping_add(1);
         i;
     }
@@ -572,7 +572,7 @@ pub unsafe extern "C" fn gk_i32incset(
 pub unsafe extern "C" fn gk_i32max(mut n: size_t, mut x: *mut int32_t) -> int32_t {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int;
     }
     i = 1 as libc::c_int as size_t;
@@ -587,7 +587,7 @@ pub unsafe extern "C" fn gk_i32max(mut n: size_t, mut x: *mut int32_t) -> int32_
 pub unsafe extern "C" fn gk_i32min(mut n: size_t, mut x: *mut int32_t) -> int32_t {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int;
     }
     i = 1 as libc::c_int as size_t;
@@ -739,7 +739,7 @@ pub unsafe extern "C" fn gk_i64argmax_n(
         i;
     }
     gk_i64kvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as libc::c_ulong) as isize))
+    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize))
         .val as size_t;
     gk_free(
         &mut cand as *mut *mut gk_i64kv_t as *mut libc::c_void as *mut *mut libc::c_void,
@@ -777,7 +777,7 @@ pub unsafe extern "C" fn gk_i64incset(
     let mut i: size_t = 0;
     i = 0 as libc::c_int as size_t;
     while i < n {
-        *x.offset(i as isize) = (baseval as libc::c_ulong).wrapping_add(i) as int64_t;
+        *x.offset(i as isize) = (baseval as u64).wrapping_add(i) as int64_t;
         i = i.wrapping_add(1);
         i;
     }
@@ -787,7 +787,7 @@ pub unsafe extern "C" fn gk_i64incset(
 pub unsafe extern "C" fn gk_i64max(mut n: size_t, mut x: *mut int64_t) -> int64_t {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as int64_t;
     }
     i = 1 as libc::c_int as size_t;
@@ -802,7 +802,7 @@ pub unsafe extern "C" fn gk_i64max(mut n: size_t, mut x: *mut int64_t) -> int64_
 pub unsafe extern "C" fn gk_i64min(mut n: size_t, mut x: *mut int64_t) -> int64_t {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as int64_t;
     }
     i = 1 as libc::c_int as size_t;
@@ -865,7 +865,7 @@ pub unsafe extern "C" fn gk_i64norm2(
         i;
         x = x.offset(incx as isize);
     }
-    return if partial > 0 as libc::c_int as libc::c_long {
+    return if partial > 0 as libc::c_int as i64 {
         sqrt(partial as libc::c_double) as int64_t
     } else {
         0 as libc::c_int as int64_t
@@ -933,7 +933,7 @@ pub unsafe extern "C" fn gk_zargmax_n(
         i;
     }
     gk_zkvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as libc::c_ulong) as isize))
+    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize))
         .val as size_t;
     gk_free(
         &mut cand as *mut *mut gk_zkv_t as *mut libc::c_void as *mut *mut libc::c_void,
@@ -950,7 +950,7 @@ pub unsafe extern "C" fn gk_zincset(
     let mut i: size_t = 0;
     i = 0 as libc::c_int as size_t;
     while i < n {
-        *x.offset(i as isize) = (baseval as libc::c_ulong).wrapping_add(i) as ssize_t;
+        *x.offset(i as isize) = (baseval as u64).wrapping_add(i) as ssize_t;
         i = i.wrapping_add(1);
         i;
     }
@@ -960,7 +960,7 @@ pub unsafe extern "C" fn gk_zincset(
 pub unsafe extern "C" fn gk_zmax(mut n: size_t, mut x: *mut ssize_t) -> ssize_t {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as ssize_t;
     }
     i = 1 as libc::c_int as size_t;
@@ -975,7 +975,7 @@ pub unsafe extern "C" fn gk_zmax(mut n: size_t, mut x: *mut ssize_t) -> ssize_t 
 pub unsafe extern "C" fn gk_zmin(mut n: size_t, mut x: *mut ssize_t) -> ssize_t {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as ssize_t;
     }
     i = 1 as libc::c_int as size_t;
@@ -1056,7 +1056,7 @@ pub unsafe extern "C" fn gk_znorm2(
         i;
         x = x.offset(incx as isize);
     }
-    return if partial > 0 as libc::c_int as libc::c_long {
+    return if partial > 0 as libc::c_int as i64 {
         sqrt(partial as libc::c_double) as ssize_t
     } else {
         0 as libc::c_int as ssize_t
@@ -1115,7 +1115,7 @@ pub unsafe extern "C" fn gk_fargmax_n(
         i;
     }
     gk_fkvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as libc::c_ulong) as isize))
+    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize))
         .val as size_t;
     gk_free(
         &mut cand as *mut *mut gk_fkv_t as *mut libc::c_void as *mut *mut libc::c_void,
@@ -1174,7 +1174,7 @@ pub unsafe extern "C" fn gk_fmax(
 ) -> libc::c_float {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as libc::c_float;
     }
     i = 1 as libc::c_int as size_t;
@@ -1192,7 +1192,7 @@ pub unsafe extern "C" fn gk_fmin(
 ) -> libc::c_float {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as libc::c_float;
     }
     i = 1 as libc::c_int as size_t;
@@ -1303,7 +1303,7 @@ pub unsafe extern "C" fn gk_dargmax_n(
         i;
     }
     gk_dkvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as libc::c_ulong) as isize))
+    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize))
         .val as size_t;
     gk_free(
         &mut cand as *mut *mut gk_dkv_t as *mut libc::c_void as *mut *mut libc::c_void,
@@ -1380,7 +1380,7 @@ pub unsafe extern "C" fn gk_dmax(
 ) -> libc::c_double {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as libc::c_double;
     }
     i = 1 as libc::c_int as size_t;
@@ -1398,7 +1398,7 @@ pub unsafe extern "C" fn gk_dmin(
 ) -> libc::c_double {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as libc::c_double;
     }
     i = 1 as libc::c_int as size_t;
@@ -1533,7 +1533,7 @@ pub unsafe extern "C" fn gk_idxargmax_n(
         i;
     }
     gk_idxkvsortd(n, cand);
-    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as libc::c_ulong) as isize))
+    max_n = (*cand.offset(k.wrapping_sub(1 as libc::c_int as u64) as isize))
         .val as size_t;
     gk_free(
         &mut cand as *mut *mut gk_idxkv_t as *mut libc::c_void as *mut *mut libc::c_void,
@@ -1571,7 +1571,7 @@ pub unsafe extern "C" fn gk_idxincset(
     let mut i: size_t = 0;
     i = 0 as libc::c_int as size_t;
     while i < n {
-        *x.offset(i as isize) = (baseval as libc::c_ulong).wrapping_add(i) as gk_idx_t;
+        *x.offset(i as isize) = (baseval as u64).wrapping_add(i) as gk_idx_t;
         i = i.wrapping_add(1);
         i;
     }
@@ -1581,7 +1581,7 @@ pub unsafe extern "C" fn gk_idxincset(
 pub unsafe extern "C" fn gk_idxmax(mut n: size_t, mut x: *mut gk_idx_t) -> gk_idx_t {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as gk_idx_t;
     }
     i = 1 as libc::c_int as size_t;
@@ -1596,7 +1596,7 @@ pub unsafe extern "C" fn gk_idxmax(mut n: size_t, mut x: *mut gk_idx_t) -> gk_id
 pub unsafe extern "C" fn gk_idxmin(mut n: size_t, mut x: *mut gk_idx_t) -> gk_idx_t {
     let mut i: size_t = 0;
     let mut min: size_t = 0 as libc::c_int as size_t;
-    if n <= 0 as libc::c_int as libc::c_ulong {
+    if n <= 0 as libc::c_int as u64 {
         return 0 as libc::c_int as gk_idx_t;
     }
     i = 1 as libc::c_int as size_t;
@@ -1676,7 +1676,7 @@ pub unsafe extern "C" fn gk_idxnorm2(
         i;
         x = x.offset(incx as isize);
     }
-    return if partial > 0 as libc::c_int as libc::c_long {
+    return if partial > 0 as libc::c_int as i64 {
         sqrt(partial as libc::c_double) as gk_idx_t
     } else {
         0 as libc::c_int as gk_idx_t

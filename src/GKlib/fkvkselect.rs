@@ -1,7 +1,7 @@
 use ::libc;
-pub type __ssize_t = libc::c_long;
+pub type __ssize_t = i64;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct gk_fkv_t {
@@ -21,11 +21,11 @@ pub unsafe extern "C" fn gk_dfkvkselect(
     let mut mid: libc::c_int = 0;
     let mut stmp: gk_fkv_t = gk_fkv_t { key: 0., val: 0 };
     let mut pivot: libc::c_float = 0.;
-    if n <= topk as libc::c_ulong {
+    if n <= topk as u64 {
         return n as libc::c_int;
     }
     lo = 0 as libc::c_int;
-    hi = n.wrapping_sub(1 as libc::c_int as libc::c_ulong) as libc::c_int;
+    hi = n.wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
     while lo < hi {
         mid = lo + (hi - lo >> 1 as libc::c_int);
         if (*cand.offset(lo as isize)).key < (*cand.offset(mid as isize)).key {
@@ -83,11 +83,11 @@ pub unsafe extern "C" fn gk_ifkvkselect(
     let mut mid: libc::c_int = 0;
     let mut stmp: gk_fkv_t = gk_fkv_t { key: 0., val: 0 };
     let mut pivot: libc::c_float = 0.;
-    if n <= topk as libc::c_ulong {
+    if n <= topk as u64 {
         return n as libc::c_int;
     }
     lo = 0 as libc::c_int;
-    hi = n.wrapping_sub(1 as libc::c_int as libc::c_ulong) as libc::c_int;
+    hi = n.wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
     while lo < hi {
         mid = lo + (hi - lo >> 1 as libc::c_int);
         if (*cand.offset(lo as isize)).key > (*cand.offset(mid as isize)).key {

@@ -1,71 +1,15 @@
-use ::libc;
+use libc::{self, exit, fprintf, free, fscanf, printf, sprintf, sscanf, strtof, strtol};
 extern "C" {
     pub type _IO_wide_data;
     pub type _IO_codecvt;
     pub type _IO_marker;
-    fn strtol(
-        _: *const libc::c_char,
-        _: *mut *mut libc::c_char,
-        _: libc::c_int,
-    ) -> libc::c_long;
-    fn strtof(_: *const libc::c_char, _: *mut *mut libc::c_char) -> libc::c_float;
-    fn free(_: *mut libc::c_void);
-    fn exit(_: libc::c_int) -> !;
-    fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn sprintf(_: *mut libc::c_char, _: *const libc::c_char, _: ...) -> libc::c_int;
-    fn fscanf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
-    fn sscanf(_: *const libc::c_char, _: *const libc::c_char, _: ...) -> libc::c_int;
-    fn gk_fopen(
-        _: *mut libc::c_char,
-        _: *mut libc::c_char,
-        _: *const libc::c_char,
-    ) -> *mut FILE;
-    fn gk_fclose(_: *mut FILE);
-    fn gk_getline(
-        lineptr: *mut *mut libc::c_char,
-        n: *mut size_t,
-        stream: *mut FILE,
-    ) -> gk_idx_t;
-    fn gk_fexists(_: *mut libc::c_char) -> libc::c_int;
-    fn gk_getfilestats(
-        fname: *mut libc::c_char,
-        r_nlines: *mut size_t,
-        r_ntokens: *mut size_t,
-        r_max_nlntokens: *mut size_t,
-        r_nbytes: *mut size_t,
-    );
-    fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
-    fn errexit(_: *mut libc::c_char, _: ...);
-    fn gk_strchr_replace(
-        str: *mut libc::c_char,
-        fromlist: *mut libc::c_char,
-        tolist: *mut libc::c_char,
-    ) -> *mut libc::c_char;
-    fn libmetis__imax(n: size_t, x: *mut idx_t) -> idx_t;
-    fn libmetis__rscale(
-        n: size_t,
-        alpha: real_t,
-        x: *mut real_t,
-        incx: size_t,
-    ) -> *mut real_t;
-    fn libmetis__imalloc(n: size_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__ismalloc(n: size_t, ival: idx_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__rsmalloc(
-        n: size_t,
-        ival: real_t,
-        msg: *mut libc::c_char,
-    ) -> *mut real_t;
-    fn libmetis__CreateGraph() -> *mut graph_t;
-    fn libmetis__CreateMesh() -> *mut mesh_t;
+
 }
-pub type __int32_t = libc::c_int;
-pub type __off_t = libc::c_long;
-pub type __off64_t = libc::c_long;
-pub type __ssize_t = libc::c_long;
-pub type int32_t = __int32_t;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type __off_t = i64;
+pub type __off64_t = i64;
+
+use crate::libmetis::structure::*;
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _IO_FILE {
@@ -100,118 +44,32 @@ pub struct _IO_FILE {
     pub _unused2: [libc::c_char; 20],
 }
 pub type _IO_lock_t = ();
-pub type FILE = _IO_FILE;
+pub type FILE = libc::FILE;
 pub type gk_idx_t = ssize_t;
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct mesh_t {
-    pub ne: idx_t,
-    pub nn: idx_t,
-    pub ncon: idx_t,
-    pub eptr: *mut idx_t,
-    pub eind: *mut idx_t,
-    pub ewgt: *mut idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct params_t {
-    pub ptype: idx_t,
-    pub objtype: idx_t,
-    pub ctype: idx_t,
-    pub iptype: idx_t,
-    pub rtype: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nooutput: idx_t,
-    pub balance: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub gtype: idx_t,
-    pub ncommon: idx_t,
-    pub seed: idx_t,
-    pub dbglvl: idx_t,
-    pub nparts: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub pfactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub filename: *mut libc::c_char,
-    pub outfile: *mut libc::c_char,
-    pub xyzfile: *mut libc::c_char,
-    pub tpwgtsfile: *mut libc::c_char,
-    pub ubvecstr: *mut libc::c_char,
-    pub wgtflag: idx_t,
-    pub numflag: idx_t,
-    pub tpwgts: *mut real_t,
-    pub ubvec: *mut real_t,
-    pub iotimer: real_t,
-    pub parttimer: real_t,
-    pub reporttimer: real_t,
-    pub maxmemory: size_t,
-}
+
+use crate::{
+    libmetis::{
+        gklib::{
+            libmetis__imalloc, libmetis__imax, libmetis__ismalloc, libmetis__rscale,
+            libmetis__rsmalloc,
+        },
+        graph::libmetis__CreateGraph,
+        mesh::libmetis__CreateMesh,
+        structure::*,
+    },
+    GKlib::{
+        error::errexit,
+        fs::{gk_fexists, gk_getfilestats},
+        io::{gk_fclose, gk_fopen, gk_getline},
+        memory::gk_free,
+        string::gk_strchr_replace,
+    },
+};
+
 #[no_mangle]
 pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
+    println!("Reading graph");
+
     let mut i: idx_t = 0;
     let mut j: idx_t = 0;
     let mut k: idx_t = 0;
@@ -238,8 +96,7 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
     let mut graph: *mut graph_t = 0 as *mut graph_t;
     if gk_fexists((*params).filename) == 0 {
         errexit(
-            b"File %s does not exist!\n\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"File %s does not exist!\n\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             (*params).filename,
         );
     }
@@ -250,11 +107,10 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
         b"ReadGRaph: Graph\0" as *const u8 as *const libc::c_char,
     );
     loop {
-        if gk_getline(&mut line, &mut lnlen, fpin) == -(1 as libc::c_int) as libc::c_long
-        {
+        if gk_getline(&mut line, &mut lnlen, fpin) == -(1 as libc::c_int) as i64 {
             errexit(
-                b"Premature end of input file: file: %s\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Premature end of input file: file: %s\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 (*params).filename,
             );
         }
@@ -274,8 +130,8 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
     );
     if nfields < 2 as libc::c_int {
         errexit(
-            b"The input file does not specify the number of vertices and edges.\n\0"
-                as *const u8 as *const libc::c_char as *mut libc::c_char,
+            b"The input file does not specify the number of vertices and edges.\n\0" as *const u8
+                as *const libc::c_char as *mut libc::c_char,
         );
     }
     if (*graph).nvtxs <= 0 as libc::c_int || (*graph).nedges <= 0 as libc::c_int {
@@ -298,12 +154,9 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
         b"%03d\0" as *const u8 as *const libc::c_char,
         fmt % 1000 as libc::c_int,
     );
-    readvs = (fmtstr[0 as libc::c_int as usize] as libc::c_int == '1' as i32)
-        as libc::c_int;
-    readvw = (fmtstr[1 as libc::c_int as usize] as libc::c_int == '1' as i32)
-        as libc::c_int;
-    readew = (fmtstr[2 as libc::c_int as usize] as libc::c_int == '1' as i32)
-        as libc::c_int;
+    readvs = (fmtstr[0 as libc::c_int as usize] as libc::c_int == '1' as i32) as libc::c_int;
+    readvw = (fmtstr[1 as libc::c_int as usize] as libc::c_int == '1' as i32) as libc::c_int;
+    readew = (fmtstr[2 as libc::c_int as usize] as libc::c_int == '1' as i32) as libc::c_int;
     if ncon > 0 as libc::c_int && readvw == 0 {
         errexit(
             b"------------------------------------------------------------------------------\n***  I detected an error in your input file  ***\n\nYou specified ncon=%d, but the fmt parameter does not specify vertex weights\nMake sure that the fmt parameter is set to either 10 or 11.\n------------------------------------------------------------------------------\n\0"
@@ -312,37 +165,36 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
         );
     }
     (*graph).nedges *= 2 as libc::c_int;
-    (*graph).ncon = if ncon == 0 as libc::c_int { 1 as libc::c_int } else { ncon };
+    (*graph).ncon = if ncon == 0 as libc::c_int {
+        1 as libc::c_int
+    } else {
+        ncon
+    };
     ncon = (*graph).ncon;
-    (*graph)
-        .xadj = libmetis__ismalloc(
+    (*graph).xadj = libmetis__ismalloc(
         ((*graph).nvtxs + 1 as libc::c_int) as size_t,
         0 as libc::c_int,
         b"ReadGraph: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     xadj = (*graph).xadj;
-    (*graph)
-        .adjncy = libmetis__imalloc(
+    (*graph).adjncy = libmetis__imalloc(
         (*graph).nedges as size_t,
         b"ReadGraph: adjncy\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     adjncy = (*graph).adjncy;
-    (*graph)
-        .vwgt = libmetis__ismalloc(
+    (*graph).vwgt = libmetis__ismalloc(
         (ncon * (*graph).nvtxs) as size_t,
         1 as libc::c_int,
         b"ReadGraph: vwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     vwgt = (*graph).vwgt;
-    (*graph)
-        .adjwgt = libmetis__ismalloc(
+    (*graph).adjwgt = libmetis__ismalloc(
         (*graph).nedges as size_t,
         1 as libc::c_int,
         b"ReadGraph: adjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     adjwgt = (*graph).adjwgt;
-    (*graph)
-        .vsize = libmetis__ismalloc(
+    (*graph).vsize = libmetis__ismalloc(
         (*graph).nvtxs as size_t,
         1 as libc::c_int,
         b"ReadGraph: vsize\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -353,12 +205,10 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
     i = 0 as libc::c_int;
     while i < (*graph).nvtxs {
         loop {
-            if gk_getline(&mut line, &mut lnlen, fpin)
-                == -(1 as libc::c_int) as libc::c_long
-            {
+            if gk_getline(&mut line, &mut lnlen, fpin) == -(1 as libc::c_int) as i64 {
                 errexit(
-                    b"Premature end of input file while reading vertex %d.\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                    b"Premature end of input file while reading vertex %d.\n\0" as *const u8
+                        as *const libc::c_char as *mut libc::c_char,
                     i + 1 as libc::c_int,
                 );
             }
@@ -369,21 +219,18 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
         curstr = line;
         newstr = 0 as *mut libc::c_char;
         if readvs != 0 {
-            *vsize
-                .offset(
-                    i as isize,
-                ) = strtol(curstr, &mut newstr, 10 as libc::c_int) as idx_t;
+            *vsize.offset(i as isize) = strtol(curstr, &mut newstr, 10 as libc::c_int) as idx_t;
             if newstr == curstr {
                 errexit(
-                    b"The line for vertex %d does not have vsize information\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                    b"The line for vertex %d does not have vsize information\n\0" as *const u8
+                        as *const libc::c_char as *mut libc::c_char,
                     i + 1 as libc::c_int,
                 );
             }
             if *vsize.offset(i as isize) < 0 as libc::c_int {
                 errexit(
-                    b"The size for vertex %d must be >= 0\n\0" as *const u8
-                        as *const libc::c_char as *mut libc::c_char,
+                    b"The size for vertex %d must be >= 0\n\0" as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                     i + 1 as libc::c_int,
                 );
             }
@@ -392,10 +239,8 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
         if readvw != 0 {
             l = 0 as libc::c_int;
             while l < ncon {
-                *vwgt
-                    .offset(
-                        (i * ncon + l) as isize,
-                    ) = strtol(curstr, &mut newstr, 10 as libc::c_int) as idx_t;
+                *vwgt.offset((i * ncon + l) as isize) =
+                    strtol(curstr, &mut newstr, 10 as libc::c_int) as idx_t;
                 if newstr == curstr {
                     errexit(
                         b"The line for vertex %d does not have enough weights for the %d constraints.\n\0"
@@ -406,8 +251,8 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
                 }
                 if *vwgt.offset((i * ncon + l) as isize) < 0 as libc::c_int {
                     errexit(
-                        b"The weight vertex %d and constraint %d must be >= 0\n\0"
-                            as *const u8 as *const libc::c_char as *mut libc::c_char,
+                        b"The weight vertex %d and constraint %d must be >= 0\n\0" as *const u8
+                            as *const libc::c_char as *mut libc::c_char,
                         i + 1 as libc::c_int,
                         l,
                     );
@@ -443,8 +288,8 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
                 }
                 if ewgt <= 0 as libc::c_int {
                     errexit(
-                        b"The weight (%d) for edge (%d, %d) must be positive.\n\0"
-                            as *const u8 as *const libc::c_char as *mut libc::c_char,
+                        b"The weight (%d) for edge (%d, %d) must be positive.\n\0" as *const u8
+                            as *const libc::c_char as *mut libc::c_char,
                         ewgt,
                         i + 1 as libc::c_int,
                         edge,
@@ -454,8 +299,8 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
             }
             if k == (*graph).nedges {
                 errexit(
-                    b"There are more edges in the file than the %d specified.\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                    b"There are more edges in the file than the %d specified.\n\0" as *const u8
+                        as *const libc::c_char as *mut libc::c_char,
                     (*graph).nedges / 2 as libc::c_int,
                 );
             }
@@ -494,8 +339,8 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
                     as *const u8 as *const libc::c_char,
             );
             printf(
-                b"    counts each edge between vertices v and u only once.\n\n\0"
-                    as *const u8 as *const libc::c_char,
+                b"    counts each edge between vertices v and u only once.\n\n\0" as *const u8
+                    as *const libc::c_char,
             );
         }
         printf(
@@ -509,14 +354,14 @@ pub unsafe extern "C" fn ReadGraph(mut params: *mut params_t) -> *mut graph_t {
         exit(0 as libc::c_int);
     }
     gk_free(
-        &mut line as *mut *mut libc::c_char as *mut libc::c_void
-            as *mut *mut libc::c_void,
+        &mut line as *mut *mut libc::c_char as *mut libc::c_void as *mut *mut libc::c_void,
         0 as *mut *mut libc::c_void,
     );
     return graph;
 }
 #[no_mangle]
 pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
+    println!("Reading Mesh");
     let mut i: idx_t = 0;
     let mut j: idx_t = 0;
     let mut k: idx_t = 0;
@@ -537,8 +382,7 @@ pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
     let mut mesh: *mut mesh_t = 0 as *mut mesh_t;
     if gk_fexists((*params).filename) == 0 {
         errexit(
-            b"File %s does not exist!\n\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"File %s does not exist!\n\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             (*params).filename,
         );
     }
@@ -556,11 +400,10 @@ pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
         (*::core::mem::transmute::<&[u8; 9], &[libc::c_char; 9]>(b"ReadMesh\0")).as_ptr(),
     );
     loop {
-        if gk_getline(&mut line, &mut lnlen, fpin) == -(1 as libc::c_int) as libc::c_long
-        {
+        if gk_getline(&mut line, &mut lnlen, fpin) == -(1 as libc::c_int) as i64 {
             errexit(
-                b"Premature end of input file: file: %s\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Premature end of input file: file: %s\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 (*params).filename,
             );
         }
@@ -588,7 +431,7 @@ pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
             (*mesh).ne,
         );
     }
-    if (*mesh).ne as libc::c_ulong > nlines {
+    if (*mesh).ne as u64 > nlines {
         errexit(
             b"The file has %zu lines which smaller than the number of elements of %d specified in the header line.\n\0"
                 as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -597,23 +440,23 @@ pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
         );
     }
     ncon = (*mesh).ncon;
-    (*mesh)
-        .eptr = libmetis__ismalloc(
+    (*mesh).eptr = libmetis__ismalloc(
         ((*mesh).ne + 1 as libc::c_int) as size_t,
         0 as libc::c_int,
         b"ReadMesh: eptr\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     eptr = (*mesh).eptr;
-    (*mesh)
-        .eind = libmetis__imalloc(
+    (*mesh).eind = libmetis__imalloc(
         ntokens,
         b"ReadMesh: eind\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     eind = (*mesh).eind;
-    (*mesh)
-        .ewgt = libmetis__ismalloc(
-        ((if ncon == 0 as libc::c_int { 1 as libc::c_int } else { ncon }) * (*mesh).ne)
-            as size_t,
+    (*mesh).ewgt = libmetis__ismalloc(
+        ((if ncon == 0 as libc::c_int {
+            1 as libc::c_int
+        } else {
+            ncon
+        }) * (*mesh).ne) as size_t,
         1 as libc::c_int,
         b"ReadMesh: ewgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
@@ -623,12 +466,10 @@ pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
     i = 0 as libc::c_int;
     while i < (*mesh).ne {
         loop {
-            if gk_getline(&mut line, &mut lnlen, fpin)
-                == -(1 as libc::c_int) as libc::c_long
-            {
+            if gk_getline(&mut line, &mut lnlen, fpin) == -(1 as libc::c_int) as i64 {
                 errexit(
-                    b"Premature end of input file while reading element %d.\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                    b"Premature end of input file while reading element %d.\n\0" as *const u8
+                        as *const libc::c_char as *mut libc::c_char,
                     i + 1 as libc::c_int,
                 );
             }
@@ -640,10 +481,8 @@ pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
         newstr = 0 as *mut libc::c_char;
         l = 0 as libc::c_int;
         while l < ncon {
-            *ewgt
-                .offset(
-                    (i * ncon + l) as isize,
-                ) = strtol(curstr, &mut newstr, 10 as libc::c_int) as idx_t;
+            *ewgt.offset((i * ncon + l) as isize) =
+                strtol(curstr, &mut newstr, 10 as libc::c_int) as idx_t;
             if newstr == curstr {
                 errexit(
                     b"The line for vertex %d does not have enough weights for the %d constraints.\n\0"
@@ -654,8 +493,8 @@ pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
             }
             if *ewgt.offset((i * ncon + l) as isize) < 0 as libc::c_int {
                 errexit(
-                    b"The weight for element %d and constraint %d must be >= 0\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                    b"The weight for element %d and constraint %d must be >= 0\n\0" as *const u8
+                        as *const libc::c_char as *mut libc::c_char,
                     i + 1 as libc::c_int,
                     l,
                 );
@@ -687,13 +526,15 @@ pub unsafe extern "C" fn ReadMesh(mut params: *mut params_t) -> *mut mesh_t {
         i;
     }
     gk_fclose(fpin);
-    (*mesh).ncon = if ncon == 0 as libc::c_int { 1 as libc::c_int } else { ncon };
-    (*mesh)
-        .nn = libmetis__imax(*eptr.offset((*mesh).ne as isize) as size_t, eind)
-        + 1 as libc::c_int;
+    (*mesh).ncon = if ncon == 0 as libc::c_int {
+        1 as libc::c_int
+    } else {
+        ncon
+    };
+    (*mesh).nn =
+        libmetis__imax(*eptr.offset((*mesh).ne as isize) as size_t, eind) + 1 as libc::c_int;
     gk_free(
-        &mut line as *mut *mut libc::c_char as *mut libc::c_void
-            as *mut *mut libc::c_void,
+        &mut line as *mut *mut libc::c_char as *mut libc::c_void as *mut *mut libc::c_void,
         0 as *mut *mut libc::c_void,
     );
     return mesh;
@@ -714,8 +555,7 @@ pub unsafe extern "C" fn ReadTPwgts(mut params: *mut params_t, mut ncon: idx_t) 
     let mut newstr: *mut libc::c_char = 0 as *mut libc::c_char;
     let mut lnlen: size_t = 0 as libc::c_int as size_t;
     let mut fpin: *mut FILE = 0 as *mut FILE;
-    (*params)
-        .tpwgts = libmetis__rsmalloc(
+    (*params).tpwgts = libmetis__rsmalloc(
         ((*params).nparts * ncon) as size_t,
         -1.0f64 as real_t,
         b"ReadTPwgts: tpwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -725,10 +565,8 @@ pub unsafe extern "C" fn ReadTPwgts(mut params: *mut params_t, mut ncon: idx_t) 
         while i < (*params).nparts {
             j = 0 as libc::c_int;
             while j < ncon {
-                *((*params).tpwgts)
-                    .offset(
-                        (i * ncon + j) as isize,
-                    ) = (1.0f64 / (*params).nparts as libc::c_double) as real_t;
+                *((*params).tpwgts).offset((i * ncon + j) as isize) =
+                    (1.0f64 / (*params).nparts as libc::c_double) as real_t;
                 j += 1;
                 j;
             }
@@ -749,8 +587,7 @@ pub unsafe extern "C" fn ReadTPwgts(mut params: *mut params_t, mut ncon: idx_t) 
         b"r\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         b"ReadTPwgts: tpwgtsfile\0" as *const u8 as *const libc::c_char,
     );
-    while gk_getline(&mut line, &mut lnlen, fpin) != -(1 as libc::c_int) as libc::c_long
-    {
+    while gk_getline(&mut line, &mut lnlen, fpin) != -(1 as libc::c_int) as i64 {
         gk_strchr_replace(
             line,
             b" \0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -776,7 +613,8 @@ pub unsafe extern "C" fn ReadTPwgts(mut params: *mut params_t, mut ncon: idx_t) 
             if newstr == curstr {
                 errexit(
                     b"The 'to' component of line <%s> in the tpwgts file is incorrect.\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                        as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                     line,
                 );
             }
@@ -793,7 +631,8 @@ pub unsafe extern "C" fn ReadTPwgts(mut params: *mut params_t, mut ncon: idx_t) 
             if newstr == curstr {
                 errexit(
                     b"The 'fromcnum' component of line <%s> in the tpwgts file is incorrect.\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                        as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                     line,
                 );
             }
@@ -807,7 +646,8 @@ pub unsafe extern "C" fn ReadTPwgts(mut params: *mut params_t, mut ncon: idx_t) 
                 if newstr == curstr {
                     errexit(
                         b"The 'tocnum' component of line <%s> in the tpwgts file is incorrect.\n\0"
-                            as *const u8 as *const libc::c_char as *mut libc::c_char,
+                            as *const u8 as *const libc::c_char
+                            as *mut libc::c_char,
                         line,
                     );
                 }
@@ -824,34 +664,39 @@ pub unsafe extern "C" fn ReadTPwgts(mut params: *mut params_t, mut ncon: idx_t) 
             if newstr == curstr {
                 errexit(
                     b"The 'wgt' component of line <%s> in the tpwgts file is incorrect.\n\0"
-                        as *const u8 as *const libc::c_char as *mut libc::c_char,
+                        as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                     line,
                 );
             }
             curstr = newstr;
         } else {
             errexit(
-                b"The 'wgt' component of line <%s> in the tpwgts file is missing.\n\0"
-                    as *const u8 as *const libc::c_char as *mut libc::c_char,
+                b"The 'wgt' component of line <%s> in the tpwgts file is missing.\n\0" as *const u8
+                    as *const libc::c_char as *mut libc::c_char,
                 line,
             );
         }
-        if from < 0 as libc::c_int || to < 0 as libc::c_int || from >= (*params).nparts
+        if from < 0 as libc::c_int
+            || to < 0 as libc::c_int
+            || from >= (*params).nparts
             || to >= (*params).nparts
         {
             errexit(
-                b"Invalid partition range for %d:%d\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Invalid partition range for %d:%d\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 from,
                 to,
             );
         }
-        if fromcnum < 0 as libc::c_int || tocnum < 0 as libc::c_int || fromcnum >= ncon
+        if fromcnum < 0 as libc::c_int
+            || tocnum < 0 as libc::c_int
+            || fromcnum >= ncon
             || tocnum >= ncon
         {
             errexit(
-                b"Invalid constraint number range for %d:%d\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Invalid constraint number range for %d:%d\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 fromcnum,
                 tocnum,
             );
@@ -909,14 +754,11 @@ pub unsafe extern "C" fn ReadTPwgts(mut params: *mut params_t, mut ncon: idx_t) 
                     twgt as libc::c_double,
                 );
             }
-            awgt = ((1.0f64 - twgt as libc::c_double) / nleft as libc::c_double)
-                as real_t;
+            awgt = ((1.0f64 - twgt as libc::c_double) / nleft as libc::c_double) as real_t;
             i = 0 as libc::c_int;
             while i < (*params).nparts {
-                *((*params).tpwgts)
-                    .offset(
-                        (i * ncon + j) as isize,
-                    ) = if *((*params).tpwgts).offset((i * ncon + j) as isize)
+                *((*params).tpwgts).offset((i * ncon + j) as isize) = if *((*params).tpwgts)
+                    .offset((i * ncon + j) as isize)
                     < 0 as libc::c_int as libc::c_float
                 {
                     awgt
@@ -944,8 +786,7 @@ pub unsafe extern "C" fn ReadPOVector(
     fpin = gk_fopen(
         filename,
         b"r\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-        (*::core::mem::transmute::<&[u8; 13], &[libc::c_char; 13]>(b"ReadPOVector\0"))
-            .as_ptr(),
+        (*::core::mem::transmute::<&[u8; 13], &[libc::c_char; 13]>(b"ReadPOVector\0")).as_ptr(),
     );
     i = 0 as libc::c_int;
     while i < (*graph).nvtxs {
@@ -958,10 +799,7 @@ pub unsafe extern "C" fn ReadPOVector(
             errexit(
                 b"[%s] Premature end of file %s at line %d [nvtxs: %d]\n\0" as *const u8
                     as *const libc::c_char as *mut libc::c_char,
-                (*::core::mem::transmute::<
-                    &[u8; 13],
-                    &[libc::c_char; 13],
-                >(b"ReadPOVector\0"))
+                (*::core::mem::transmute::<&[u8; 13], &[libc::c_char; 13]>(b"ReadPOVector\0"))
                     .as_ptr(),
                 filename,
                 i,
@@ -992,8 +830,7 @@ pub unsafe extern "C" fn WritePartition(
     fpout = gk_fopen(
         filename.as_mut_ptr(),
         b"w\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-        (*::core::mem::transmute::<&[u8; 15], &[libc::c_char; 15]>(b"WritePartition\0"))
-            .as_ptr(),
+        (*::core::mem::transmute::<&[u8; 15], &[libc::c_char; 15]>(b"WritePartition\0")).as_ptr(),
     );
     i = 0 as libc::c_int;
     while i < n {
@@ -1019,8 +856,8 @@ pub unsafe extern "C" fn WriteMeshPartition(
     let mut fpout: *mut FILE = 0 as *mut FILE;
     let mut i: idx_t = 0;
     let mut filename: [libc::c_char; 256] = [0; 256];
-    sprintf(
-        filename.as_mut_ptr(),
+    fprintf(
+        fpout,
         b"%s.epart.%d\0" as *const u8 as *const libc::c_char,
         fname,
         nparts,
@@ -1028,10 +865,7 @@ pub unsafe extern "C" fn WriteMeshPartition(
     fpout = gk_fopen(
         filename.as_mut_ptr(),
         b"w\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-        (*::core::mem::transmute::<
-            &[u8; 19],
-            &[libc::c_char; 19],
-        >(b"WriteMeshPartition\0"))
+        (*::core::mem::transmute::<&[u8; 19], &[libc::c_char; 19]>(b"WriteMeshPartition\0"))
             .as_ptr(),
     );
     i = 0 as libc::c_int;
@@ -1054,10 +888,7 @@ pub unsafe extern "C" fn WriteMeshPartition(
     fpout = gk_fopen(
         filename.as_mut_ptr(),
         b"w\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-        (*::core::mem::transmute::<
-            &[u8; 19],
-            &[libc::c_char; 19],
-        >(b"WriteMeshPartition\0"))
+        (*::core::mem::transmute::<&[u8; 19], &[libc::c_char; 19]>(b"WriteMeshPartition\0"))
             .as_ptr(),
     );
     i = 0 as libc::c_int;
@@ -1089,11 +920,7 @@ pub unsafe extern "C" fn WritePermutation(
     fpout = gk_fopen(
         filename.as_mut_ptr(),
         b"w\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-        (*::core::mem::transmute::<
-            &[u8; 17],
-            &[libc::c_char; 17],
-        >(b"WritePermutation\0"))
-            .as_ptr(),
+        (*::core::mem::transmute::<&[u8; 17], &[libc::c_char; 17]>(b"WritePermutation\0")).as_ptr(),
     );
     i = 0 as libc::c_int;
     while i < n {
@@ -1108,10 +935,7 @@ pub unsafe extern "C" fn WritePermutation(
     gk_fclose(fpout);
 }
 #[no_mangle]
-pub unsafe extern "C" fn WriteGraph(
-    mut graph: *mut graph_t,
-    mut filename: *mut libc::c_char,
-) {
+pub unsafe extern "C" fn WriteGraph(mut graph: *mut graph_t, mut filename: *mut libc::c_char) {
     let mut i: idx_t = 0;
     let mut j: idx_t = 0;
     let mut nvtxs: idx_t = 0;
@@ -1171,8 +995,7 @@ pub unsafe extern "C" fn WriteGraph(
     fpout = gk_fopen(
         filename,
         b"w\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
-        (*::core::mem::transmute::<&[u8; 11], &[libc::c_char; 11]>(b"WriteGraph\0"))
-            .as_ptr(),
+        (*::core::mem::transmute::<&[u8; 11], &[libc::c_char; 11]>(b"WriteGraph\0")).as_ptr(),
     );
     fprintf(
         fpout,
@@ -1189,7 +1012,11 @@ pub unsafe extern "C" fn WriteGraph(
             hasewgt,
         );
         if hasvwgt != 0 {
-            fprintf(fpout, b" %d\0" as *const u8 as *const libc::c_char, (*graph).ncon);
+            fprintf(
+                fpout,
+                b" %d\0" as *const u8 as *const libc::c_char,
+                (*graph).ncon,
+            );
         }
     }
     i = 0 as libc::c_int;

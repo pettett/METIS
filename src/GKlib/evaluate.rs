@@ -2,7 +2,7 @@ use ::libc;
 extern "C" {
     fn sqrt(_: libc::c_double) -> libc::c_double;
 }
-pub type __ssize_t = libc::c_long;
+pub type __ssize_t = i64;
 pub type ssize_t = __ssize_t;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -26,7 +26,7 @@ pub unsafe extern "C" fn ComputeAccuracy(
     i = 0 as libc::c_int;
     while i < n {
         P
-            += if (*list.offset(i as isize)).val == 1 as libc::c_int as libc::c_long {
+            += if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
                 1 as libc::c_int
             } else {
                 0 as libc::c_int
@@ -39,7 +39,7 @@ pub unsafe extern "C" fn ComputeAccuracy(
     TP = FN;
     i = 0 as libc::c_int;
     while i < n {
-        if (*list.offset(i as isize)).val == 1 as libc::c_int as libc::c_long {
+        if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
             TP += 1;
             TP;
         } else {
@@ -81,7 +81,7 @@ pub unsafe extern "C" fn ComputeROCn(
     i = 0 as libc::c_int;
     while i < n {
         P
-            += if (*list.offset(i as isize)).val == 1 as libc::c_int as libc::c_long {
+            += if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
                 1 as libc::c_int
             } else {
                 0 as libc::c_int
@@ -97,7 +97,7 @@ pub unsafe extern "C" fn ComputeROCn(
             FPprev = FP;
             TPprev = TP;
         }
-        if (*list.offset(i as isize)).val == 1 as libc::c_int as libc::c_long {
+        if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
             TP += 1;
             TP;
         } else {
@@ -129,7 +129,7 @@ pub unsafe extern "C" fn ComputeMedianRFP(
     P = N;
     i = 0 as libc::c_int;
     while i < n {
-        if (*list.offset(i as isize)).val == 1 as libc::c_int as libc::c_long {
+        if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
             P += 1;
             P;
         } else {
@@ -143,7 +143,7 @@ pub unsafe extern "C" fn ComputeMedianRFP(
     FP = TP;
     i = 0 as libc::c_int;
     while i < n && TP < (P + 1 as libc::c_int) / 2 as libc::c_int {
-        if (*list.offset(i as isize)).val == 1 as libc::c_int as libc::c_long {
+        if (*list.offset(i as isize)).val == 1 as libc::c_int as i64 {
             TP += 1;
             TP;
         } else {

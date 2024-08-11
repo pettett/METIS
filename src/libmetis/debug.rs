@@ -1,203 +1,13 @@
 use ::libc;
-extern "C" {
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
-    fn libmetis__iargmax(n: size_t, x: *mut idx_t) -> size_t;
-    fn libmetis__ismalloc(n: size_t, ival: idx_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__wspacepop(ctrl: *mut ctrl_t);
-    fn libmetis__wspacemalloc(ctrl: *mut ctrl_t, nbytes: size_t) -> *mut libc::c_void;
-    fn libmetis__wspacepush(ctrl: *mut ctrl_t);
-}
-pub type __int32_t = libc::c_int;
-pub type __ssize_t = libc::c_long;
-pub type int32_t = __int32_t;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mop_t {
-    pub type_0: libc::c_int,
-    pub nbytes: ssize_t,
-    pub ptr: *mut libc::c_void,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mcore_t {
-    pub coresize: size_t,
-    pub corecpos: size_t,
-    pub core: *mut libc::c_void,
-    pub nmops: size_t,
-    pub cmop: size_t,
-    pub mops: *mut gk_mop_t,
-    pub num_callocs: size_t,
-    pub num_hallocs: size_t,
-    pub size_callocs: size_t,
-    pub size_hallocs: size_t,
-    pub cur_callocs: size_t,
-    pub cur_hallocs: size_t,
-    pub max_callocs: size_t,
-    pub max_hallocs: size_t,
-}
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-pub type moptype_et = libc::c_uint;
-pub const METIS_OP_OMETIS: moptype_et = 2;
-pub const METIS_OP_KMETIS: moptype_et = 1;
-pub const METIS_OP_PMETIS: moptype_et = 0;
-pub type mctype_et = libc::c_uint;
-pub const METIS_CTYPE_SHEM: mctype_et = 1;
-pub const METIS_CTYPE_RM: mctype_et = 0;
-pub type miptype_et = libc::c_uint;
-pub const METIS_IPTYPE_METISRB: miptype_et = 4;
-pub const METIS_IPTYPE_NODE: miptype_et = 3;
-pub const METIS_IPTYPE_EDGE: miptype_et = 2;
-pub const METIS_IPTYPE_RANDOM: miptype_et = 1;
-pub const METIS_IPTYPE_GROW: miptype_et = 0;
-pub type mrtype_et = libc::c_uint;
-pub const METIS_RTYPE_SEP1SIDED: mrtype_et = 3;
-pub const METIS_RTYPE_SEP2SIDED: mrtype_et = 2;
-pub const METIS_RTYPE_GREEDY: mrtype_et = 1;
-pub const METIS_RTYPE_FM: mrtype_et = 0;
-pub type mdbglvl_et = libc::c_uint;
-pub const METIS_DBG_MEMORY: mdbglvl_et = 2048;
-pub const METIS_DBG_CONTIGINFO: mdbglvl_et = 256;
-pub const METIS_DBG_CONNINFO: mdbglvl_et = 128;
-pub const METIS_DBG_SEPINFO: mdbglvl_et = 64;
-pub const METIS_DBG_MOVEINFO: mdbglvl_et = 32;
-pub const METIS_DBG_IPART: mdbglvl_et = 16;
-pub const METIS_DBG_REFINE: mdbglvl_et = 8;
-pub const METIS_DBG_COARSEN: mdbglvl_et = 4;
-pub const METIS_DBG_TIME: mdbglvl_et = 2;
-pub const METIS_DBG_INFO: mdbglvl_et = 1;
-pub type mobjtype_et = libc::c_uint;
-pub const METIS_OBJTYPE_NODE: mobjtype_et = 2;
-pub const METIS_OBJTYPE_VOL: mobjtype_et = 1;
-pub const METIS_OBJTYPE_CUT: mobjtype_et = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct cnbr_t {
-    pub pid: idx_t,
-    pub ed: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vnbr_t {
-    pub pid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ctrl_t {
-    pub optype: moptype_et,
-    pub objtype: mobjtype_et,
-    pub dbglvl: mdbglvl_et,
-    pub ctype: mctype_et,
-    pub iptype: miptype_et,
-    pub rtype: mrtype_et,
-    pub CoarsenTo: idx_t,
-    pub nIparts: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub seed: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub numflag: idx_t,
-    pub maxvwgt: *mut idx_t,
-    pub ncon: idx_t,
-    pub nparts: idx_t,
-    pub pfactor: real_t,
-    pub ubfactors: *mut real_t,
-    pub tpwgts: *mut real_t,
-    pub pijbm: *mut real_t,
-    pub cfactor: real_t,
-    pub TotalTmr: libc::c_double,
-    pub InitPartTmr: libc::c_double,
-    pub MatchTmr: libc::c_double,
-    pub ContractTmr: libc::c_double,
-    pub CoarsenTmr: libc::c_double,
-    pub UncoarsenTmr: libc::c_double,
-    pub RefTmr: libc::c_double,
-    pub ProjectTmr: libc::c_double,
-    pub SplitTmr: libc::c_double,
-    pub Aux1Tmr: libc::c_double,
-    pub Aux2Tmr: libc::c_double,
-    pub Aux3Tmr: libc::c_double,
-    pub mcore: *mut gk_mcore_t,
-    pub nbrpoolsize: size_t,
-    pub nbrpoolcpos: size_t,
-    pub nbrpoolreallocs: size_t,
-    pub cnbrpool: *mut cnbr_t,
-    pub vnbrpool: *mut vnbr_t,
-    pub maxnads: *mut idx_t,
-    pub nads: *mut idx_t,
-    pub adids: *mut *mut idx_t,
-    pub adwgts: *mut *mut idx_t,
-    pub pvec1: *mut idx_t,
-    pub pvec2: *mut idx_t,
-}
+use libc::printf;
+
+use crate::GKlib::memory::gk_free;
+
+use super::{
+    gklib::{libmetis__iargmax, libmetis__ismalloc},
+    structure::*,
+    wspace::{libmetis__wspacemalloc, libmetis__wspacepop, libmetis__wspacepush},
+};
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__ComputeCut(
     mut graph: *mut graph_t,
@@ -264,13 +74,12 @@ pub unsafe extern "C" fn libmetis__ComputeVolume(
     xadj = (*graph).xadj;
     adjncy = (*graph).adjncy;
     vsize = (*graph).vsize;
-    nparts = *where_0.offset(libmetis__iargmax(nvtxs as size_t, where_0) as isize)
-        + 1 as libc::c_int;
+    nparts =
+        *where_0.offset(libmetis__iargmax(nvtxs as size_t, where_0) as isize) + 1 as libc::c_int;
     marker = libmetis__ismalloc(
         nparts as size_t,
         -(1 as libc::c_int),
-        b"ComputeVolume: marker\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"ComputeVolume: marker\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     totalv = 0 as libc::c_int;
     i = 0 as libc::c_int;
@@ -281,12 +90,11 @@ pub unsafe extern "C" fn libmetis__ComputeVolume(
             k = *where_0.offset(*adjncy.offset(j as isize) as isize);
             if *marker.offset(k as isize) != i {
                 *marker.offset(k as isize) = i;
-                totalv
-                    += if !vsize.is_null() {
-                        *vsize.offset(i as isize)
-                    } else {
-                        1 as libc::c_int
-                    };
+                totalv += if !vsize.is_null() {
+                    *vsize.offset(i as isize)
+                } else {
+                    1 as libc::c_int
+                };
             }
             j += 1;
             j;
@@ -323,8 +131,7 @@ pub unsafe extern "C" fn libmetis__ComputeMaxCut(
                 if *where_0.offset(i as isize)
                     != *where_0.offset(*((*graph).adjncy).offset(j as isize) as isize)
                 {
-                    let ref mut fresh0 = *cuts
-                        .offset(*where_0.offset(i as isize) as isize);
+                    let ref mut fresh0 = *cuts.offset(*where_0.offset(i as isize) as isize);
                     *fresh0 += 1;
                     *fresh0;
                 }
@@ -342,8 +149,7 @@ pub unsafe extern "C" fn libmetis__ComputeMaxCut(
                 if *where_0.offset(i as isize)
                     != *where_0.offset(*((*graph).adjncy).offset(j as isize) as isize)
                 {
-                    let ref mut fresh1 = *cuts
-                        .offset(*where_0.offset(i as isize) as isize);
+                    let ref mut fresh1 = *cuts.offset(*where_0.offset(i as isize) as isize);
                     *fresh1 += *((*graph).adjwgt).offset(j as isize);
                 }
                 j += 1;
@@ -393,9 +199,7 @@ pub unsafe extern "C" fn libmetis__CheckBnd(mut graph: *mut graph_t) -> idx_t {
         }
         j = *xadj.offset(i as isize);
         while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
-            if *where_0.offset(i as isize)
-                != *where_0.offset(*adjncy.offset(j as isize) as isize)
-            {
+            if *where_0.offset(i as isize) != *where_0.offset(*adjncy.offset(j as isize) as isize) {
                 nbnd += 1;
                 nbnd;
                 break;
@@ -435,9 +239,7 @@ pub unsafe extern "C" fn libmetis__CheckBnd2(mut graph: *mut graph_t) -> idx_t {
         id = ed;
         j = *xadj.offset(i as isize);
         while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
-            if *where_0.offset(i as isize)
-                != *where_0.offset(*adjncy.offset(j as isize) as isize)
-            {
+            if *where_0.offset(i as isize) != *where_0.offset(*adjncy.offset(j as isize) as isize) {
                 ed += *((*graph).adjwgt).offset(j as isize);
             } else {
                 id += *((*graph).adjwgt).offset(j as isize);
@@ -516,9 +318,7 @@ pub unsafe extern "C" fn libmetis__CheckRInfo(
     return 1 as libc::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(
-    mut graph: *mut graph_t,
-) -> idx_t {
+pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(mut graph: *mut graph_t) -> idx_t {
     let mut i: idx_t = 0;
     let mut j: idx_t = 0;
     let mut k: idx_t = 0;
@@ -553,18 +353,15 @@ pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(
             while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
                 other = *where_0.offset(*adjncy.offset(j as isize) as isize);
                 if other != 2 as libc::c_int {
-                    edegrees[other as usize]
-                        += *vwgt.offset(*adjncy.offset(j as isize) as isize);
+                    edegrees[other as usize] += *vwgt.offset(*adjncy.offset(j as isize) as isize);
                 }
                 j += 1;
                 j;
             }
             if edegrees[0 as libc::c_int as usize]
-                != (*((*graph).nrinfo).offset(i as isize))
-                    .edegrees[0 as libc::c_int as usize]
+                != (*((*graph).nrinfo).offset(i as isize)).edegrees[0 as libc::c_int as usize]
                 || edegrees[1 as libc::c_int as usize]
-                    != (*((*graph).nrinfo).offset(i as isize))
-                        .edegrees[1 as libc::c_int as usize]
+                    != (*((*graph).nrinfo).offset(i as isize)).edegrees[1 as libc::c_int as usize]
             {
                 printf(
                     b"Something wrong with edegrees: %d %d %d %d %d\n\0" as *const u8
@@ -572,10 +369,8 @@ pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(
                     i,
                     edegrees[0 as libc::c_int as usize],
                     edegrees[1 as libc::c_int as usize],
-                    (*((*graph).nrinfo).offset(i as isize))
-                        .edegrees[0 as libc::c_int as usize],
-                    (*((*graph).nrinfo).offset(i as isize))
-                        .edegrees[1 as libc::c_int as usize],
+                    (*((*graph).nrinfo).offset(i as isize)).edegrees[0 as libc::c_int as usize],
+                    (*((*graph).nrinfo).offset(i as isize)).edegrees[1 as libc::c_int as usize],
                 );
                 return 0 as libc::c_int;
             }
@@ -583,12 +378,9 @@ pub unsafe extern "C" fn libmetis__CheckNodePartitionParams(
         i += 1;
         i;
     }
-    if pwgts[0 as libc::c_int as usize]
-        != *((*graph).pwgts).offset(0 as libc::c_int as isize)
-        || pwgts[1 as libc::c_int as usize]
-            != *((*graph).pwgts).offset(1 as libc::c_int as isize)
-        || pwgts[2 as libc::c_int as usize]
-            != *((*graph).pwgts).offset(2 as libc::c_int as isize)
+    if pwgts[0 as libc::c_int as usize] != *((*graph).pwgts).offset(0 as libc::c_int as isize)
+        || pwgts[1 as libc::c_int as usize] != *((*graph).pwgts).offset(1 as libc::c_int as isize)
+        || pwgts[2 as libc::c_int as usize] != *((*graph).pwgts).offset(2 as libc::c_int as isize)
     {
         printf(
             b"Something wrong with part-weights: %d %d %d %d %d %d\n\0" as *const u8
@@ -679,8 +471,7 @@ pub unsafe extern "C" fn libmetis__CheckKWayVolPartitionParams(
     rinfo = (*graph).vkrinfo;
     tmpnbrs = libmetis__wspacemalloc(
         ctrl,
-        ((*ctrl).nparts as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<vnbr_t>() as libc::c_ulong),
+        ((*ctrl).nparts as u64).wrapping_mul(::core::mem::size_of::<vnbr_t>() as u64),
     ) as *mut vnbr_t;
     i = 0 as libc::c_int;
     while i < nvtxs {
@@ -803,12 +594,9 @@ pub unsafe extern "C" fn libmetis__CheckKWayVolPartitionParams(
             kk = 0 as libc::c_int;
             while kk < tmprinfo.nnbrs {
                 if (*tmpnbrs.offset(kk as isize)).pid == pid {
-                    if (*tmpnbrs.offset(kk as isize)).gv
-                        != (*mynbrs.offset(k as isize)).gv
-                    {
+                    if (*tmpnbrs.offset(kk as isize)).gv != (*mynbrs.offset(k as isize)).gv {
                         printf(
-                            b"[%8d %8d %8d %+8d %+8d]\n\0" as *const u8
-                                as *const libc::c_char,
+                            b"[%8d %8d %8d %+8d %+8d]\n\0" as *const u8 as *const libc::c_char,
                             i,
                             *where_0.offset(i as isize),
                             pid,

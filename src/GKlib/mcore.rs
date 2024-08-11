@@ -1,103 +1,60 @@
 use ::libc;
-extern "C" {
-    fn malloc(_: libc::c_ulong) -> *mut libc::c_void;
-    fn realloc(_: *mut libc::c_void, _: libc::c_ulong) -> *mut libc::c_void;
-    fn free(_: *mut libc::c_void);
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn memset(
-        _: *mut libc::c_void,
-        _: libc::c_int,
-        _: libc::c_ulong,
-    ) -> *mut libc::c_void;
-    fn gk_malloc(nbytes: size_t, msg: *mut libc::c_char) -> *mut libc::c_void;
-    fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
-    fn errexit(_: *mut libc::c_char, _: ...);
-    fn gk_errexit(signum: libc::c_int, _: *mut libc::c_char, _: ...);
-}
-pub type __ssize_t = libc::c_long;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mop_t {
-    pub type_0: libc::c_int,
-    pub nbytes: ssize_t,
-    pub ptr: *mut libc::c_void,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mcore_t {
-    pub coresize: size_t,
-    pub corecpos: size_t,
-    pub core: *mut libc::c_void,
-    pub nmops: size_t,
-    pub cmop: size_t,
-    pub mops: *mut gk_mop_t,
-    pub num_callocs: size_t,
-    pub num_hallocs: size_t,
-    pub size_callocs: size_t,
-    pub size_hallocs: size_t,
-    pub cur_callocs: size_t,
-    pub cur_hallocs: size_t,
-    pub max_callocs: size_t,
-    pub max_hallocs: size_t,
-}
+use libc::{free, malloc, memset, printf, realloc};
+
+use crate::libmetis::structure::*;
+
+use super::{
+    error::{errexit, gk_errexit},
+    memory::{gk_free, gk_malloc},
+};
+
 #[no_mangle]
 pub unsafe extern "C" fn gk_mcoreCreate(mut coresize: size_t) -> *mut gk_mcore_t {
     let mut mcore: *mut gk_mcore_t = 0 as *mut gk_mcore_t;
     mcore = gk_malloc(
-        ::core::mem::size_of::<gk_mcore_t>() as libc::c_ulong,
-        b"gk_mcoreCreate: mcore\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        ::core::mem::size_of::<gk_mcore_t>() as u64,
+        b"gk_mcoreCreate: mcore\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut gk_mcore_t;
     memset(
         mcore as *mut libc::c_void,
         0 as libc::c_int,
-        ::core::mem::size_of::<gk_mcore_t>() as libc::c_ulong,
+        ::core::mem::size_of::<gk_mcore_t>(),
     );
     (*mcore).coresize = coresize;
     (*mcore).corecpos = 0 as libc::c_int as size_t;
-    (*mcore)
-        .core = if coresize == 0 as libc::c_int as libc::c_ulong {
+    (*mcore).core = if coresize == 0 as libc::c_int as u64 {
         0 as *mut libc::c_void
     } else {
         gk_malloc(
             (*mcore).coresize,
-            b"gk_mcoreCreate: core\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_mcoreCreate: core\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         )
     };
     (*mcore).nmops = 2048 as libc::c_int as size_t;
     (*mcore).cmop = 0 as libc::c_int as size_t;
-    (*mcore)
-        .mops = gk_malloc(
-        ((*mcore).nmops)
-            .wrapping_mul(::core::mem::size_of::<gk_mop_t>() as libc::c_ulong),
-        b"gk_mcoreCreate: mcore->mops\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+    (*mcore).mops = gk_malloc(
+        ((*mcore).nmops).wrapping_mul(::core::mem::size_of::<gk_mop_t>() as u64),
+        b"gk_mcoreCreate: mcore->mops\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut gk_mop_t;
     return mcore;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_gkmcoreCreate() -> *mut gk_mcore_t {
     let mut mcore: *mut gk_mcore_t = 0 as *mut gk_mcore_t;
-    mcore = malloc(::core::mem::size_of::<gk_mcore_t>() as libc::c_ulong)
-        as *mut gk_mcore_t;
+    mcore = malloc(::core::mem::size_of::<gk_mcore_t>()) as *mut gk_mcore_t;
     if mcore.is_null() {
         return 0 as *mut gk_mcore_t;
     }
     memset(
         mcore as *mut libc::c_void,
         0 as libc::c_int,
-        ::core::mem::size_of::<gk_mcore_t>() as libc::c_ulong,
+        ::core::mem::size_of::<gk_mcore_t>(),
     );
     (*mcore).nmops = 2048 as libc::c_int as size_t;
     (*mcore).cmop = 0 as libc::c_int as size_t;
-    (*mcore)
-        .mops = malloc(
-        ((*mcore).nmops)
-            .wrapping_mul(::core::mem::size_of::<gk_mop_t>() as libc::c_ulong),
-    ) as *mut gk_mop_t;
+    (*mcore).mops =
+        malloc(((*mcore).nmops).wrapping_mul(::core::mem::size_of::<gk_mop_t>() as u64) as usize)
+            as *mut gk_mop_t;
     if ((*mcore).mops).is_null() {
         free(mcore as *mut libc::c_void);
         return 0 as *mut gk_mcore_t;
@@ -130,9 +87,9 @@ pub unsafe extern "C" fn gk_mcoreDestroy(
             (*mcore).max_hallocs,
         );
     }
-    if (*mcore).cur_callocs != 0 as libc::c_int as libc::c_ulong
-        || (*mcore).cur_hallocs != 0 as libc::c_int as libc::c_ulong
-        || (*mcore).cmop != 0 as libc::c_int as libc::c_ulong
+    if (*mcore).cur_callocs != 0 as libc::c_int as u64
+        || (*mcore).cur_hallocs != 0 as libc::c_int as u64
+        || (*mcore).cmop != 0 as libc::c_int as u64
     {
         printf(
             b"***Warning: mcore memory was not fully freed when destroyed.\n cur_callocs: %6zu  cur_hallocs: %6zu cmop: %6zu\n\0"
@@ -171,9 +128,7 @@ pub unsafe extern "C" fn gk_gkmcoreDestroy(
             (*mcore).max_hallocs,
         );
     }
-    if (*mcore).cur_hallocs != 0 as libc::c_int as libc::c_ulong
-        || (*mcore).cmop != 0 as libc::c_int as libc::c_ulong
-    {
+    if (*mcore).cur_hallocs != 0 as libc::c_int as u64 || (*mcore).cmop != 0 as libc::c_int as u64 {
         printf(
             b"***Warning: mcore memory was not fully freed when destroyed.\n cur_hallocs: %6zu cmop: %6zu\n\0"
                 as *const u8 as *const libc::c_char,
@@ -191,29 +146,22 @@ pub unsafe extern "C" fn gk_mcoreMalloc(
     mut nbytes: size_t,
 ) -> *mut libc::c_void {
     let mut ptr: *mut libc::c_void = 0 as *mut libc::c_void;
-    nbytes = (nbytes as libc::c_ulong)
-        .wrapping_add(
-            if nbytes.wrapping_rem(8 as libc::c_int as libc::c_ulong)
-                == 0 as libc::c_int as libc::c_ulong
-            {
-                0 as libc::c_int as libc::c_ulong
-            } else {
-                (8 as libc::c_int as libc::c_ulong)
-                    .wrapping_sub(nbytes.wrapping_rem(8 as libc::c_int as libc::c_ulong))
-            },
-        ) as size_t as size_t;
+    nbytes = (nbytes as u64).wrapping_add(
+        if nbytes.wrapping_rem(8 as libc::c_int as u64) == 0 as libc::c_int as u64 {
+            0 as libc::c_int as u64
+        } else {
+            (8 as libc::c_int as u64).wrapping_sub(nbytes.wrapping_rem(8 as libc::c_int as u64))
+        },
+    ) as size_t as size_t;
     if ((*mcore).corecpos).wrapping_add(nbytes) < (*mcore).coresize {
         ptr = ((*mcore).core as *mut libc::c_char).offset((*mcore).corecpos as isize)
             as *mut libc::c_void;
-        (*mcore)
-            .corecpos = ((*mcore).corecpos as libc::c_ulong).wrapping_add(nbytes)
-            as size_t as size_t;
+        (*mcore).corecpos = ((*mcore).corecpos as u64).wrapping_add(nbytes) as size_t as size_t;
         gk_mcoreAdd(mcore, 2 as libc::c_int, nbytes, ptr);
     } else {
         ptr = gk_malloc(
             nbytes,
-            b"gk_mcoremalloc: ptr\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_mcoremalloc: ptr\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         gk_mcoreAdd(mcore, 3 as libc::c_int, nbytes, ptr);
     }
@@ -239,7 +187,7 @@ pub unsafe extern "C" fn gk_gkmcorePush(mut mcore: *mut gk_mcore_t) {
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_mcorePop(mut mcore: *mut gk_mcore_t) {
-    while (*mcore).cmop > 0 as libc::c_int as libc::c_ulong {
+    while (*mcore).cmop > 0 as libc::c_int as u64 {
         (*mcore).cmop = ((*mcore).cmop).wrapping_sub(1);
         (*mcore).cmop;
         match (*((*mcore).mops).offset((*mcore).cmop as isize)).type_0 {
@@ -248,8 +196,7 @@ pub unsafe extern "C" fn gk_mcorePop(mut mcore: *mut gk_mcore_t) {
             }
             2 => {
                 if (*mcore).corecpos
-                    < (*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes
-                        as libc::c_ulong
+                    < (*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes as u64
                 {
                     errexit(
                         b"Internal Error: wspace's core is about to be over-freed [%zu, %zu, %zd]\n\0"
@@ -259,18 +206,12 @@ pub unsafe extern "C" fn gk_mcorePop(mut mcore: *mut gk_mcore_t) {
                         (*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes,
                     );
                 }
-                (*mcore)
-                    .corecpos = ((*mcore).corecpos as libc::c_ulong)
-                    .wrapping_sub(
-                        (*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes
-                            as libc::c_ulong,
-                    ) as size_t as size_t;
-                (*mcore)
-                    .cur_callocs = ((*mcore).cur_callocs as libc::c_ulong)
-                    .wrapping_sub(
-                        (*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes
-                            as libc::c_ulong,
-                    ) as size_t as size_t;
+                (*mcore).corecpos = ((*mcore).corecpos as u64)
+                    .wrapping_sub((*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes as u64)
+                    as size_t as size_t;
+                (*mcore).cur_callocs = ((*mcore).cur_callocs as u64)
+                    .wrapping_sub((*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes as u64)
+                    as size_t as size_t;
             }
             3 => {
                 gk_free(
@@ -278,12 +219,9 @@ pub unsafe extern "C" fn gk_mcorePop(mut mcore: *mut gk_mcore_t) {
                         as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
-                (*mcore)
-                    .cur_hallocs = ((*mcore).cur_hallocs as libc::c_ulong)
-                    .wrapping_sub(
-                        (*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes
-                            as libc::c_ulong,
-                    ) as size_t as size_t;
+                (*mcore).cur_hallocs = ((*mcore).cur_hallocs as u64)
+                    .wrapping_sub((*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes as u64)
+                    as size_t as size_t;
             }
             _ => {
                 gk_errexit(
@@ -298,7 +236,7 @@ pub unsafe extern "C" fn gk_mcorePop(mut mcore: *mut gk_mcore_t) {
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_gkmcorePop(mut mcore: *mut gk_mcore_t) {
-    while (*mcore).cmop > 0 as libc::c_int as libc::c_ulong {
+    while (*mcore).cmop > 0 as libc::c_int as u64 {
         (*mcore).cmop = ((*mcore).cmop).wrapping_sub(1);
         (*mcore).cmop;
         match (*((*mcore).mops).offset((*mcore).cmop as isize)).type_0 {
@@ -307,12 +245,9 @@ pub unsafe extern "C" fn gk_gkmcorePop(mut mcore: *mut gk_mcore_t) {
             }
             3 => {
                 free((*((*mcore).mops).offset((*mcore).cmop as isize)).ptr);
-                (*mcore)
-                    .cur_hallocs = ((*mcore).cur_hallocs as libc::c_ulong)
-                    .wrapping_sub(
-                        (*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes
-                            as libc::c_ulong,
-                    ) as size_t as size_t;
+                (*mcore).cur_hallocs = ((*mcore).cur_hallocs as u64)
+                    .wrapping_sub((*((*mcore).mops).offset((*mcore).cmop as isize)).nbytes as u64)
+                    as size_t as size_t;
             }
             _ => {
                 gk_errexit(
@@ -333,20 +268,17 @@ pub unsafe extern "C" fn gk_mcoreAdd(
     mut ptr: *mut libc::c_void,
 ) {
     if (*mcore).cmop == (*mcore).nmops {
-        (*mcore)
-            .nmops = ((*mcore).nmops as libc::c_ulong)
-            .wrapping_mul(2 as libc::c_int as libc::c_ulong) as size_t as size_t;
-        (*mcore)
-            .mops = realloc(
+        (*mcore).nmops =
+            ((*mcore).nmops as u64).wrapping_mul(2 as libc::c_int as u64) as size_t as size_t;
+        (*mcore).mops = realloc(
             (*mcore).mops as *mut libc::c_void,
-            ((*mcore).nmops)
-                .wrapping_mul(::core::mem::size_of::<gk_mop_t>() as libc::c_ulong),
+            ((*mcore).nmops).wrapping_mul(::core::mem::size_of::<gk_mop_t>() as u64) as usize,
         ) as *mut gk_mop_t;
         if ((*mcore).mops).is_null() {
             gk_errexit(
                 6 as libc::c_int,
-                b"***Memory allocation for gkmcore failed.\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"***Memory allocation for gkmcore failed.\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             );
         }
     }
@@ -361,12 +293,10 @@ pub unsafe extern "C" fn gk_mcoreAdd(
         2 => {
             (*mcore).num_callocs = ((*mcore).num_callocs).wrapping_add(1);
             (*mcore).num_callocs;
-            (*mcore)
-                .size_callocs = ((*mcore).size_callocs as libc::c_ulong)
-                .wrapping_add(nbytes) as size_t as size_t;
-            (*mcore)
-                .cur_callocs = ((*mcore).cur_callocs as libc::c_ulong)
-                .wrapping_add(nbytes) as size_t as size_t;
+            (*mcore).size_callocs =
+                ((*mcore).size_callocs as u64).wrapping_add(nbytes) as size_t as size_t;
+            (*mcore).cur_callocs =
+                ((*mcore).cur_callocs as u64).wrapping_add(nbytes) as size_t as size_t;
             if (*mcore).max_callocs < (*mcore).cur_callocs {
                 (*mcore).max_callocs = (*mcore).cur_callocs;
             }
@@ -374,12 +304,10 @@ pub unsafe extern "C" fn gk_mcoreAdd(
         3 => {
             (*mcore).num_hallocs = ((*mcore).num_hallocs).wrapping_add(1);
             (*mcore).num_hallocs;
-            (*mcore)
-                .size_hallocs = ((*mcore).size_hallocs as libc::c_ulong)
-                .wrapping_add(nbytes) as size_t as size_t;
-            (*mcore)
-                .cur_hallocs = ((*mcore).cur_hallocs as libc::c_ulong)
-                .wrapping_add(nbytes) as size_t as size_t;
+            (*mcore).size_hallocs =
+                ((*mcore).size_hallocs as u64).wrapping_add(nbytes) as size_t as size_t;
+            (*mcore).cur_hallocs =
+                ((*mcore).cur_hallocs as u64).wrapping_add(nbytes) as size_t as size_t;
             if (*mcore).max_hallocs < (*mcore).cur_hallocs {
                 (*mcore).max_hallocs = (*mcore).cur_hallocs;
             }
@@ -387,8 +315,8 @@ pub unsafe extern "C" fn gk_mcoreAdd(
         _ => {
             gk_errexit(
                 6 as libc::c_int,
-                b"Incorrect mcore type operation.\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Incorrect mcore type operation.\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             );
         }
     };
@@ -401,20 +329,17 @@ pub unsafe extern "C" fn gk_gkmcoreAdd(
     mut ptr: *mut libc::c_void,
 ) {
     if (*mcore).cmop == (*mcore).nmops {
-        (*mcore)
-            .nmops = ((*mcore).nmops as libc::c_ulong)
-            .wrapping_mul(2 as libc::c_int as libc::c_ulong) as size_t as size_t;
-        (*mcore)
-            .mops = realloc(
+        (*mcore).nmops =
+            ((*mcore).nmops as u64).wrapping_mul(2 as libc::c_int as u64) as size_t as size_t;
+        (*mcore).mops = realloc(
             (*mcore).mops as *mut libc::c_void,
-            ((*mcore).nmops)
-                .wrapping_mul(::core::mem::size_of::<gk_mop_t>() as libc::c_ulong),
+            ((*mcore).nmops).wrapping_mul(::core::mem::size_of::<gk_mop_t>() as u64) as usize,
         ) as *mut gk_mop_t;
         if ((*mcore).mops).is_null() {
             gk_errexit(
                 6 as libc::c_int,
-                b"***Memory allocation for gkmcore failed.\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"***Memory allocation for gkmcore failed.\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             );
         }
     }
@@ -429,12 +354,10 @@ pub unsafe extern "C" fn gk_gkmcoreAdd(
         3 => {
             (*mcore).num_hallocs = ((*mcore).num_hallocs).wrapping_add(1);
             (*mcore).num_hallocs;
-            (*mcore)
-                .size_hallocs = ((*mcore).size_hallocs as libc::c_ulong)
-                .wrapping_add(nbytes) as size_t as size_t;
-            (*mcore)
-                .cur_hallocs = ((*mcore).cur_hallocs as libc::c_ulong)
-                .wrapping_add(nbytes) as size_t as size_t;
+            (*mcore).size_hallocs =
+                ((*mcore).size_hallocs as u64).wrapping_add(nbytes) as size_t as size_t;
+            (*mcore).cur_hallocs =
+                ((*mcore).cur_hallocs as u64).wrapping_add(nbytes) as size_t as size_t;
             if (*mcore).max_hallocs < (*mcore).cur_hallocs {
                 (*mcore).max_hallocs = (*mcore).cur_hallocs;
             }
@@ -442,25 +365,22 @@ pub unsafe extern "C" fn gk_gkmcoreAdd(
         _ => {
             gk_errexit(
                 6 as libc::c_int,
-                b"Incorrect mcore type operation.\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Incorrect mcore type operation.\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             );
         }
     };
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_mcoreDel(
-    mut mcore: *mut gk_mcore_t,
-    mut ptr: *mut libc::c_void,
-) {
+pub unsafe extern "C" fn gk_mcoreDel(mut mcore: *mut gk_mcore_t, mut ptr: *mut libc::c_void) {
     let mut i: libc::c_int = 0;
-    i = ((*mcore).cmop).wrapping_sub(1 as libc::c_int as libc::c_ulong) as libc::c_int;
+    i = ((*mcore).cmop).wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
     while i >= 0 as libc::c_int {
         if (*((*mcore).mops).offset(i as isize)).type_0 == 1 as libc::c_int {
             gk_errexit(
                 6 as libc::c_int,
-                b"Could not find pointer %p in mcore\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Could not find pointer %p in mcore\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 ptr,
             );
         }
@@ -468,18 +388,15 @@ pub unsafe extern "C" fn gk_mcoreDel(
             if (*((*mcore).mops).offset(i as isize)).type_0 != 3 as libc::c_int {
                 gk_errexit(
                     6 as libc::c_int,
-                    b"Trying to delete a non-HEAP mop.\n\0" as *const u8
-                        as *const libc::c_char as *mut libc::c_char,
+                    b"Trying to delete a non-HEAP mop.\n\0" as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                 );
             }
-            (*mcore)
-                .cur_hallocs = ((*mcore).cur_hallocs as libc::c_ulong)
-                .wrapping_sub(
-                    (*((*mcore).mops).offset(i as isize)).nbytes as libc::c_ulong,
-                ) as size_t as size_t;
+            (*mcore).cur_hallocs = ((*mcore).cur_hallocs as u64)
+                .wrapping_sub((*((*mcore).mops).offset(i as isize)).nbytes as u64)
+                as size_t as size_t;
             (*mcore).cmop = ((*mcore).cmop).wrapping_sub(1);
-            *((*mcore).mops)
-                .offset(i as isize) = *((*mcore).mops).offset((*mcore).cmop as isize);
+            *((*mcore).mops).offset(i as isize) = *((*mcore).mops).offset((*mcore).cmop as isize);
             return;
         }
         i -= 1;
@@ -492,18 +409,15 @@ pub unsafe extern "C" fn gk_mcoreDel(
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_gkmcoreDel(
-    mut mcore: *mut gk_mcore_t,
-    mut ptr: *mut libc::c_void,
-) {
+pub unsafe extern "C" fn gk_gkmcoreDel(mut mcore: *mut gk_mcore_t, mut ptr: *mut libc::c_void) {
     let mut i: libc::c_int = 0;
-    i = ((*mcore).cmop).wrapping_sub(1 as libc::c_int as libc::c_ulong) as libc::c_int;
+    i = ((*mcore).cmop).wrapping_sub(1 as libc::c_int as u64) as libc::c_int;
     while i >= 0 as libc::c_int {
         if (*((*mcore).mops).offset(i as isize)).type_0 == 1 as libc::c_int {
             gk_errexit(
                 6 as libc::c_int,
-                b"Could not find pointer %p in mcore\n\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"Could not find pointer %p in mcore\n\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
                 ptr,
             );
         }
@@ -511,18 +425,15 @@ pub unsafe extern "C" fn gk_gkmcoreDel(
             if (*((*mcore).mops).offset(i as isize)).type_0 != 3 as libc::c_int {
                 gk_errexit(
                     6 as libc::c_int,
-                    b"Trying to delete a non-HEAP mop.\n\0" as *const u8
-                        as *const libc::c_char as *mut libc::c_char,
+                    b"Trying to delete a non-HEAP mop.\n\0" as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                 );
             }
-            (*mcore)
-                .cur_hallocs = ((*mcore).cur_hallocs as libc::c_ulong)
-                .wrapping_sub(
-                    (*((*mcore).mops).offset(i as isize)).nbytes as libc::c_ulong,
-                ) as size_t as size_t;
+            (*mcore).cur_hallocs = ((*mcore).cur_hallocs as u64)
+                .wrapping_sub((*((*mcore).mops).offset(i as isize)).nbytes as u64)
+                as size_t as size_t;
             (*mcore).cmop = ((*mcore).cmop).wrapping_sub(1);
-            *((*mcore).mops)
-                .offset(i as isize) = *((*mcore).mops).offset((*mcore).cmop as isize);
+            *((*mcore).mops).offset(i as isize) = *((*mcore).mops).offset((*mcore).cmop as isize);
             return;
         }
         i -= 1;
@@ -530,7 +441,7 @@ pub unsafe extern "C" fn gk_gkmcoreDel(
     }
     gk_errexit(
         6 as libc::c_int,
-        b"gkmcoreDel should never have been here!\n\0" as *const u8
-            as *const libc::c_char as *mut libc::c_char,
+        b"gkmcoreDel should never have been here!\n\0" as *const u8 as *const libc::c_char
+            as *mut libc::c_char,
     );
 }

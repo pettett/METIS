@@ -1,17 +1,20 @@
-[workspace]
-members = []
+
 [package]
-name = "c2rust_out"
+name = "metis"
 authors = ["C2Rust"]
 version = "0.0.0"
 publish = false
 edition = "2021"
-autobins = false
+# autobins = false
 
-[lib]
-name = "c2rust_out"
-path = "c2rust-lib.rs"
-crate-type = ["staticlib", "rlib"]
+# [lib]
+# name = "c2rust_out"
+# path = "c2rust-lib.rs"
+
+# [[bin]]
+# name = "mpmetis"
+# path = "src/bin/mpmetis.rs"
+
 [dependencies]
 c2rust-bitfields = "0.3"
 libc = "0.2"

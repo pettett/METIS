@@ -1,15 +1,10 @@
 use ::libc;
-extern "C" {
-    fn libmetis__wspacepush(ctrl: *mut ctrl_t);
-    fn libmetis__iwspacemalloc(_: *mut ctrl_t, _: idx_t) -> *mut idx_t;
-    fn libmetis__wspacepop(ctrl: *mut ctrl_t);
-    fn libmetis__iset(n: size_t, val: idx_t, x: *mut idx_t) -> *mut idx_t;
-}
-pub type __int32_t = libc::c_int;
-pub type __ssize_t = libc::c_long;
-pub type int32_t = __int32_t;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+
+use super::{
+    auxapi::*, coarsen::libmetis__CoarsenGraph, contig::*, fortran::*, gklib::*, graph::*,
+    kwayrefine::*, options::*, structure::*, timing::*, util::*, wspace::*,
+};
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct gk_mop_t {
@@ -83,61 +78,7 @@ pub struct vnbr_t {
     pub ned: idx_t,
     pub gv: idx_t,
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ctrl_t {
-    pub optype: moptype_et,
-    pub objtype: mobjtype_et,
-    pub dbglvl: mdbglvl_et,
-    pub ctype: mctype_et,
-    pub iptype: miptype_et,
-    pub rtype: mrtype_et,
-    pub CoarsenTo: idx_t,
-    pub nIparts: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub seed: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub numflag: idx_t,
-    pub maxvwgt: *mut idx_t,
-    pub ncon: idx_t,
-    pub nparts: idx_t,
-    pub pfactor: real_t,
-    pub ubfactors: *mut real_t,
-    pub tpwgts: *mut real_t,
-    pub pijbm: *mut real_t,
-    pub cfactor: real_t,
-    pub TotalTmr: libc::c_double,
-    pub InitPartTmr: libc::c_double,
-    pub MatchTmr: libc::c_double,
-    pub ContractTmr: libc::c_double,
-    pub CoarsenTmr: libc::c_double,
-    pub UncoarsenTmr: libc::c_double,
-    pub RefTmr: libc::c_double,
-    pub ProjectTmr: libc::c_double,
-    pub SplitTmr: libc::c_double,
-    pub Aux1Tmr: libc::c_double,
-    pub Aux2Tmr: libc::c_double,
-    pub Aux3Tmr: libc::c_double,
-    pub mcore: *mut gk_mcore_t,
-    pub nbrpoolsize: size_t,
-    pub nbrpoolcpos: size_t,
-    pub nbrpoolreallocs: size_t,
-    pub cnbrpool: *mut cnbr_t,
-    pub vnbrpool: *mut vnbr_t,
-    pub maxnads: *mut idx_t,
-    pub nads: *mut idx_t,
-    pub adids: *mut *mut idx_t,
-    pub adwgts: *mut *mut idx_t,
-    pub pvec1: *mut idx_t,
-    pub pvec2: *mut idx_t,
-}
+use super::structure::*;
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__BucketSortKeysInc(
     mut ctrl: *mut ctrl_t,

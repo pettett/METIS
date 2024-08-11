@@ -1,3 +1,5 @@
+use std::ffi::CStr;
+
 use ::libc;
 extern "C" {
     fn exit(_: libc::c_int) -> !;
@@ -36,7 +38,7 @@ extern "C" {
 }
 pub type __int32_t = libc::c_int;
 pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 pub type idx_t = int32_t;
 pub type real_t = libc::c_float;
 pub type C2RustUnnamed = libc::c_int;
@@ -153,32 +155,21 @@ pub struct params_t {
     pub reporttimer: real_t,
     pub maxmemory: size_t,
 }
-static mut gtypenames: [[libc::c_char; 15]; 2] = unsafe {
-    [
-        *::core::mem::transmute::<
-            &[u8; 15],
-            &mut [libc::c_char; 15],
-        >(b"dual\0\0\0\0\0\0\0\0\0\0\0"),
-        *::core::mem::transmute::<
-            &[u8; 15],
-            &mut [libc::c_char; 15],
-        >(b"nodal\0\0\0\0\0\0\0\0\0\0"),
-    ]
-};
-unsafe fn main_0(
-    mut argc: libc::c_int,
-    mut argv: *mut *mut libc::c_char,
-) -> libc::c_int {
+static mut gtypenames: [&CStr; 2] = unsafe { [c"dual", c"nodal"] };
+static mut iptypenames: [&CStr; 5] = unsafe { [c"grow", c"random", c"edge", c"node", c"metisrb"] };
+static mut rtypenames: [&CStr; 4] = unsafe { [c"fm", c"greedy", c"2sided", c"1sided"] };
+static mut ctypenames: [&CStr; 2] = unsafe { [c"rm", c"shem"] };
+static mut objtypenames: [&CStr; 3] = unsafe { [c"cut", c"vol", c"node"] };
+static mut ptypenames: [&CStr; 2] = unsafe { [c"rb", c"kway"] };
+unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> libc::c_int {
     let mut mesh: *mut mesh_t = 0 as *mut mesh_t;
     let mut graph: *mut graph_t = 0 as *mut graph_t;
     let mut params: *mut params_t = 0 as *mut params_t;
     let mut status: libc::c_int = 0 as libc::c_int;
     params = parse_cmdline(argc, argv);
-    (*params)
-        .iotimer = ((*params).iotimer as libc::c_double - gk_CPUSeconds()) as real_t;
+    (*params).iotimer = ((*params).iotimer as libc::c_double - gk_CPUSeconds()) as real_t;
     mesh = ReadMesh(params);
-    (*params)
-        .iotimer = ((*params).iotimer as libc::c_double + gk_CPUSeconds()) as real_t;
+    (*params).iotimer = ((*params).iotimer as libc::c_double + gk_CPUSeconds()) as real_t;
     if (*mesh).ncon > 1 as libc::c_int {
         printf(
             b"*** Meshes with more than one balancing constraint are not supported yet.\n\0"
@@ -189,8 +180,7 @@ unsafe fn main_0(
     M2GPrintInfo(params, mesh);
     graph = libmetis__CreateGraph();
     gk_malloc_init();
-    (*params)
-        .parttimer = ((*params).parttimer as libc::c_double - gk_CPUSeconds()) as real_t;
+    (*params).parttimer = ((*params).parttimer as libc::c_double - gk_CPUSeconds()) as real_t;
     match (*params).gtype {
         0 => {
             status = METIS_MeshToDual(
@@ -227,26 +217,21 @@ unsafe fn main_0(
         }
         _ => {}
     }
-    (*params)
-        .parttimer = ((*params).parttimer as libc::c_double + gk_CPUSeconds()) as real_t;
-    if gk_GetCurMemoryUsed() != 0 as libc::c_int as libc::c_ulong {
+    (*params).parttimer = ((*params).parttimer as libc::c_double + gk_CPUSeconds()) as real_t;
+    if gk_GetCurMemoryUsed() != 0 as libc::c_int as u64 {
         printf(
-            b"***It seems that Metis did not free all of its memory! Report this.\n\0"
-                as *const u8 as *const libc::c_char,
+            b"***It seems that Metis did not free all of its memory! Report this.\n\0" as *const u8
+                as *const libc::c_char,
         );
     }
     (*params).maxmemory = gk_GetMaxMemoryUsed();
     gk_malloc_cleanup(0 as libc::c_int);
     if status != METIS_OK as libc::c_int {
-        printf(
-            b"\n***Metis returned with an error.\n\0" as *const u8 as *const libc::c_char,
-        );
+        printf(b"\n***Metis returned with an error.\n\0" as *const u8 as *const libc::c_char);
     } else {
-        (*params)
-            .iotimer = ((*params).iotimer as libc::c_double - gk_CPUSeconds()) as real_t;
+        (*params).iotimer = ((*params).iotimer as libc::c_double - gk_CPUSeconds()) as real_t;
         WriteGraph(graph, (*params).outfile);
-        (*params)
-            .iotimer = ((*params).iotimer as libc::c_double + gk_CPUSeconds()) as real_t;
+        (*params).iotimer = ((*params).iotimer as libc::c_double + gk_CPUSeconds()) as real_t;
         M2GReportResults(params, mesh, graph);
     }
     libmetis__FreeGraph(&mut graph);
@@ -267,8 +252,8 @@ pub unsafe extern "C" fn M2GPrintInfo(mut params: *mut params_t, mut mesh: *mut 
     );
     printf(
         b"%s\0" as *const u8 as *const libc::c_char,
-        b"METIS 5.0 Copyright 1998-13, Regents of the University of Minnesota\n\0"
-            as *const u8 as *const libc::c_char,
+        b"METIS 5.0 Copyright 1998-13, Regents of the University of Minnesota\n\0" as *const u8
+            as *const libc::c_char,
     );
     printf(
         b" (HEAD: %s, Built on: %s, %s)\n\0" as *const u8 as *const libc::c_char,
@@ -279,12 +264,9 @@ pub unsafe extern "C" fn M2GPrintInfo(mut params: *mut params_t, mut mesh: *mut 
     printf(
         b" size of idx_t: %zubits, real_t: %zubits, idx_t *: %zubits\n\0" as *const u8
             as *const libc::c_char,
-        (8 as libc::c_int as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<idx_t>() as libc::c_ulong),
-        (8 as libc::c_int as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<real_t>() as libc::c_ulong),
-        (8 as libc::c_int as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<*mut idx_t>() as libc::c_ulong),
+        (8 as libc::c_int as u64).wrapping_mul(::core::mem::size_of::<idx_t>() as u64),
+        (8 as libc::c_int as u64).wrapping_mul(::core::mem::size_of::<real_t>() as u64),
+        (8 as libc::c_int as u64).wrapping_mul(::core::mem::size_of::<*mut idx_t>() as u64),
     );
     printf(b"\n\0" as *const u8 as *const libc::c_char);
     printf(
@@ -303,7 +285,7 @@ pub unsafe extern "C" fn M2GPrintInfo(mut params: *mut params_t, mut mesh: *mut 
     );
     printf(
         b" gtype=%s, ncommon=%d, outfile=%s\n\0" as *const u8 as *const libc::c_char,
-        (gtypenames[(*params).gtype as usize]).as_mut_ptr(),
+        (gtypenames[(*params).gtype as usize]).as_ptr(),
         (*params).ncommon,
         (*params).outfile,
     );
@@ -315,17 +297,13 @@ pub unsafe extern "C" fn M2GReportResults(
     mut mesh: *mut mesh_t,
     mut graph: *mut graph_t,
 ) {
-    (*params)
-        .reporttimer = ((*params).reporttimer as libc::c_double - gk_CPUSeconds())
-        as real_t;
+    (*params).reporttimer = ((*params).reporttimer as libc::c_double - gk_CPUSeconds()) as real_t;
     printf(
         b" - #nvtxs: %d, #edges: %d\n\0" as *const u8 as *const libc::c_char,
         (*graph).nvtxs,
         (*graph).nedges,
     );
-    (*params)
-        .reporttimer = ((*params).reporttimer as libc::c_double + gk_CPUSeconds())
-        as real_t;
+    (*params).reporttimer = ((*params).reporttimer as libc::c_double + gk_CPUSeconds()) as real_t;
     printf(
         b"\nTiming Information ----------------------------------------------------------\n\0"
             as *const u8 as *const libc::c_char,
@@ -335,8 +313,7 @@ pub unsafe extern "C" fn M2GReportResults(
         (*params).iotimer as libc::c_double,
     );
     printf(
-        b"  Partitioning: \t\t %7.3f sec   (METIS time)\n\0" as *const u8
-            as *const libc::c_char,
+        b"  Partitioning: \t\t %7.3f sec   (METIS time)\n\0" as *const u8 as *const libc::c_char,
         (*params).parttimer as libc::c_double,
     );
     printf(
@@ -358,7 +335,7 @@ pub unsafe extern "C" fn M2GReportResults(
     );
 }
 pub fn main() {
-    let mut args: Vec::<*mut libc::c_char> = Vec::new();
+    let mut args: Vec<*mut libc::c_char> = Vec::new();
     for arg in ::std::env::args() {
         args.push(
             (::std::ffi::CString::new(arg))
@@ -368,11 +345,9 @@ pub fn main() {
     }
     args.push(::core::ptr::null_mut());
     unsafe {
-        ::std::process::exit(
-            main_0(
-                (args.len() - 1) as libc::c_int,
-                args.as_mut_ptr() as *mut *mut libc::c_char,
-            ) as i32,
-        )
+        ::std::process::exit(main_0(
+            (args.len() - 1) as libc::c_int,
+            args.as_mut_ptr() as *mut *mut libc::c_char,
+        ) as i32)
     }
 }

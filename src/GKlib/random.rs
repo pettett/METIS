@@ -5,13 +5,13 @@ extern "C" {
 }
 pub type __int32_t = libc::c_int;
 pub type __uint32_t = libc::c_uint;
-pub type __uint64_t = libc::c_ulong;
-pub type __ssize_t = libc::c_long;
+pub type __uint64_t = u64;
+pub type __ssize_t = i64;
 pub type int32_t = __int32_t;
 pub type uint32_t = __uint32_t;
 pub type uint64_t = __uint64_t;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 pub type gk_idx_t = ssize_t;
 #[no_mangle]
 pub unsafe extern "C" fn gk_csrand(mut seed: size_t) {
@@ -63,7 +63,7 @@ pub unsafe extern "C" fn gk_crandArrayPermute(
             i;
         }
     }
-    if n < 10 as libc::c_int as libc::c_ulong {
+    if n < 10 as libc::c_int as u64 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             v = gk_crandInRange(n);
@@ -77,36 +77,24 @@ pub unsafe extern "C" fn gk_crandArrayPermute(
     } else {
         i = 0 as libc::c_int as size_t;
         while i < nshuffles {
-            v = gk_crandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            u = gk_crandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize) = tmp;
+            v = gk_crandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            u = gk_crandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -114,12 +102,10 @@ pub unsafe extern "C" fn gk_crandArrayPermute(
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_crand() -> size_t {
-    if ::core::mem::size_of::<size_t>() as libc::c_ulong
-        <= ::core::mem::size_of::<int32_t>() as libc::c_ulong
-    {
-        return gk_randint32() as size_t
+    if ::core::mem::size_of::<size_t>() as u64 <= ::core::mem::size_of::<int32_t>() as u64 {
+        return gk_randint32() as size_t;
     } else {
-        return gk_randint64()
+        return gk_randint64();
     };
 }
 #[no_mangle]
@@ -149,7 +135,7 @@ pub unsafe extern "C" fn gk_irandArrayPermute(
             i;
         }
     }
-    if n < 10 as libc::c_int as libc::c_ulong {
+    if n < 10 as libc::c_int as u64 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             v = gk_irandInRange(n);
@@ -163,36 +149,24 @@ pub unsafe extern "C" fn gk_irandArrayPermute(
     } else {
         i = 0 as libc::c_int as size_t;
         while i < nshuffles {
-            v = gk_irandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            u = gk_irandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize) = tmp;
+            v = gk_irandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            u = gk_irandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -227,12 +201,10 @@ pub unsafe extern "C" fn gk_irandArrayPermuteFine(
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_irand() -> size_t {
-    if ::core::mem::size_of::<size_t>() as libc::c_ulong
-        <= ::core::mem::size_of::<int32_t>() as libc::c_ulong
-    {
-        return gk_randint32() as size_t
+    if ::core::mem::size_of::<size_t>() as u64 <= ::core::mem::size_of::<int32_t>() as u64 {
+        return gk_randint32() as size_t;
     } else {
-        return gk_randint64()
+        return gk_randint64();
     };
 }
 #[no_mangle]
@@ -258,7 +230,7 @@ pub unsafe extern "C" fn gk_frandArrayPermute(
             i;
         }
     }
-    if n < 10 as libc::c_int as libc::c_ulong {
+    if n < 10 as libc::c_int as u64 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             v = gk_frandInRange(n);
@@ -272,36 +244,24 @@ pub unsafe extern "C" fn gk_frandArrayPermute(
     } else {
         i = 0 as libc::c_int as size_t;
         while i < nshuffles {
-            v = gk_frandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            u = gk_frandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize) = tmp;
+            v = gk_frandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            u = gk_frandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -344,12 +304,10 @@ pub unsafe extern "C" fn gk_frandInRange(mut max: size_t) -> size_t {
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_frand() -> size_t {
-    if ::core::mem::size_of::<size_t>() as libc::c_ulong
-        <= ::core::mem::size_of::<int32_t>() as libc::c_ulong
-    {
-        return gk_randint32() as size_t
+    if ::core::mem::size_of::<size_t>() as u64 <= ::core::mem::size_of::<int32_t>() as u64 {
+        return gk_randint32() as size_t;
     } else {
-        return gk_randint64()
+        return gk_randint64();
     };
 }
 #[no_mangle]
@@ -375,7 +333,7 @@ pub unsafe extern "C" fn gk_drandArrayPermute(
             i;
         }
     }
-    if n < 10 as libc::c_int as libc::c_ulong {
+    if n < 10 as libc::c_int as u64 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             v = gk_drandInRange(n);
@@ -389,36 +347,24 @@ pub unsafe extern "C" fn gk_drandArrayPermute(
     } else {
         i = 0 as libc::c_int as size_t;
         while i < nshuffles {
-            v = gk_drandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            u = gk_drandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize) = tmp;
+            v = gk_drandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            u = gk_drandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -453,12 +399,10 @@ pub unsafe extern "C" fn gk_drandArrayPermuteFine(
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_drand() -> size_t {
-    if ::core::mem::size_of::<size_t>() as libc::c_ulong
-        <= ::core::mem::size_of::<int32_t>() as libc::c_ulong
-    {
-        return gk_randint32() as size_t
+    if ::core::mem::size_of::<size_t>() as u64 <= ::core::mem::size_of::<int32_t>() as u64 {
+        return gk_randint32() as size_t;
     } else {
-        return gk_randint64()
+        return gk_randint64();
     };
 }
 #[no_mangle]
@@ -488,7 +432,7 @@ pub unsafe extern "C" fn gk_idxrandArrayPermute(
             i;
         }
     }
-    if n < 10 as libc::c_int as libc::c_ulong {
+    if n < 10 as libc::c_int as u64 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             v = gk_idxrandInRange(n);
@@ -502,36 +446,24 @@ pub unsafe extern "C" fn gk_idxrandArrayPermute(
     } else {
         i = 0 as libc::c_int as size_t;
         while i < nshuffles {
-            v = gk_idxrandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            u = gk_idxrandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize) = tmp;
+            v = gk_idxrandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            u = gk_idxrandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -566,12 +498,10 @@ pub unsafe extern "C" fn gk_idxrandArrayPermuteFine(
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_idxrand() -> size_t {
-    if ::core::mem::size_of::<size_t>() as libc::c_ulong
-        <= ::core::mem::size_of::<int32_t>() as libc::c_ulong
-    {
-        return gk_randint32() as size_t
+    if ::core::mem::size_of::<size_t>() as u64 <= ::core::mem::size_of::<int32_t>() as u64 {
+        return gk_randint32() as size_t;
     } else {
-        return gk_randint64()
+        return gk_randint64();
     };
 }
 #[no_mangle]
@@ -597,7 +527,7 @@ pub unsafe extern "C" fn gk_zrandArrayPermute(
             i;
         }
     }
-    if n < 10 as libc::c_int as libc::c_ulong {
+    if n < 10 as libc::c_int as u64 {
         i = 0 as libc::c_int as size_t;
         while i < n {
             v = gk_zrandInRange(n);
@@ -611,36 +541,24 @@ pub unsafe extern "C" fn gk_zrandArrayPermute(
     } else {
         i = 0 as libc::c_int as size_t;
         while i < nshuffles {
-            v = gk_zrandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            u = gk_zrandInRange(n.wrapping_sub(3 as libc::c_int as libc::c_ulong));
-            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(2 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(0 as libc::c_int as libc::c_ulong) as isize) = tmp;
-            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize);
-            *p
-                .offset(
-                    v.wrapping_add(3 as libc::c_int as libc::c_ulong) as isize,
-                ) = *p
-                .offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize);
-            *p.offset(u.wrapping_add(1 as libc::c_int as libc::c_ulong) as isize) = tmp;
+            v = gk_zrandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            u = gk_zrandInRange(n.wrapping_sub(3 as libc::c_int as u64));
+            tmp = *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(0 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(2 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(1 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(3 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(2 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(0 as libc::c_int as u64) as isize) = tmp;
+            tmp = *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize);
+            *p.offset(v.wrapping_add(3 as libc::c_int as u64) as isize) =
+                *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize);
+            *p.offset(u.wrapping_add(1 as libc::c_int as u64) as isize) = tmp;
             i = i.wrapping_add(1);
             i;
         }
@@ -679,12 +597,10 @@ pub unsafe extern "C" fn gk_zsrand(mut seed: size_t) {
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_zrand() -> size_t {
-    if ::core::mem::size_of::<size_t>() as libc::c_ulong
-        <= ::core::mem::size_of::<int32_t>() as libc::c_ulong
-    {
-        return gk_randint32() as size_t
+    if ::core::mem::size_of::<size_t>() as u64 <= ::core::mem::size_of::<int32_t>() as u64 {
+        return gk_randint32() as size_t;
     } else {
-        return gk_randint64()
+        return gk_randint64();
     };
 }
 #[no_mangle]
@@ -697,7 +613,7 @@ pub unsafe extern "C" fn gk_randinit(mut seed: uint64_t) {
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_randint64() -> uint64_t {
-    return (rand() as uint64_t) << 32 as libc::c_int | rand() as uint64_t;
+    return (rand() as uint64_t) << 32 | rand() as uint64_t;
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_randint32() -> uint32_t {

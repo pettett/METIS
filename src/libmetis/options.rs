@@ -1,62 +1,14 @@
 use ::libc;
-extern "C" {
-    fn memset(
-        _: *mut libc::c_void,
-        _: libc::c_int,
-        _: libc::c_ulong,
-    ) -> *mut libc::c_void;
-    fn libmetis__InitRandom(_: idx_t);
-    fn libmetis__FreeWorkSpace(ctrl: *mut ctrl_t);
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn gk_malloc(nbytes: size_t, msg: *mut libc::c_char) -> *mut libc::c_void;
-    fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
-    fn gk_errexit(signum: libc::c_int, _: *mut libc::c_char, _: ...);
-    fn libmetis__rsum(n: size_t, x: *mut real_t, incx: size_t) -> real_t;
-    fn libmetis__ismalloc(n: size_t, ival: idx_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__rmalloc(n: size_t, msg: *mut libc::c_char) -> *mut real_t;
-    fn libmetis__rsmalloc(
-        n: size_t,
-        ival: real_t,
-        msg: *mut libc::c_char,
-    ) -> *mut real_t;
-    fn libmetis__rcopy(n: size_t, a: *mut real_t, b: *mut real_t) -> *mut real_t;
-}
-pub type __int32_t = libc::c_int;
-pub type __ssize_t = libc::c_long;
-pub type int32_t = __int32_t;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mop_t {
-    pub type_0: libc::c_int,
-    pub nbytes: ssize_t,
-    pub ptr: *mut libc::c_void,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mcore_t {
-    pub coresize: size_t,
-    pub corecpos: size_t,
-    pub core: *mut libc::c_void,
-    pub nmops: size_t,
-    pub cmop: size_t,
-    pub mops: *mut gk_mop_t,
-    pub num_callocs: size_t,
-    pub num_hallocs: size_t,
-    pub size_callocs: size_t,
-    pub size_hallocs: size_t,
-    pub cur_callocs: size_t,
-    pub cur_hallocs: size_t,
-    pub max_callocs: size_t,
-    pub max_hallocs: size_t,
-}
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-pub type moptype_et = libc::c_uint;
-pub const METIS_OP_OMETIS: moptype_et = 2;
-pub const METIS_OP_KMETIS: moptype_et = 1;
-pub const METIS_OP_PMETIS: moptype_et = 0;
+use libc::{memset, printf};
+
+use crate::GKlib::error::gk_errexit;
+use crate::GKlib::memory::{gk_free, gk_malloc};
+
+use super::{
+    auxapi::*, contig::*, fortran::*, gklib::*, graph::*, kwayrefine::*, structure::*, util::*,
+    wspace::*,
+};
+
 pub type C2RustUnnamed = libc::c_uint;
 pub const METIS_OPTION_UBVEC: C2RustUnnamed = 24;
 pub const METIS_OPTION_GTYPE: C2RustUnnamed = 23;
@@ -83,160 +35,8 @@ pub const METIS_OPTION_IPTYPE: C2RustUnnamed = 3;
 pub const METIS_OPTION_CTYPE: C2RustUnnamed = 2;
 pub const METIS_OPTION_OBJTYPE: C2RustUnnamed = 1;
 pub const METIS_OPTION_PTYPE: C2RustUnnamed = 0;
-pub type mctype_et = libc::c_uint;
-pub const METIS_CTYPE_SHEM: mctype_et = 1;
-pub const METIS_CTYPE_RM: mctype_et = 0;
-pub type miptype_et = libc::c_uint;
-pub const METIS_IPTYPE_METISRB: miptype_et = 4;
-pub const METIS_IPTYPE_NODE: miptype_et = 3;
-pub const METIS_IPTYPE_EDGE: miptype_et = 2;
-pub const METIS_IPTYPE_RANDOM: miptype_et = 1;
-pub const METIS_IPTYPE_GROW: miptype_et = 0;
-pub type mrtype_et = libc::c_uint;
-pub const METIS_RTYPE_SEP1SIDED: mrtype_et = 3;
-pub const METIS_RTYPE_SEP2SIDED: mrtype_et = 2;
-pub const METIS_RTYPE_GREEDY: mrtype_et = 1;
-pub const METIS_RTYPE_FM: mrtype_et = 0;
-pub type mdbglvl_et = libc::c_uint;
-pub const METIS_DBG_MEMORY: mdbglvl_et = 2048;
-pub const METIS_DBG_CONTIGINFO: mdbglvl_et = 256;
-pub const METIS_DBG_CONNINFO: mdbglvl_et = 128;
-pub const METIS_DBG_SEPINFO: mdbglvl_et = 64;
-pub const METIS_DBG_MOVEINFO: mdbglvl_et = 32;
-pub const METIS_DBG_IPART: mdbglvl_et = 16;
-pub const METIS_DBG_REFINE: mdbglvl_et = 8;
-pub const METIS_DBG_COARSEN: mdbglvl_et = 4;
-pub const METIS_DBG_TIME: mdbglvl_et = 2;
-pub const METIS_DBG_INFO: mdbglvl_et = 1;
-pub type mobjtype_et = libc::c_uint;
-pub const METIS_OBJTYPE_NODE: mobjtype_et = 2;
-pub const METIS_OBJTYPE_VOL: mobjtype_et = 1;
-pub const METIS_OBJTYPE_CUT: mobjtype_et = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct cnbr_t {
-    pub pid: idx_t,
-    pub ed: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vnbr_t {
-    pub pid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ctrl_t {
-    pub optype: moptype_et,
-    pub objtype: mobjtype_et,
-    pub dbglvl: mdbglvl_et,
-    pub ctype: mctype_et,
-    pub iptype: miptype_et,
-    pub rtype: mrtype_et,
-    pub CoarsenTo: idx_t,
-    pub nIparts: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub seed: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub numflag: idx_t,
-    pub maxvwgt: *mut idx_t,
-    pub ncon: idx_t,
-    pub nparts: idx_t,
-    pub pfactor: real_t,
-    pub ubfactors: *mut real_t,
-    pub tpwgts: *mut real_t,
-    pub pijbm: *mut real_t,
-    pub cfactor: real_t,
-    pub TotalTmr: libc::c_double,
-    pub InitPartTmr: libc::c_double,
-    pub MatchTmr: libc::c_double,
-    pub ContractTmr: libc::c_double,
-    pub CoarsenTmr: libc::c_double,
-    pub UncoarsenTmr: libc::c_double,
-    pub RefTmr: libc::c_double,
-    pub ProjectTmr: libc::c_double,
-    pub SplitTmr: libc::c_double,
-    pub Aux1Tmr: libc::c_double,
-    pub Aux2Tmr: libc::c_double,
-    pub Aux3Tmr: libc::c_double,
-    pub mcore: *mut gk_mcore_t,
-    pub nbrpoolsize: size_t,
-    pub nbrpoolcpos: size_t,
-    pub nbrpoolreallocs: size_t,
-    pub cnbrpool: *mut cnbr_t,
-    pub vnbrpool: *mut vnbr_t,
-    pub maxnads: *mut idx_t,
-    pub nads: *mut idx_t,
-    pub adids: *mut *mut idx_t,
-    pub adwgts: *mut *mut idx_t,
-    pub pvec1: *mut idx_t,
-    pub pvec2: *mut idx_t,
-}
+
+use super::structure::*;
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__SetupCtrl(
     mut optype: moptype_et,
@@ -250,18 +50,17 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
     let mut j: idx_t = 0;
     let mut ctrl: *mut ctrl_t = 0 as *mut ctrl_t;
     ctrl = gk_malloc(
-        ::core::mem::size_of::<ctrl_t>() as libc::c_ulong,
+        ::core::mem::size_of::<ctrl_t>() as u64,
         b"SetupCtrl: ctrl\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut ctrl_t;
     memset(
         ctrl as *mut libc::c_void,
         0 as libc::c_int,
-        ::core::mem::size_of::<ctrl_t>() as libc::c_ulong,
+        ::core::mem::size_of::<ctrl_t>() as usize,
     );
     match optype as libc::c_uint {
         0 => {
-            (*ctrl)
-                .objtype = (if options.is_null()
+            (*ctrl).objtype = (if options.is_null()
                 || *options.offset(METIS_OPTION_OBJTYPE as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -270,8 +69,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
                 *options.offset(METIS_OPTION_OBJTYPE as libc::c_int as isize)
             }) as mobjtype_et;
             (*ctrl).rtype = METIS_RTYPE_FM;
-            (*ctrl)
-                .ncuts = if options.is_null()
+            (*ctrl).ncuts = if options.is_null()
                 || *options.offset(METIS_OPTION_NCUTS as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -279,8 +77,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_NCUTS as libc::c_int as isize)
             };
-            (*ctrl)
-                .niter = if options.is_null()
+            (*ctrl).niter = if options.is_null()
                 || *options.offset(METIS_OPTION_NITER as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -289,8 +86,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
                 *options.offset(METIS_OPTION_NITER as libc::c_int as isize)
             };
             if ncon == 1 as libc::c_int {
-                (*ctrl)
-                    .iptype = (if options.is_null()
+                (*ctrl).iptype = (if options.is_null()
                     || *options.offset(METIS_OPTION_IPTYPE as libc::c_int as isize)
                         == -(1 as libc::c_int)
                 {
@@ -298,8 +94,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
                 } else {
                     *options.offset(METIS_OPTION_IPTYPE as libc::c_int as isize)
                 }) as miptype_et;
-                (*ctrl)
-                    .ufactor = if options.is_null()
+                (*ctrl).ufactor = if options.is_null()
                     || *options.offset(METIS_OPTION_UFACTOR as libc::c_int as isize)
                         == -(1 as libc::c_int)
                 {
@@ -309,8 +104,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
                 };
                 (*ctrl).CoarsenTo = 20 as libc::c_int;
             } else {
-                (*ctrl)
-                    .iptype = (if options.is_null()
+                (*ctrl).iptype = (if options.is_null()
                     || *options.offset(METIS_OPTION_IPTYPE as libc::c_int as isize)
                         == -(1 as libc::c_int)
                 {
@@ -318,8 +112,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
                 } else {
                     *options.offset(METIS_OPTION_IPTYPE as libc::c_int as isize)
                 }) as miptype_et;
-                (*ctrl)
-                    .ufactor = if options.is_null()
+                (*ctrl).ufactor = if options.is_null()
                     || *options.offset(METIS_OPTION_UFACTOR as libc::c_int as isize)
                         == -(1 as libc::c_int)
                 {
@@ -331,8 +124,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             }
         }
         1 => {
-            (*ctrl)
-                .objtype = (if options.is_null()
+            (*ctrl).objtype = (if options.is_null()
                 || *options.offset(METIS_OPTION_OBJTYPE as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -342,8 +134,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             }) as mobjtype_et;
             (*ctrl).iptype = METIS_IPTYPE_METISRB;
             (*ctrl).rtype = METIS_RTYPE_GREEDY;
-            (*ctrl)
-                .ncuts = if options.is_null()
+            (*ctrl).ncuts = if options.is_null()
                 || *options.offset(METIS_OPTION_NCUTS as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -351,8 +142,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_NCUTS as libc::c_int as isize)
             };
-            (*ctrl)
-                .niter = if options.is_null()
+            (*ctrl).niter = if options.is_null()
                 || *options.offset(METIS_OPTION_NITER as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -360,8 +150,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_NITER as libc::c_int as isize)
             };
-            (*ctrl)
-                .ufactor = if options.is_null()
+            (*ctrl).ufactor = if options.is_null()
                 || *options.offset(METIS_OPTION_UFACTOR as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -369,8 +158,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_UFACTOR as libc::c_int as isize)
             };
-            (*ctrl)
-                .minconn = if options.is_null()
+            (*ctrl).minconn = if options.is_null()
                 || *options.offset(METIS_OPTION_MINCONN as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -378,8 +166,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_MINCONN as libc::c_int as isize)
             };
-            (*ctrl)
-                .contig = if options.is_null()
+            (*ctrl).contig = if options.is_null()
                 || *options.offset(METIS_OPTION_CONTIG as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -389,8 +176,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             };
         }
         2 => {
-            (*ctrl)
-                .objtype = (if options.is_null()
+            (*ctrl).objtype = (if options.is_null()
                 || *options.offset(METIS_OPTION_OBJTYPE as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -398,8 +184,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_OBJTYPE as libc::c_int as isize)
             }) as mobjtype_et;
-            (*ctrl)
-                .rtype = (if options.is_null()
+            (*ctrl).rtype = (if options.is_null()
                 || *options.offset(METIS_OPTION_RTYPE as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -407,8 +192,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_RTYPE as libc::c_int as isize)
             }) as mrtype_et;
-            (*ctrl)
-                .iptype = (if options.is_null()
+            (*ctrl).iptype = (if options.is_null()
                 || *options.offset(METIS_OPTION_IPTYPE as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -416,8 +200,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_IPTYPE as libc::c_int as isize)
             }) as miptype_et;
-            (*ctrl)
-                .nseps = if options.is_null()
+            (*ctrl).nseps = if options.is_null()
                 || *options.offset(METIS_OPTION_NSEPS as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -425,8 +208,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_NSEPS as libc::c_int as isize)
             };
-            (*ctrl)
-                .niter = if options.is_null()
+            (*ctrl).niter = if options.is_null()
                 || *options.offset(METIS_OPTION_NITER as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -434,8 +216,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_NITER as libc::c_int as isize)
             };
-            (*ctrl)
-                .ufactor = if options.is_null()
+            (*ctrl).ufactor = if options.is_null()
                 || *options.offset(METIS_OPTION_UFACTOR as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -443,8 +224,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_UFACTOR as libc::c_int as isize)
             };
-            (*ctrl)
-                .compress = if options.is_null()
+            (*ctrl).compress = if options.is_null()
                 || *options.offset(METIS_OPTION_COMPRESS as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -452,8 +232,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_COMPRESS as libc::c_int as isize)
             };
-            (*ctrl)
-                .ccorder = if options.is_null()
+            (*ctrl).ccorder = if options.is_null()
                 || *options.offset(METIS_OPTION_CCORDER as libc::c_int as isize)
                     == -(1 as libc::c_int)
             {
@@ -461,8 +240,7 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             } else {
                 *options.offset(METIS_OPTION_CCORDER as libc::c_int as isize)
             };
-            (*ctrl)
-                .pfactor = (0.1f64
+            (*ctrl).pfactor = (0.1f64
                 * (if options.is_null()
                     || *options.offset(METIS_OPTION_PFACTOR as libc::c_int as isize)
                         == -(1 as libc::c_int)
@@ -482,46 +260,36 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             );
         }
     }
-    (*ctrl)
-        .ctype = (if options.is_null()
-        || *options.offset(METIS_OPTION_CTYPE as libc::c_int as isize)
-            == -(1 as libc::c_int)
+    (*ctrl).ctype = (if options.is_null()
+        || *options.offset(METIS_OPTION_CTYPE as libc::c_int as isize) == -(1 as libc::c_int)
     {
         METIS_CTYPE_SHEM as libc::c_int
     } else {
         *options.offset(METIS_OPTION_CTYPE as libc::c_int as isize)
     }) as mctype_et;
-    (*ctrl)
-        .no2hop = if options.is_null()
-        || *options.offset(METIS_OPTION_NO2HOP as libc::c_int as isize)
-            == -(1 as libc::c_int)
+    (*ctrl).no2hop = if options.is_null()
+        || *options.offset(METIS_OPTION_NO2HOP as libc::c_int as isize) == -(1 as libc::c_int)
     {
         0 as libc::c_int
     } else {
         *options.offset(METIS_OPTION_NO2HOP as libc::c_int as isize)
     };
-    (*ctrl)
-        .seed = if options.is_null()
-        || *options.offset(METIS_OPTION_SEED as libc::c_int as isize)
-            == -(1 as libc::c_int)
+    (*ctrl).seed = if options.is_null()
+        || *options.offset(METIS_OPTION_SEED as libc::c_int as isize) == -(1 as libc::c_int)
     {
         -(1 as libc::c_int)
     } else {
         *options.offset(METIS_OPTION_SEED as libc::c_int as isize)
     };
-    (*ctrl)
-        .dbglvl = (if options.is_null()
-        || *options.offset(METIS_OPTION_DBGLVL as libc::c_int as isize)
-            == -(1 as libc::c_int)
+    (*ctrl).dbglvl = (if options.is_null()
+        || *options.offset(METIS_OPTION_DBGLVL as libc::c_int as isize) == -(1 as libc::c_int)
     {
         0 as libc::c_int
     } else {
         *options.offset(METIS_OPTION_DBGLVL as libc::c_int as isize)
     }) as mdbglvl_et;
-    (*ctrl)
-        .numflag = if options.is_null()
-        || *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize)
-            == -(1 as libc::c_int)
+    (*ctrl).numflag = if options.is_null()
+        || *options.offset(METIS_OPTION_NUMBERING as libc::c_int as isize) == -(1 as libc::c_int)
     {
         0 as libc::c_int
     } else {
@@ -530,18 +298,15 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
     (*ctrl).optype = optype;
     (*ctrl).ncon = ncon;
     (*ctrl).nparts = nparts;
-    (*ctrl)
-        .maxvwgt = libmetis__ismalloc(
+    (*ctrl).maxvwgt = libmetis__ismalloc(
         ncon as size_t,
         0 as libc::c_int,
         b"SetupCtrl: maxvwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     if (*ctrl).optype as libc::c_uint != METIS_OP_OMETIS as libc::c_int as libc::c_uint {
-        (*ctrl)
-            .tpwgts = libmetis__rmalloc(
+        (*ctrl).tpwgts = libmetis__rmalloc(
             (nparts * ncon) as size_t,
-            b"SetupCtrl: ctrl->tpwgts\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"SetupCtrl: ctrl->tpwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         if !tpwgts.is_null() {
             libmetis__rcopy((nparts * ncon) as size_t, tpwgts, (*ctrl).tpwgts);
@@ -550,10 +315,8 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             while i < nparts {
                 j = 0 as libc::c_int;
                 while j < ncon {
-                    *((*ctrl).tpwgts)
-                        .offset(
-                            (i * ncon + j) as isize,
-                        ) = (1.0f64 / nparts as libc::c_double) as real_t;
+                    *((*ctrl).tpwgts).offset((i * ncon + j) as isize) =
+                        (1.0f64 / nparts as libc::c_double) as real_t;
                     j += 1;
                     j;
                 }
@@ -562,20 +325,16 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
             }
         }
     } else {
-        (*ctrl)
-            .tpwgts = libmetis__rsmalloc(
+        (*ctrl).tpwgts = libmetis__rsmalloc(
             2 as libc::c_int as size_t,
             0.5f64 as real_t,
-            b"SetupCtrl: ctrl->tpwgts\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"SetupCtrl: ctrl->tpwgts\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
     }
-    (*ctrl)
-        .ubfactors = libmetis__rsmalloc(
+    (*ctrl).ubfactors = libmetis__rsmalloc(
         (*ctrl).ncon as size_t,
         (1.0f64 + 0.001f64 * (*ctrl).ufactor as libc::c_double) as real_t,
-        b"SetupCtrl: ubfactors\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"SetupCtrl: ubfactors\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     if !ubvec.is_null() {
         libmetis__rcopy((*ctrl).ncon as size_t, ubvec, (*ctrl).ubfactors);
@@ -587,23 +346,19 @@ pub unsafe extern "C" fn libmetis__SetupCtrl(
         i += 1;
         i;
     }
-    (*ctrl)
-        .pijbm = libmetis__rmalloc(
+    (*ctrl).pijbm = libmetis__rmalloc(
         (nparts * ncon) as size_t,
-        b"SetupCtrl: ctrl->pijbm\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"SetupCtrl: ctrl->pijbm\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     libmetis__InitRandom((*ctrl).seed);
-    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-        != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
         libmetis__PrintCtrl(ctrl);
     }
     if libmetis__CheckParams(ctrl) == 0 {
         libmetis__FreeCtrl(&mut ctrl);
         return 0 as *mut ctrl_t;
     } else {
-        return ctrl
+        return ctrl;
     };
 }
 #[no_mangle]
@@ -617,10 +372,8 @@ pub unsafe extern "C" fn libmetis__SetupKWayBalMultipliers(
     while i < (*ctrl).nparts {
         j = 0 as libc::c_int;
         while j < (*graph).ncon {
-            *((*ctrl).pijbm)
-                .offset(
-                    (i * (*graph).ncon + j) as isize,
-                ) = *((*graph).invtvwgt).offset(j as isize)
+            *((*ctrl).pijbm).offset((i * (*graph).ncon + j) as isize) = *((*graph).invtvwgt)
+                .offset(j as isize)
                 / *((*ctrl).tpwgts).offset((i * (*graph).ncon + j) as isize);
             j += 1;
             j;
@@ -641,10 +394,8 @@ pub unsafe extern "C" fn libmetis__Setup2WayBalMultipliers(
     while i < 2 as libc::c_int {
         j = 0 as libc::c_int;
         while j < (*graph).ncon {
-            *((*ctrl).pijbm)
-                .offset(
-                    (i * (*graph).ncon + j) as isize,
-                ) = *((*graph).invtvwgt).offset(j as isize)
+            *((*ctrl).pijbm).offset((i * (*graph).ncon + j) as isize) = *((*graph).invtvwgt)
+                .offset(j as isize)
                 / *tpwgts.offset((i * (*graph).ncon + j) as isize);
             j += 1;
             j;
@@ -734,13 +485,11 @@ pub unsafe extern "C" fn libmetis__PrintCtrl(mut ctrl: *mut ctrl_t) {
         },
     );
     printf(
-        b"   Number of balancing constraints: %d\n\0" as *const u8
-            as *const libc::c_char,
+        b"   Number of balancing constraints: %d\n\0" as *const u8 as *const libc::c_char,
         (*ctrl).ncon,
     );
     printf(
-        b"   Number of refinement iterations: %d\n\0" as *const u8
-            as *const libc::c_char,
+        b"   Number of refinement iterations: %d\n\0" as *const u8 as *const libc::c_char,
         (*ctrl).niter,
     );
     printf(
@@ -753,8 +502,7 @@ pub unsafe extern "C" fn libmetis__PrintCtrl(mut ctrl: *mut ctrl_t) {
             (*ctrl).nseps,
         );
         printf(
-            b"   Compress graph prior to ordering: %s\n\0" as *const u8
-                as *const libc::c_char,
+            b"   Compress graph prior to ordering: %s\n\0" as *const u8 as *const libc::c_char,
             if (*ctrl).compress != 0 {
                 b"Yes\0" as *const u8 as *const libc::c_char
             } else {
@@ -788,9 +536,7 @@ pub unsafe extern "C" fn libmetis__PrintCtrl(mut ctrl: *mut ctrl_t) {
             b"   User-supplied ufactor: %d\n\0" as *const u8 as *const libc::c_char,
             (*ctrl).ufactor,
         );
-        if (*ctrl).optype as libc::c_uint
-            == METIS_OP_KMETIS as libc::c_int as libc::c_uint
-        {
+        if (*ctrl).optype as libc::c_uint == METIS_OP_KMETIS as libc::c_int as libc::c_uint {
             printf(
                 b"   Minimize connectivity: %s\n\0" as *const u8 as *const libc::c_char,
                 if (*ctrl).minconn != 0 {
@@ -800,8 +546,7 @@ pub unsafe extern "C" fn libmetis__PrintCtrl(mut ctrl: *mut ctrl_t) {
                 },
             );
             printf(
-                b"   Create contigous partitions: %s\n\0" as *const u8
-                    as *const libc::c_char,
+                b"   Create contigous partitions: %s\n\0" as *const u8 as *const libc::c_char,
                 if (*ctrl).contig != 0 {
                     b"Yes\0" as *const u8 as *const libc::c_char
                 } else {
@@ -834,8 +579,7 @@ pub unsafe extern "C" fn libmetis__PrintCtrl(mut ctrl: *mut ctrl_t) {
                     } else {
                         b" \0" as *const u8 as *const libc::c_char
                     },
-                    *((*ctrl).tpwgts).offset((i * (*ctrl).ncon + j) as isize)
-                        as libc::c_double,
+                    *((*ctrl).tpwgts).offset((i * (*ctrl).ncon + j) as isize) as libc::c_double,
                 );
                 j += 1;
                 j;
@@ -867,12 +611,8 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
     let mut dbglvl: mdbglvl_et = METIS_DBG_INFO;
     match (*ctrl).optype as libc::c_uint {
         0 => {
-            if (*ctrl).objtype as libc::c_uint
-                != METIS_OBJTYPE_CUT as libc::c_int as libc::c_uint
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+            if (*ctrl).objtype as libc::c_uint != METIS_OBJTYPE_CUT as libc::c_int as libc::c_uint {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect objective type.\n\0" as *const u8
                             as *const libc::c_char,
@@ -880,14 +620,10 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).ctype as libc::c_uint
-                != METIS_CTYPE_RM as libc::c_int as libc::c_uint
-                && (*ctrl).ctype as libc::c_uint
-                    != METIS_CTYPE_SHEM as libc::c_int as libc::c_uint
+            if (*ctrl).ctype as libc::c_uint != METIS_CTYPE_RM as libc::c_int as libc::c_uint
+                && (*ctrl).ctype as libc::c_uint != METIS_CTYPE_SHEM as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect coarsening scheme.\n\0" as *const u8
                             as *const libc::c_char,
@@ -895,27 +631,20 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).iptype as libc::c_uint
-                != METIS_IPTYPE_GROW as libc::c_int as libc::c_uint
+            if (*ctrl).iptype as libc::c_uint != METIS_IPTYPE_GROW as libc::c_int as libc::c_uint
                 && (*ctrl).iptype as libc::c_uint
                     != METIS_IPTYPE_RANDOM as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect initial partitioning scheme.\n\0"
-                            as *const u8 as *const libc::c_char,
+                        b"Input Error: Incorrect initial partitioning scheme.\n\0" as *const u8
+                            as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).rtype as libc::c_uint
-                != METIS_RTYPE_FM as libc::c_int as libc::c_uint
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+            if (*ctrl).rtype as libc::c_uint != METIS_RTYPE_FM as libc::c_int as libc::c_uint {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect refinement scheme.\n\0" as *const u8
                             as *const libc::c_char,
@@ -924,69 +653,48 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 return 0 as libc::c_int;
             }
             if (*ctrl).ncuts <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect ncuts.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect ncuts.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).niter <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect niter.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect niter.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).ufactor <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect ufactor.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect ufactor.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).numflag != 0 as libc::c_int && (*ctrl).numflag != 1 as libc::c_int
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+            if (*ctrl).numflag != 0 as libc::c_int && (*ctrl).numflag != 1 as libc::c_int {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect numflag.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect numflag.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).nparts <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect nparts.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect nparts.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).ncon <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
-                    printf(
-                        b"Input Error: Incorrect ncon.\n\0" as *const u8
-                            as *const libc::c_char,
-                    );
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
+                    printf(b"Input Error: Incorrect ncon.\n\0" as *const u8 as *const libc::c_char);
                 }
                 return 0 as libc::c_int;
             }
@@ -998,9 +706,7 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                     (*ctrl).ncon as size_t,
                 );
                 if (sum as libc::c_double) < 0.99f64 || sum as libc::c_double > 1.01f64 {
-                    if dbglvl as libc::c_uint
-                        & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0
-                    {
+                    if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                         printf(
                             b"Input Error: Incorrect sum of %f for tpwgts for constraint %d.\n\0"
                                 as *const u8 as *const libc::c_char,
@@ -1017,11 +723,11 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
             while i < (*ctrl).ncon {
                 j = 0 as libc::c_int;
                 while j < (*ctrl).nparts {
-                    if *((*ctrl).tpwgts).offset((j * (*ctrl).ncon + i) as isize)
-                        as libc::c_double <= 0.0f64
+                    if *((*ctrl).tpwgts).offset((j * (*ctrl).ncon + i) as isize) as libc::c_double
+                        <= 0.0f64
                     {
-                        if dbglvl as libc::c_uint
-                            & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0
+                        if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
+                            != 0
                         {
                             printf(
                                 b"Input Error: Incorrect tpwgts for partition %d and constraint %d.\n\0"
@@ -1041,12 +747,10 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
             i = 0 as libc::c_int;
             while i < (*ctrl).ncon {
                 if *((*ctrl).ubfactors).offset(i as isize) as libc::c_double <= 1.0f64 {
-                    if dbglvl as libc::c_uint
-                        & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0
-                    {
+                    if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                         printf(
-                            b"Input Error: Incorrect ubfactor for constraint %d.\n\0"
-                                as *const u8 as *const libc::c_char,
+                            b"Input Error: Incorrect ubfactor for constraint %d.\n\0" as *const u8
+                                as *const libc::c_char,
                             i,
                         );
                     }
@@ -1057,14 +761,11 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
             }
         }
         1 => {
-            if (*ctrl).objtype as libc::c_uint
-                != METIS_OBJTYPE_CUT as libc::c_int as libc::c_uint
+            if (*ctrl).objtype as libc::c_uint != METIS_OBJTYPE_CUT as libc::c_int as libc::c_uint
                 && (*ctrl).objtype as libc::c_uint
                     != METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect objective type.\n\0" as *const u8
                             as *const libc::c_char,
@@ -1072,14 +773,10 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).ctype as libc::c_uint
-                != METIS_CTYPE_RM as libc::c_int as libc::c_uint
-                && (*ctrl).ctype as libc::c_uint
-                    != METIS_CTYPE_SHEM as libc::c_int as libc::c_uint
+            if (*ctrl).ctype as libc::c_uint != METIS_CTYPE_RM as libc::c_int as libc::c_uint
+                && (*ctrl).ctype as libc::c_uint != METIS_CTYPE_SHEM as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect coarsening scheme.\n\0" as *const u8
                             as *const libc::c_char,
@@ -1087,25 +784,18 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).iptype as libc::c_uint
-                != METIS_IPTYPE_METISRB as libc::c_int as libc::c_uint
+            if (*ctrl).iptype as libc::c_uint != METIS_IPTYPE_METISRB as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect initial partitioning scheme.\n\0"
-                            as *const u8 as *const libc::c_char,
+                        b"Input Error: Incorrect initial partitioning scheme.\n\0" as *const u8
+                            as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).rtype as libc::c_uint
-                != METIS_RTYPE_GREEDY as libc::c_int as libc::c_uint
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+            if (*ctrl).rtype as libc::c_uint != METIS_RTYPE_GREEDY as libc::c_int as libc::c_uint {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect refinement scheme.\n\0" as *const u8
                             as *const libc::c_char,
@@ -1114,91 +804,63 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 return 0 as libc::c_int;
             }
             if (*ctrl).ncuts <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect ncuts.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect ncuts.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).niter <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect niter.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect niter.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).ufactor <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect ufactor.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect ufactor.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).numflag != 0 as libc::c_int && (*ctrl).numflag != 1 as libc::c_int
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+            if (*ctrl).numflag != 0 as libc::c_int && (*ctrl).numflag != 1 as libc::c_int {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect numflag.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect numflag.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).nparts <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect nparts.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect nparts.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).ncon <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
-                    printf(
-                        b"Input Error: Incorrect ncon.\n\0" as *const u8
-                            as *const libc::c_char,
-                    );
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
+                    printf(b"Input Error: Incorrect ncon.\n\0" as *const u8 as *const libc::c_char);
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).contig != 0 as libc::c_int && (*ctrl).contig != 1 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect contig.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect contig.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).minconn != 0 as libc::c_int && (*ctrl).minconn != 1 as libc::c_int
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+            if (*ctrl).minconn != 0 as libc::c_int && (*ctrl).minconn != 1 as libc::c_int {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect minconn.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect minconn.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
@@ -1211,9 +873,7 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                     (*ctrl).ncon as size_t,
                 );
                 if (sum as libc::c_double) < 0.99f64 || sum as libc::c_double > 1.01f64 {
-                    if dbglvl as libc::c_uint
-                        & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0
-                    {
+                    if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                         printf(
                             b"Input Error: Incorrect sum of %f for tpwgts for constraint %d.\n\0"
                                 as *const u8 as *const libc::c_char,
@@ -1230,11 +890,11 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
             while i < (*ctrl).ncon {
                 j = 0 as libc::c_int;
                 while j < (*ctrl).nparts {
-                    if *((*ctrl).tpwgts).offset((j * (*ctrl).ncon + i) as isize)
-                        as libc::c_double <= 0.0f64
+                    if *((*ctrl).tpwgts).offset((j * (*ctrl).ncon + i) as isize) as libc::c_double
+                        <= 0.0f64
                     {
-                        if dbglvl as libc::c_uint
-                            & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0
+                        if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
+                            != 0
                         {
                             printf(
                                 b"Input Error: Incorrect tpwgts for partition %d and constraint %d.\n\0"
@@ -1254,12 +914,10 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
             i = 0 as libc::c_int;
             while i < (*ctrl).ncon {
                 if *((*ctrl).ubfactors).offset(i as isize) as libc::c_double <= 1.0f64 {
-                    if dbglvl as libc::c_uint
-                        & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0
-                    {
+                    if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                         printf(
-                            b"Input Error: Incorrect ubfactor for constraint %d.\n\0"
-                                as *const u8 as *const libc::c_char,
+                            b"Input Error: Incorrect ubfactor for constraint %d.\n\0" as *const u8
+                                as *const libc::c_char,
                             i,
                         );
                     }
@@ -1270,12 +928,9 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
             }
         }
         2 => {
-            if (*ctrl).objtype as libc::c_uint
-                != METIS_OBJTYPE_NODE as libc::c_int as libc::c_uint
+            if (*ctrl).objtype as libc::c_uint != METIS_OBJTYPE_NODE as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect objective type.\n\0" as *const u8
                             as *const libc::c_char,
@@ -1283,14 +938,10 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).ctype as libc::c_uint
-                != METIS_CTYPE_RM as libc::c_int as libc::c_uint
-                && (*ctrl).ctype as libc::c_uint
-                    != METIS_CTYPE_SHEM as libc::c_int as libc::c_uint
+            if (*ctrl).ctype as libc::c_uint != METIS_CTYPE_RM as libc::c_int as libc::c_uint
+                && (*ctrl).ctype as libc::c_uint != METIS_CTYPE_SHEM as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect coarsening scheme.\n\0" as *const u8
                             as *const libc::c_char,
@@ -1298,29 +949,23 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).iptype as libc::c_uint
-                != METIS_IPTYPE_EDGE as libc::c_int as libc::c_uint
+            if (*ctrl).iptype as libc::c_uint != METIS_IPTYPE_EDGE as libc::c_int as libc::c_uint
                 && (*ctrl).iptype as libc::c_uint
                     != METIS_IPTYPE_NODE as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect initial partitioning scheme.\n\0"
-                            as *const u8 as *const libc::c_char,
+                        b"Input Error: Incorrect initial partitioning scheme.\n\0" as *const u8
+                            as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).rtype as libc::c_uint
-                != METIS_RTYPE_SEP1SIDED as libc::c_int as libc::c_uint
+            if (*ctrl).rtype as libc::c_uint != METIS_RTYPE_SEP1SIDED as libc::c_int as libc::c_uint
                 && (*ctrl).rtype as libc::c_uint
                     != METIS_RTYPE_SEP2SIDED as libc::c_int as libc::c_uint
             {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
                         b"Input Error: Incorrect refinement scheme.\n\0" as *const u8
                             as *const libc::c_char,
@@ -1329,104 +974,71 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
                 return 0 as libc::c_int;
             }
             if (*ctrl).nseps <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect nseps.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect nseps.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).niter <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect niter.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect niter.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).ufactor <= 0 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect ufactor.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect ufactor.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).numflag != 0 as libc::c_int && (*ctrl).numflag != 1 as libc::c_int
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+            if (*ctrl).numflag != 0 as libc::c_int && (*ctrl).numflag != 1 as libc::c_int {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect numflag.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect numflag.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).nparts != 3 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect nparts.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect nparts.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if (*ctrl).ncon != 1 as libc::c_int {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
+                    printf(b"Input Error: Incorrect ncon.\n\0" as *const u8 as *const libc::c_char);
+                }
+                return 0 as libc::c_int;
+            }
+            if (*ctrl).compress != 0 as libc::c_int && (*ctrl).compress != 1 as libc::c_int {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect ncon.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect compress.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
-            if (*ctrl).compress != 0 as libc::c_int
-                && (*ctrl).compress != 1 as libc::c_int
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+            if (*ctrl).ccorder != 0 as libc::c_int && (*ctrl).ccorder != 1 as libc::c_int {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect compress.\n\0" as *const u8
-                            as *const libc::c_char,
-                    );
-                }
-                return 0 as libc::c_int;
-            }
-            if (*ctrl).ccorder != 0 as libc::c_int && (*ctrl).ccorder != 1 as libc::c_int
-            {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
-                    printf(
-                        b"Input Error: Incorrect ccorder.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect ccorder.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
             }
             if ((*ctrl).pfactor as libc::c_double) < 0.0f64 {
-                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                    != 0
-                {
+                if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                     printf(
-                        b"Input Error: Incorrect pfactor.\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Input Error: Incorrect pfactor.\n\0" as *const u8 as *const libc::c_char,
                     );
                 }
                 return 0 as libc::c_int;
@@ -1434,12 +1046,10 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
             i = 0 as libc::c_int;
             while i < (*ctrl).ncon {
                 if *((*ctrl).ubfactors).offset(i as isize) as libc::c_double <= 1.0f64 {
-                    if dbglvl as libc::c_uint
-                        & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0
-                    {
+                    if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
                         printf(
-                            b"Input Error: Incorrect ubfactor for constraint %d.\n\0"
-                                as *const u8 as *const libc::c_char,
+                            b"Input Error: Incorrect ubfactor for constraint %d.\n\0" as *const u8
+                                as *const libc::c_char,
                             i,
                         );
                     }
@@ -1450,13 +1060,8 @@ pub unsafe extern "C" fn libmetis__CheckParams(mut ctrl: *mut ctrl_t) -> libc::c
             }
         }
         _ => {
-            if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint
-                != 0
-            {
-                printf(
-                    b"Input Error: Incorrect optype\n\0" as *const u8
-                        as *const libc::c_char,
-                );
+            if dbglvl as libc::c_uint & METIS_DBG_INFO as libc::c_int as libc::c_uint != 0 {
+                printf(b"Input Error: Incorrect optype\n\0" as *const u8 as *const libc::c_char);
             }
             return 0 as libc::c_int;
         }

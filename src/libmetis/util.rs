@@ -1,12 +1,8 @@
 use ::libc;
-extern "C" {
-    fn libmetis__isrand(seed: idx_t);
-}
-pub type __int32_t = libc::c_int;
-pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
+
+use super::gklib::libmetis__isrand;
+use super::structure::*;
+
 pub type C2RustUnnamed = libc::c_int;
 pub const METIS_ERROR: C2RustUnnamed = -4;
 pub const METIS_ERROR_MEMORY: C2RustUnnamed = -3;
@@ -14,9 +10,11 @@ pub const METIS_ERROR_INPUT: C2RustUnnamed = -2;
 pub const METIS_OK: C2RustUnnamed = 1;
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__InitRandom(mut seed: idx_t) {
-    libmetis__isrand(
-        if seed == -(1 as libc::c_int) { 4321 as libc::c_int } else { seed },
-    );
+    libmetis__isrand(if seed == -(1 as libc::c_int) {
+        4321 as libc::c_int
+    } else {
+        seed
+    });
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__iargmax_nrm(
@@ -27,7 +25,7 @@ pub unsafe extern "C" fn libmetis__iargmax_nrm(
     let mut i: idx_t = 0;
     let mut max: idx_t = 0 as libc::c_int;
     i = 1 as libc::c_int;
-    while (i as libc::c_ulong) < n {
+    while (i as u64) < n {
         max = if *x.offset(i as isize) as libc::c_float * *y.offset(i as isize)
             > *x.offset(max as isize) as libc::c_float * *y.offset(max as isize)
         {
@@ -48,13 +46,17 @@ pub unsafe extern "C" fn libmetis__iargmax_strd(
 ) -> idx_t {
     let mut i: size_t = 0;
     let mut max: size_t = 0 as libc::c_int as size_t;
-    n = (n as libc::c_ulong).wrapping_mul(incx as libc::c_ulong) as size_t as size_t;
+    n = (n as u64).wrapping_mul(incx as u64) as size_t as size_t;
     i = incx as size_t;
     while i < n {
-        max = if *x.offset(i as isize) > *x.offset(max as isize) { i } else { max };
-        i = (i as libc::c_ulong).wrapping_add(incx as libc::c_ulong) as size_t as size_t;
+        max = if *x.offset(i as isize) > *x.offset(max as isize) {
+            i
+        } else {
+            max
+        };
+        i = (i as u64).wrapping_add(incx as u64) as size_t as size_t;
     }
-    return max.wrapping_div(incx as libc::c_ulong) as idx_t;
+    return max.wrapping_div(incx as u64) as idx_t;
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__rargmax2(mut n: size_t, mut x: *mut real_t) -> idx_t {
@@ -90,8 +92,7 @@ pub unsafe extern "C" fn libmetis__iargmax2_nrm(
     let mut i: size_t = 0;
     let mut max1: size_t = 0;
     let mut max2: size_t = 0;
-    if *x.offset(0 as libc::c_int as isize) as libc::c_float
-        * *y.offset(0 as libc::c_int as isize)
+    if *x.offset(0 as libc::c_int as isize) as libc::c_float * *y.offset(0 as libc::c_int as isize)
         > *x.offset(1 as libc::c_int as isize) as libc::c_float
             * *y.offset(1 as libc::c_int as isize)
     {

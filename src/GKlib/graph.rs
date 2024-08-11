@@ -7,7 +7,7 @@ extern "C" {
         _: *const libc::c_char,
         _: *mut *mut libc::c_char,
         _: libc::c_int,
-    ) -> libc::c_long;
+    ) -> i64;
     fn strtof(_: *const libc::c_char, _: *mut *mut libc::c_char) -> libc::c_float;
     static mut stdout: *mut FILE;
     fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
@@ -16,7 +16,7 @@ extern "C" {
     fn memset(
         _: *mut libc::c_void,
         _: libc::c_int,
-        _: libc::c_ulong,
+        _: u64,
     ) -> *mut libc::c_void;
     fn gk_i32incset(n: size_t, baseval: int32_t, x: *mut int32_t) -> *mut int32_t;
     fn gk_fopen(
@@ -70,12 +70,12 @@ extern "C" {
     fn gk_fpqGetTop(queue: *mut gk_fpq_t) -> gk_idx_t;
 }
 pub type __int32_t = libc::c_int;
-pub type __off_t = libc::c_long;
-pub type __off64_t = libc::c_long;
-pub type __ssize_t = libc::c_long;
+pub type __off_t = i64;
+pub type __off64_t = i64;
+pub type __ssize_t = i64;
 pub type int32_t = __int32_t;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _IO_FILE {
@@ -158,7 +158,7 @@ pub struct gk_graph_t {
 pub unsafe extern "C" fn gk_graph_Create() -> *mut gk_graph_t {
     let mut graph: *mut gk_graph_t = 0 as *mut gk_graph_t;
     graph = gk_malloc(
-        ::core::mem::size_of::<gk_graph_t>() as libc::c_ulong,
+        ::core::mem::size_of::<gk_graph_t>() as u64,
         b"gk_graph_Create: graph\0" as *const u8 as *const libc::c_char
             as *mut libc::c_char,
     ) as *mut gk_graph_t;
@@ -170,7 +170,7 @@ pub unsafe extern "C" fn gk_graph_Init(mut graph: *mut gk_graph_t) {
     memset(
         graph as *mut libc::c_void,
         0 as libc::c_int,
-        ::core::mem::size_of::<gk_graph_t>() as libc::c_ulong,
+        ::core::mem::size_of::<gk_graph_t>() as u64,
     );
     (*graph).nvtxs = -(1 as libc::c_int);
 }
@@ -243,7 +243,7 @@ pub unsafe extern "C" fn gk_graph_Read(
         );
         loop {
             if gk_getline(&mut line, &mut lnlen, fpin)
-                <= 0 as libc::c_int as libc::c_long
+                <= 0 as libc::c_int as i64
             {
                 gk_errexit(
                     15 as libc::c_int,
@@ -266,16 +266,16 @@ pub unsafe extern "C" fn gk_graph_Read(
             &mut fmt as *mut size_t,
             &mut ncon as *mut size_t,
         ) as size_t;
-        if nfields < 2 as libc::c_int as libc::c_ulong {
+        if nfields < 2 as libc::c_int as u64 {
             gk_errexit(
                 15 as libc::c_int,
                 b"Header line must contain at least 2 integers (#vtxs and #edges).\n\0"
                     as *const u8 as *const libc::c_char as *mut libc::c_char,
             );
         }
-        nedges = (nedges as libc::c_ulong)
-            .wrapping_mul(2 as libc::c_int as libc::c_ulong) as size_t as size_t;
-        if fmt > 111 as libc::c_int as libc::c_ulong {
+        nedges = (nedges as u64)
+            .wrapping_mul(2 as libc::c_int as u64) as size_t as size_t;
+        if fmt > 111 as libc::c_int as u64 {
             gk_errexit(
                 15 as libc::c_int,
                 b"Cannot read this type of file format [fmt=%zu]!\n\0" as *const u8
@@ -286,7 +286,7 @@ pub unsafe extern "C" fn gk_graph_Read(
         sprintf(
             fmtstr.as_mut_ptr(),
             b"%03zu\0" as *const u8 as *const libc::c_char,
-            fmt.wrapping_rem(1000 as libc::c_int as libc::c_ulong),
+            fmt.wrapping_rem(1000 as libc::c_int as u64),
         );
         readsizes = (fmtstr[0 as libc::c_int as usize] as libc::c_int == '1' as i32)
             as libc::c_int;
@@ -295,8 +295,8 @@ pub unsafe extern "C" fn gk_graph_Read(
         readvals = (fmtstr[2 as libc::c_int as usize] as libc::c_int == '1' as i32)
             as libc::c_int;
         numbering = 1 as libc::c_int;
-        ncon = if ncon == 0 as libc::c_int as libc::c_ulong {
-            1 as libc::c_int as libc::c_ulong
+        ncon = if ncon == 0 as libc::c_int as u64 {
+            1 as libc::c_int as u64
         } else {
             ncon
         };
@@ -312,7 +312,7 @@ pub unsafe extern "C" fn gk_graph_Read(
     (*graph).nvtxs = nvtxs as int32_t;
     (*graph)
         .xadj = gk_zmalloc(
-        nvtxs.wrapping_add(1 as libc::c_int as libc::c_ulong),
+        nvtxs.wrapping_add(1 as libc::c_int as u64),
         b"gk_graph_Read: xadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     (*graph)
@@ -376,10 +376,10 @@ pub unsafe extern "C" fn gk_graph_Read(
     *((*graph).xadj).offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
     k = 0 as libc::c_int as ssize_t;
     i = 0 as libc::c_int as ssize_t;
-    while (i as libc::c_ulong) < nvtxs {
+    while (i as u64) < nvtxs {
         loop {
             if gk_getline(&mut line, &mut lnlen, fpin)
-                == -(1 as libc::c_int) as libc::c_long
+                == -(1 as libc::c_int) as i64
             {
                 gk_errexit(
                     15 as libc::c_int,
@@ -402,7 +402,7 @@ pub unsafe extern "C" fn gk_graph_Read(
                         15 as libc::c_int,
                         b"The line for vertex %zd does not have size information\n\0"
                             as *const u8 as *const libc::c_char as *mut libc::c_char,
-                        i + 1 as libc::c_int as libc::c_long,
+                        i + 1 as libc::c_int as i64,
                     );
                 }
                 if *((*graph).fvsizes).offset(i as isize)
@@ -412,7 +412,7 @@ pub unsafe extern "C" fn gk_graph_Read(
                         15 as libc::c_int,
                         b"The size for vertex %zd must be >= 0\n\0" as *const u8
                             as *const libc::c_char as *mut libc::c_char,
-                        i + 1 as libc::c_int as libc::c_long,
+                        i + 1 as libc::c_int as i64,
                     );
                 }
             } else {
@@ -425,7 +425,7 @@ pub unsafe extern "C" fn gk_graph_Read(
                         15 as libc::c_int,
                         b"The line for vertex %zd does not have size information\n\0"
                             as *const u8 as *const libc::c_char as *mut libc::c_char,
-                        i + 1 as libc::c_int as libc::c_long,
+                        i + 1 as libc::c_int as i64,
                     );
                 }
                 if *((*graph).ivsizes).offset(i as isize) < 0 as libc::c_int {
@@ -433,7 +433,7 @@ pub unsafe extern "C" fn gk_graph_Read(
                         15 as libc::c_int,
                         b"The size for vertex %zd must be >= 0\n\0" as *const u8
                             as *const libc::c_char as *mut libc::c_char,
-                        i + 1 as libc::c_int as libc::c_long,
+                        i + 1 as libc::c_int as i64,
                     );
                 }
             }
@@ -441,66 +441,66 @@ pub unsafe extern "C" fn gk_graph_Read(
         }
         if readwgts != 0 {
             l = 0 as libc::c_int as ssize_t;
-            while (l as libc::c_ulong) < ncon {
+            while (l as u64) < ncon {
                 if isfvwgts != 0 {
                     *((*graph).fvwgts)
                         .offset(
-                            (i as libc::c_ulong)
+                            (i as u64)
                                 .wrapping_mul(ncon)
-                                .wrapping_add(l as libc::c_ulong) as isize,
+                                .wrapping_add(l as u64) as isize,
                         ) = strtof(head, &mut tail);
                     if tail == head {
                         gk_errexit(
                             15 as libc::c_int,
                             b"The line for vertex %zd does not have enough weights for the %d constraints.\n\0"
                                 as *const u8 as *const libc::c_char as *mut libc::c_char,
-                            i + 1 as libc::c_int as libc::c_long,
+                            i + 1 as libc::c_int as i64,
                             ncon,
                         );
                     }
                     if *((*graph).fvwgts)
                         .offset(
-                            (i as libc::c_ulong)
+                            (i as u64)
                                 .wrapping_mul(ncon)
-                                .wrapping_add(l as libc::c_ulong) as isize,
+                                .wrapping_add(l as u64) as isize,
                         ) < 0 as libc::c_int as libc::c_float
                     {
                         gk_errexit(
                             15 as libc::c_int,
                             b"The weight vertex %zd and constraint %zd must be >= 0\n\0"
                                 as *const u8 as *const libc::c_char as *mut libc::c_char,
-                            i + 1 as libc::c_int as libc::c_long,
+                            i + 1 as libc::c_int as i64,
                             l,
                         );
                     }
                 } else {
                     *((*graph).ivwgts)
                         .offset(
-                            (i as libc::c_ulong)
+                            (i as u64)
                                 .wrapping_mul(ncon)
-                                .wrapping_add(l as libc::c_ulong) as isize,
+                                .wrapping_add(l as u64) as isize,
                         ) = strtol(head, &mut tail, 0 as libc::c_int) as int32_t;
                     if tail == head {
                         gk_errexit(
                             15 as libc::c_int,
                             b"The line for vertex %zd does not have enough weights for the %d constraints.\n\0"
                                 as *const u8 as *const libc::c_char as *mut libc::c_char,
-                            i + 1 as libc::c_int as libc::c_long,
+                            i + 1 as libc::c_int as i64,
                             ncon,
                         );
                     }
                     if *((*graph).ivwgts)
                         .offset(
-                            (i as libc::c_ulong)
+                            (i as u64)
                                 .wrapping_mul(ncon)
-                                .wrapping_add(l as libc::c_ulong) as isize,
+                                .wrapping_add(l as u64) as isize,
                         ) < 0 as libc::c_int
                     {
                         gk_errexit(
                             15 as libc::c_int,
                             b"The weight vertex %zd and constraint %zd must be >= 0\n\0"
                                 as *const u8 as *const libc::c_char as *mut libc::c_char,
-                            i + 1 as libc::c_int as libc::c_long,
+                            i + 1 as libc::c_int as i64,
                             l,
                         );
                     }
@@ -558,11 +558,11 @@ pub unsafe extern "C" fn gk_graph_Read(
             k += 1;
             k;
         }
-        *((*graph).xadj).offset((i + 1 as libc::c_int as libc::c_long) as isize) = k;
+        *((*graph).xadj).offset((i + 1 as libc::c_int as i64) as isize) = k;
         i += 1;
         i;
     }
-    if k as libc::c_ulong != nedges {
+    if k as u64 != nedges {
         gk_errexit(
             15 as libc::c_int,
             b"gk_graph_Read: Something wrong with the number of edges in the input file. nedges=%zd, Actualnedges=%zd.\n\0"
@@ -618,7 +618,7 @@ pub unsafe extern "C" fn gk_graph_Write(
         b"%d %zd\0" as *const u8 as *const libc::c_char,
         (*graph).nvtxs,
         *((*graph).xadj).offset((*graph).nvtxs as isize)
-            / 2 as libc::c_int as libc::c_long,
+            / 2 as libc::c_int as i64,
     );
     if hasvwgts != 0 || hasvsizes != 0 || hasewgts != 0 {
         fprintf(
@@ -631,7 +631,7 @@ pub unsafe extern "C" fn gk_graph_Write(
     }
     fprintf(fpout, b"\n\0" as *const u8 as *const libc::c_char);
     i = 0 as libc::c_int as ssize_t;
-    while i < (*graph).nvtxs as libc::c_long {
+    while i < (*graph).nvtxs as i64 {
         if hasvsizes != 0 {
             if !((*graph).ivsizes).is_null() {
                 fprintf(
@@ -664,7 +664,7 @@ pub unsafe extern "C" fn gk_graph_Write(
         }
         j = *((*graph).xadj).offset(i as isize);
         while j
-            < *((*graph).xadj).offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            < *((*graph).xadj).offset((i + 1 as libc::c_int as i64) as isize)
         {
             fprintf(
                 fpout,
@@ -838,7 +838,7 @@ pub unsafe extern "C" fn gk_graph_ExtractSubgraph(
         );
     }
     i = nvtxs as ssize_t;
-    while i >= 0 as libc::c_int as libc::c_long {
+    while i >= 0 as libc::c_int as i64 {
         let ref mut fresh1 = *((*ngraph).xadj).offset(i as isize);
         *fresh1 -= *((*ngraph).xadj).offset(0 as libc::c_int as isize);
         i -= 1;
@@ -1161,7 +1161,7 @@ pub unsafe extern "C" fn gk_graph_FindComponents(
     adjncy = (*graph).adjncy;
     if cptr.is_null() {
         cptr = gk_i32malloc(
-            (nvtxs + 1 as libc::c_int as libc::c_long) as size_t,
+            (nvtxs + 1 as libc::c_int as i64) as size_t,
             b"gk_graph_FindComponents: cptr\0" as *const u8 as *const libc::c_char
                 as *mut libc::c_char,
         );
@@ -1194,7 +1194,7 @@ pub unsafe extern "C" fn gk_graph_FindComponents(
     ntodo = nvtxs;
     last = 0 as libc::c_int as ssize_t;
     first = last;
-    while ntodo > 0 as libc::c_int as libc::c_long {
+    while ntodo > 0 as libc::c_int as i64 {
         if first == last {
             ncmps += 1;
             *cptr.offset(ncmps as isize) = first as int32_t;
@@ -1214,7 +1214,7 @@ pub unsafe extern "C" fn gk_graph_FindComponents(
         j = *fresh4 as ssize_t;
         *pos.offset(j as isize) = k as int32_t;
         j = *xadj.offset(i as isize);
-        while j < *xadj.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+        while j < *xadj.offset((i + 1 as libc::c_int as i64) as isize) {
             k = *adjncy.offset(j as isize) as ssize_t;
             if *pos.offset(k as isize) != -(1 as libc::c_int) {
                 let fresh5 = last;
@@ -1741,7 +1741,7 @@ pub unsafe extern "C" fn gk_graph_ComputeBestFOrdering(
         }
         if type_0 == 4 as libc::c_int {
             j = 0 as libc::c_int as ssize_t;
-            while j < nopen as libc::c_long {
+            while j < nopen as i64 {
                 u = *ot.offset(j as isize);
                 if *perm.offset(u as isize) != -(1 as libc::c_int) {
                     gk_errexit(
@@ -1839,7 +1839,7 @@ pub unsafe extern "C" fn gk_graph_SingleSourceShortestPaths(
             }
             *inqueue.offset(v as isize) = 2 as libc::c_int;
             i = *xadj.offset(v as isize) as libc::c_int;
-            while (i as libc::c_long) < *xadj.offset((v + 1 as libc::c_int) as isize) {
+            while (i as i64) < *xadj.offset((v + 1 as libc::c_int) as isize) {
                 u = *adjncy.offset(i as isize);
                 if !(*inqueue.offset(u as isize) == 2 as libc::c_int) {
                     if *sps.offset(u as isize) < 0 as libc::c_int
@@ -1894,7 +1894,7 @@ pub unsafe extern "C" fn gk_graph_SingleSourceShortestPaths(
             }
             *inqueue.offset(v as isize) = 2 as libc::c_int;
             i = *xadj.offset(v as isize) as libc::c_int;
-            while (i as libc::c_long) < *xadj.offset((v + 1 as libc::c_int) as isize) {
+            while (i as i64) < *xadj.offset((v + 1 as libc::c_int) as isize) {
                 u = *adjncy.offset(i as isize);
                 if !(*inqueue.offset(u as isize) == 2 as libc::c_int) {
                     if *sps_0.offset(u as isize) < 0 as libc::c_int as libc::c_float

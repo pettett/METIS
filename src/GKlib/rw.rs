@@ -14,10 +14,10 @@ extern "C" {
     fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
 }
 pub type __int32_t = libc::c_int;
-pub type __ssize_t = libc::c_long;
+pub type __ssize_t = i64;
 pub type int32_t = __int32_t;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct gk_csr_t {
@@ -89,7 +89,7 @@ pub unsafe extern "C" fn gk_rw_PageRank(
     i = 0 as libc::c_int as ssize_t;
     while i < nrows {
         j = *rowptr.offset(i as isize);
-        while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+        while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize) {
             *rscale.offset(i as isize) += *rowval.offset(j as isize) as libc::c_double;
             j += 1;
             j;
@@ -107,7 +107,7 @@ pub unsafe extern "C" fn gk_rw_PageRank(
         i;
     }
     iter = 0 as libc::c_int as ssize_t;
-    while iter < max_niter as libc::c_long {
+    while iter < max_niter as i64 {
         prtmp = prnew;
         prnew = prold;
         prold = prtmp;
@@ -124,7 +124,7 @@ pub unsafe extern "C" fn gk_rw_PageRank(
         i = 0 as libc::c_int as ssize_t;
         while i < nrows {
             j = *rowptr.offset(i as isize);
-            while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+            while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize) {
                 *prnew.offset(*rowind.offset(j as isize) as isize)
                     += *prold.offset(i as isize) * *rscale.offset(i as isize)
                         * *rowval.offset(j as isize) as libc::c_double;
@@ -178,5 +178,5 @@ pub unsafe extern "C" fn gk_rw_PageRank(
         &mut rscale as *mut *mut libc::c_double,
         0 as *mut *mut libc::c_void,
     );
-    return (iter + 1 as libc::c_int as libc::c_long) as libc::c_int;
+    return (iter + 1 as libc::c_int as i64) as libc::c_int;
 }

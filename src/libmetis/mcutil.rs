@@ -1,68 +1,7 @@
 use ::libc;
-extern "C" {
-    fn fabsf(_: libc::c_float) -> libc::c_float;
-}
-pub type __int32_t = libc::c_int;
-pub type int32_t = __int32_t;
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
+
+use super::structure::*;
+
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__rvecle(
     mut n: idx_t,
@@ -221,12 +160,10 @@ pub unsafe extern "C" fn libmetis__BetterVBalance(
     let mut diff2: real_t = 0.0f64 as real_t;
     i = 0 as libc::c_int;
     while i < ncon {
-        sum1
-            += (*v_vwgt.offset(i as isize) + *u1_vwgt.offset(i as isize))
-                as libc::c_float * *invtvwgt.offset(i as isize);
-        sum2
-            += (*v_vwgt.offset(i as isize) + *u2_vwgt.offset(i as isize))
-                as libc::c_float * *invtvwgt.offset(i as isize);
+        sum1 += (*v_vwgt.offset(i as isize) + *u1_vwgt.offset(i as isize)) as libc::c_float
+            * *invtvwgt.offset(i as isize);
+        sum2 += (*v_vwgt.offset(i as isize) + *u2_vwgt.offset(i as isize)) as libc::c_float
+            * *invtvwgt.offset(i as isize);
         i += 1;
         i;
     }
@@ -234,18 +171,14 @@ pub unsafe extern "C" fn libmetis__BetterVBalance(
     sum2 = sum2 / ncon as libc::c_float;
     i = 0 as libc::c_int;
     while i < ncon {
-        diff1
-            += fabsf(
-                sum1
-                    - (*v_vwgt.offset(i as isize) + *u1_vwgt.offset(i as isize))
-                        as libc::c_float * *invtvwgt.offset(i as isize),
-            );
-        diff2
-            += fabsf(
-                sum2
-                    - (*v_vwgt.offset(i as isize) + *u2_vwgt.offset(i as isize))
-                        as libc::c_float * *invtvwgt.offset(i as isize),
-            );
+        diff1 += (sum1
+            - (*v_vwgt.offset(i as isize) + *u1_vwgt.offset(i as isize)) as libc::c_float
+                * *invtvwgt.offset(i as isize))
+        .abs();
+        diff2 += (sum2
+            - (*v_vwgt.offset(i as isize) + *u2_vwgt.offset(i as isize)) as libc::c_float
+                * *invtvwgt.offset(i as isize))
+        .abs();
         i += 1;
         i;
     }
@@ -367,7 +300,8 @@ pub unsafe extern "C" fn libmetis__ComputeLoadImbalanceDiff(
         j = 0 as libc::c_int;
         while j < nparts {
             cur = *pwgts.offset((j * ncon + i) as isize) as libc::c_float
-                * *pijbm.offset((j * ncon + i) as isize) - *ubvec.offset(i as isize);
+                * *pijbm.offset((j * ncon + i) as isize)
+                - *ubvec.offset(i as isize);
             if cur > max {
                 max = cur;
             }
@@ -398,15 +332,14 @@ pub unsafe extern "C" fn libmetis__ComputeLoadImbalanceDiffVec(
     max = -1.0f64 as real_t;
     i = 0 as libc::c_int;
     while i < ncon {
-        *diffvec
-            .offset(
-                i as isize,
-            ) = *pwgts.offset(i as isize) as libc::c_float * *pijbm.offset(i as isize)
+        *diffvec.offset(i as isize) = *pwgts.offset(i as isize) as libc::c_float
+            * *pijbm.offset(i as isize)
             - *ubfactors.offset(i as isize);
         j = 1 as libc::c_int;
         while j < nparts {
             cur = *pwgts.offset((j * ncon + i) as isize) as libc::c_float
-                * *pijbm.offset((j * ncon + i) as isize) - *ubfactors.offset(i as isize);
+                * *pijbm.offset((j * ncon + i) as isize)
+                - *ubfactors.offset(i as isize);
             if cur > *diffvec.offset(i as isize) {
                 *diffvec.offset(i as isize) = cur;
             }
@@ -437,10 +370,8 @@ pub unsafe extern "C" fn libmetis__ComputeLoadImbalanceVec(
     pwgts = (*graph).pwgts;
     i = 0 as libc::c_int;
     while i < ncon {
-        *lbvec
-            .offset(
-                i as isize,
-            ) = *pwgts.offset(i as isize) as libc::c_float * *pijbm.offset(i as isize);
+        *lbvec.offset(i as isize) =
+            *pwgts.offset(i as isize) as libc::c_float * *pijbm.offset(i as isize);
         j = 1 as libc::c_int;
         while j < nparts {
             cur = *pwgts.offset((j * ncon + i) as isize) as libc::c_float

@@ -1,274 +1,13 @@
 use ::libc;
-extern "C" {
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn libmetis__ikvwspacemalloc(_: *mut ctrl_t, _: idx_t) -> *mut ikv_t;
-    fn libmetis__cnbrpoolGetNext(ctrl: *mut ctrl_t, nnbrs: idx_t) -> idx_t;
-    fn libmetis__vnbrpoolGetNext(ctrl: *mut ctrl_t, nnbrs: idx_t) -> idx_t;
-    fn libmetis__wspacepush(ctrl: *mut ctrl_t);
-    fn libmetis__iwspacemalloc(_: *mut ctrl_t, _: idx_t) -> *mut idx_t;
-    fn libmetis__wspacepop(ctrl: *mut ctrl_t);
-    fn libmetis__ivecaxpylez(
-        n: idx_t,
-        a: idx_t,
-        x: *mut idx_t,
-        y: *mut idx_t,
-        z: *mut idx_t,
-    ) -> libc::c_int;
-    fn libmetis__KWayVolUpdate(
-        ctrl: *mut ctrl_t,
-        graph: *mut graph_t,
-        v: idx_t,
-        from: idx_t,
-        to: idx_t,
-        queue: *mut ipq_t,
-        vstatus: *mut idx_t,
-        r_nupd: *mut idx_t,
-        updptr: *mut idx_t,
-        updind: *mut idx_t,
-        bndtype: idx_t,
-        vmarker: *mut idx_t,
-        pmarker: *mut idx_t,
-        modind: *mut idx_t,
-    );
-    fn libmetis__ikvsortd(n: size_t, base: *mut ikv_t);
-    fn libmetis__ikvsorti(n: size_t, base: *mut ikv_t);
-    fn libmetis__iarray2csr(
-        n: idx_t,
-        range: idx_t,
-        array: *mut idx_t,
-        ptr: *mut idx_t,
-        ind: *mut idx_t,
-    );
-    fn libmetis__ipqGetTop(queue: *mut ipq_t) -> idx_t;
-    fn libmetis__ipqInsert(queue: *mut ipq_t, node: idx_t, key: idx_t) -> libc::c_int;
-    fn libmetis__ipqFree(queue: *mut ipq_t);
-    fn libmetis__ipqReset(queue: *mut ipq_t);
-    fn libmetis__ipqInit(queue: *mut ipq_t, maxnodes: size_t);
-    fn libmetis__iset(n: size_t, val: idx_t, x: *mut idx_t) -> *mut idx_t;
-    fn libmetis__ismalloc(n: size_t, ival: idx_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__irealloc(
-        ptr: *mut idx_t,
-        n: size_t,
-        msg: *mut libc::c_char,
-    ) -> *mut idx_t;
-    fn libmetis__iaxpy(
-        n: size_t,
-        alpha: idx_t,
-        x: *mut idx_t,
-        incx: size_t,
-        y: *mut idx_t,
-        incy: size_t,
-    ) -> *mut idx_t;
-    fn libmetis__isum(n: size_t, x: *mut idx_t, incx: size_t) -> idx_t;
-    fn libmetis__iargmax(n: size_t, x: *mut idx_t) -> size_t;
-    fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
-    fn gk_errexit(signum: libc::c_int, _: *mut libc::c_char, _: ...);
-}
-pub type __int32_t = libc::c_int;
-pub type __ssize_t = libc::c_long;
-pub type int32_t = __int32_t;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
-pub type gk_idx_t = ssize_t;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mop_t {
-    pub type_0: libc::c_int,
-    pub nbytes: ssize_t,
-    pub ptr: *mut libc::c_void,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mcore_t {
-    pub coresize: size_t,
-    pub corecpos: size_t,
-    pub core: *mut libc::c_void,
-    pub nmops: size_t,
-    pub cmop: size_t,
-    pub mops: *mut gk_mop_t,
-    pub num_callocs: size_t,
-    pub num_hallocs: size_t,
-    pub size_callocs: size_t,
-    pub size_hallocs: size_t,
-    pub cur_callocs: size_t,
-    pub cur_hallocs: size_t,
-    pub max_callocs: size_t,
-    pub max_hallocs: size_t,
-}
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-pub type moptype_et = libc::c_uint;
-pub const METIS_OP_OMETIS: moptype_et = 2;
-pub const METIS_OP_KMETIS: moptype_et = 1;
-pub const METIS_OP_PMETIS: moptype_et = 0;
-pub type mctype_et = libc::c_uint;
-pub const METIS_CTYPE_SHEM: mctype_et = 1;
-pub const METIS_CTYPE_RM: mctype_et = 0;
-pub type miptype_et = libc::c_uint;
-pub const METIS_IPTYPE_METISRB: miptype_et = 4;
-pub const METIS_IPTYPE_NODE: miptype_et = 3;
-pub const METIS_IPTYPE_EDGE: miptype_et = 2;
-pub const METIS_IPTYPE_RANDOM: miptype_et = 1;
-pub const METIS_IPTYPE_GROW: miptype_et = 0;
-pub type mrtype_et = libc::c_uint;
-pub const METIS_RTYPE_SEP1SIDED: mrtype_et = 3;
-pub const METIS_RTYPE_SEP2SIDED: mrtype_et = 2;
-pub const METIS_RTYPE_GREEDY: mrtype_et = 1;
-pub const METIS_RTYPE_FM: mrtype_et = 0;
-pub type mdbglvl_et = libc::c_uint;
-pub const METIS_DBG_MEMORY: mdbglvl_et = 2048;
-pub const METIS_DBG_CONTIGINFO: mdbglvl_et = 256;
-pub const METIS_DBG_CONNINFO: mdbglvl_et = 128;
-pub const METIS_DBG_SEPINFO: mdbglvl_et = 64;
-pub const METIS_DBG_MOVEINFO: mdbglvl_et = 32;
-pub const METIS_DBG_IPART: mdbglvl_et = 16;
-pub const METIS_DBG_REFINE: mdbglvl_et = 8;
-pub const METIS_DBG_COARSEN: mdbglvl_et = 4;
-pub const METIS_DBG_TIME: mdbglvl_et = 2;
-pub const METIS_DBG_INFO: mdbglvl_et = 1;
-pub type mobjtype_et = libc::c_uint;
-pub const METIS_OBJTYPE_NODE: mobjtype_et = 2;
-pub const METIS_OBJTYPE_VOL: mobjtype_et = 1;
-pub const METIS_OBJTYPE_CUT: mobjtype_et = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ikv_t {
-    pub key: idx_t,
-    pub val: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ipq_t {
-    pub nnodes: gk_idx_t,
-    pub maxnodes: gk_idx_t,
-    pub heap: *mut ikv_t,
-    pub locator: *mut gk_idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct cnbr_t {
-    pub pid: idx_t,
-    pub ed: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vnbr_t {
-    pub pid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ctrl_t {
-    pub optype: moptype_et,
-    pub objtype: mobjtype_et,
-    pub dbglvl: mdbglvl_et,
-    pub ctype: mctype_et,
-    pub iptype: miptype_et,
-    pub rtype: mrtype_et,
-    pub CoarsenTo: idx_t,
-    pub nIparts: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub seed: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub numflag: idx_t,
-    pub maxvwgt: *mut idx_t,
-    pub ncon: idx_t,
-    pub nparts: idx_t,
-    pub pfactor: real_t,
-    pub ubfactors: *mut real_t,
-    pub tpwgts: *mut real_t,
-    pub pijbm: *mut real_t,
-    pub cfactor: real_t,
-    pub TotalTmr: libc::c_double,
-    pub InitPartTmr: libc::c_double,
-    pub MatchTmr: libc::c_double,
-    pub ContractTmr: libc::c_double,
-    pub CoarsenTmr: libc::c_double,
-    pub UncoarsenTmr: libc::c_double,
-    pub RefTmr: libc::c_double,
-    pub ProjectTmr: libc::c_double,
-    pub SplitTmr: libc::c_double,
-    pub Aux1Tmr: libc::c_double,
-    pub Aux2Tmr: libc::c_double,
-    pub Aux3Tmr: libc::c_double,
-    pub mcore: *mut gk_mcore_t,
-    pub nbrpoolsize: size_t,
-    pub nbrpoolcpos: size_t,
-    pub nbrpoolreallocs: size_t,
-    pub cnbrpool: *mut cnbr_t,
-    pub vnbrpool: *mut vnbr_t,
-    pub maxnads: *mut idx_t,
-    pub nads: *mut idx_t,
-    pub adids: *mut *mut idx_t,
-    pub adwgts: *mut *mut idx_t,
-    pub pvec1: *mut idx_t,
-    pub pvec2: *mut idx_t,
-}
+use libc::printf;
+
+use crate::GKlib::{error::gk_errexit, memory::gk_free};
+
+use super::{
+    gklib::*, kwayfm::libmetis__KWayVolUpdate, mcutil::libmetis__ivecaxpylez, structure::*,
+    wspace::*,
+};
+
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__ComputeSubDomainGraph(
     mut ctrl: *mut ctrl_t,
@@ -316,8 +55,7 @@ pub unsafe extern "C" fn libmetis__ComputeSubDomainGraph(
                     i = *pind.offset(ii as isize);
                     if (*rinfo.offset(i as isize)).ed > 0 as libc::c_int {
                         nnbrs = (*rinfo.offset(i as isize)).nnbrs;
-                        nbrs = ((*ctrl).cnbrpool)
-                            .offset((*rinfo.offset(i as isize)).inbr as isize);
+                        nbrs = ((*ctrl).cnbrpool).offset((*rinfo.offset(i as isize)).inbr as isize);
                         j = 0 as libc::c_int;
                         while j < nnbrs {
                             other = (*nbrs.offset(j as isize)).pid;
@@ -346,8 +84,8 @@ pub unsafe extern "C" fn libmetis__ComputeSubDomainGraph(
                     i = *pind.offset(ii as isize);
                     if (*rinfo_0.offset(i as isize)).ned > 0 as libc::c_int {
                         nnbrs = (*rinfo_0.offset(i as isize)).nnbrs;
-                        nbrs_0 = ((*ctrl).vnbrpool)
-                            .offset((*rinfo_0.offset(i as isize)).inbr as isize);
+                        nbrs_0 =
+                            ((*ctrl).vnbrpool).offset((*rinfo_0.offset(i as isize)).inbr as isize);
                         j = 0 as libc::c_int;
                         while j < nnbrs {
                             other = (*nbrs_0.offset(j as isize)).pid;
@@ -381,26 +119,24 @@ pub unsafe extern "C" fn libmetis__ComputeSubDomainGraph(
             *fresh4 = libmetis__irealloc(
                 *((*ctrl).adids).offset(pid as isize),
                 *((*ctrl).maxnads).offset(pid as isize) as size_t,
-                b"ComputeSubDomainGraph: adids[pid]\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"ComputeSubDomainGraph: adids[pid]\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             );
             let ref mut fresh5 = *((*ctrl).adwgts).offset(pid as isize);
             *fresh5 = libmetis__irealloc(
                 *((*ctrl).adwgts).offset(pid as isize),
                 *((*ctrl).maxnads).offset(pid as isize) as size_t,
-                b"ComputeSubDomainGraph: adids[pid]\0" as *const u8
-                    as *const libc::c_char as *mut libc::c_char,
+                b"ComputeSubDomainGraph: adids[pid]\0" as *const u8 as *const libc::c_char
+                    as *mut libc::c_char,
             );
         }
         *((*ctrl).nads).offset(pid as isize) = nads;
         j = 0 as libc::c_int;
         while j < nads {
-            *(*((*ctrl).adids).offset(pid as isize))
-                .offset(j as isize) = *vadids.offset(j as isize);
-            *(*((*ctrl).adwgts).offset(pid as isize))
-                .offset(
-                    j as isize,
-                ) = *vadwgts.offset(*vadids.offset(j as isize) as isize);
+            *(*((*ctrl).adids).offset(pid as isize)).offset(j as isize) =
+                *vadids.offset(j as isize);
+            *(*((*ctrl).adwgts).offset(pid as isize)).offset(j as isize) =
+                *vadwgts.offset(*vadids.offset(j as isize) as isize);
             *vadwgts.offset(*vadids.offset(j as isize) as isize) = 0 as libc::c_int;
             j += 1;
             j;
@@ -430,8 +166,7 @@ pub unsafe extern "C" fn libmetis__UpdateEdgeSubDomainGraph(
         j = 0 as libc::c_int;
         while j < nads {
             if *(*((*ctrl).adids).offset(u as isize)).offset(j as isize) == v {
-                let ref mut fresh6 = *(*((*ctrl).adwgts).offset(u as isize))
-                    .offset(j as isize);
+                let ref mut fresh6 = *(*((*ctrl).adwgts).offset(u as isize)).offset(j as isize);
                 *fresh6 += ewgt;
                 break;
             } else {
@@ -441,21 +176,21 @@ pub unsafe extern "C" fn libmetis__UpdateEdgeSubDomainGraph(
         }
         if j == nads {
             if *((*ctrl).maxnads).offset(u as isize) == nads {
-                *((*ctrl).maxnads)
-                    .offset(u as isize) = 2 as libc::c_int * (nads + 1 as libc::c_int);
+                *((*ctrl).maxnads).offset(u as isize) =
+                    2 as libc::c_int * (nads + 1 as libc::c_int);
                 let ref mut fresh7 = *((*ctrl).adids).offset(u as isize);
                 *fresh7 = libmetis__irealloc(
                     *((*ctrl).adids).offset(u as isize),
                     *((*ctrl).maxnads).offset(u as isize) as size_t,
-                    b"IncreaseEdgeSubDomainGraph: adids[pid]\0" as *const u8
-                        as *const libc::c_char as *mut libc::c_char,
+                    b"IncreaseEdgeSubDomainGraph: adids[pid]\0" as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                 );
                 let ref mut fresh8 = *((*ctrl).adwgts).offset(u as isize);
                 *fresh8 = libmetis__irealloc(
                     *((*ctrl).adwgts).offset(u as isize),
                     *((*ctrl).maxnads).offset(u as isize) as size_t,
-                    b"IncreaseEdgeSubDomainGraph: adids[pid]\0" as *const u8
-                        as *const libc::c_char as *mut libc::c_char,
+                    b"IncreaseEdgeSubDomainGraph: adids[pid]\0" as *const u8 as *const libc::c_char
+                        as *mut libc::c_char,
                 );
             }
             *(*((*ctrl).adids).offset(u as isize)).offset(nads as isize) = v;
@@ -471,27 +206,16 @@ pub unsafe extern "C" fn libmetis__UpdateEdgeSubDomainGraph(
                 );
                 *r_maxndoms = nads;
             }
-        } else if *(*((*ctrl).adwgts).offset(u as isize)).offset(j as isize)
-            == 0 as libc::c_int
-        {
-            *(*((*ctrl).adids).offset(u as isize))
-                .offset(
-                    j as isize,
-                ) = *(*((*ctrl).adids).offset(u as isize))
-                .offset((nads - 1 as libc::c_int) as isize);
-            *(*((*ctrl).adwgts).offset(u as isize))
-                .offset(
-                    j as isize,
-                ) = *(*((*ctrl).adwgts).offset(u as isize))
-                .offset((nads - 1 as libc::c_int) as isize);
+        } else if *(*((*ctrl).adwgts).offset(u as isize)).offset(j as isize) == 0 as libc::c_int {
+            *(*((*ctrl).adids).offset(u as isize)).offset(j as isize) =
+                *(*((*ctrl).adids).offset(u as isize)).offset((nads - 1 as libc::c_int) as isize);
+            *(*((*ctrl).adwgts).offset(u as isize)).offset(j as isize) =
+                *(*((*ctrl).adwgts).offset(u as isize)).offset((nads - 1 as libc::c_int) as isize);
             nads -= 1;
             nads;
             if !r_maxndoms.is_null() && nads + 1 as libc::c_int == *r_maxndoms {
                 *r_maxndoms = *((*ctrl).nads)
-                    .offset(
-                        libmetis__iargmax((*ctrl).nparts as size_t, (*ctrl).nads)
-                            as isize,
-                    );
+                    .offset(libmetis__iargmax((*ctrl).nparts as size_t, (*ctrl).nads) as isize);
             }
         }
         *((*ctrl).nads).offset(u as isize) = nads;
@@ -568,8 +292,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
     xadj = (*graph).xadj;
     adjncy = (*graph).adjncy;
     vwgt = (*graph).vwgt;
-    adjwgt = if (*ctrl).objtype as libc::c_uint
-        == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
+    adjwgt = if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
     {
         0 as *mut idx_t
     } else {
@@ -592,9 +315,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
     pptr = libmetis__iwspacemalloc(ctrl, nparts + 1 as libc::c_int);
     pind = libmetis__iwspacemalloc(ctrl, nvtxs);
     libmetis__iarray2csr(nvtxs, nparts, where_0, pptr, pind);
-    if (*ctrl).objtype as libc::c_uint
-        == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
-    {
+    if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint {
         modind = libmetis__iwspacemalloc(ctrl, nvtxs);
         vmarker = libmetis__iset(
             nvtxs as size_t,
@@ -617,13 +338,15 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
     while i < nparts {
         j = 0 as libc::c_int;
         while j < ncon {
-            *maxpwgt
-                .offset(
-                    (i * ncon + j) as isize,
-                ) = ((if ncon == 1 as libc::c_int { 1.25f64 } else { 1.025f64 })
-                * *tpwgts.offset(i as isize) as libc::c_double
+            *maxpwgt.offset((i * ncon + j) as isize) = ((if ncon == 1 as libc::c_int {
+                1.25f64
+            } else {
+                1.025f64
+            }) * *tpwgts.offset(i as isize)
+                as libc::c_double
                 * *((*graph).tvwgt).offset(j as isize) as libc::c_double
-                * *((*ctrl).ubfactors).offset(j as isize) as libc::c_double) as idx_t;
+                * *((*ctrl).ubfactors).offset(j as isize) as libc::c_double)
+                as idx_t;
             j += 1;
             j;
         }
@@ -635,12 +358,10 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
         total = libmetis__isum(nparts as size_t, nads, 1 as libc::c_int as size_t);
         avg = total / nparts;
         max = *nads.offset(libmetis__iargmax(nparts as size_t, nads) as isize);
-        if (*ctrl).dbglvl as libc::c_uint
-            & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint != 0
-        {
+        if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint != 0 {
             printf(
-                b"Adjacent Subdomain Stats: Total: %3d, Max: %3d[%zu], Avg: %3d\n\0"
-                    as *const u8 as *const libc::c_char,
+                b"Adjacent Subdomain Stats: Total: %3d, Max: %3d[%zu], Avg: %3d\n\0" as *const u8
+                    as *const libc::c_char,
                 total,
                 max,
                 libmetis__iargmax(nparts as size_t, nads),
@@ -673,29 +394,28 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
             ncand2 = 0 as libc::c_int;
             i = 0 as libc::c_int;
             while i < *nads.offset(me as isize) {
-                *mypmat
-                    .offset(
-                        *(*adids.offset(me as isize)).offset(i as isize) as isize,
-                    ) = *(*adwgts.offset(me as isize)).offset(i as isize);
-                if 2 as libc::c_int * *nads.offset(me as isize)
-                    * *(*adwgts.offset(me as isize)).offset(i as isize) < totalout
+                *mypmat.offset(*(*adids.offset(me as isize)).offset(i as isize) as isize) =
+                    *(*adwgts.offset(me as isize)).offset(i as isize);
+                if 2 as libc::c_int
+                    * *nads.offset(me as isize)
+                    * *(*adwgts.offset(me as isize)).offset(i as isize)
+                    < totalout
                 {
-                    (*cand2.offset(ncand2 as isize))
-                        .val = *(*adids.offset(me as isize)).offset(i as isize);
+                    (*cand2.offset(ncand2 as isize)).val =
+                        *(*adids.offset(me as isize)).offset(i as isize);
                     let fresh9 = ncand2;
                     ncand2 = ncand2 + 1;
-                    (*cand2.offset(fresh9 as isize))
-                        .key = *(*adwgts.offset(me as isize)).offset(i as isize);
+                    (*cand2.offset(fresh9 as isize)).key =
+                        *(*adwgts.offset(me as isize)).offset(i as isize);
                 }
                 i += 1;
                 i;
             }
-            if (*ctrl).dbglvl as libc::c_uint
-                & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint != 0
+            if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint
+                != 0
             {
                 printf(
-                    b"Me: %d, Degree: %4d, TotalOut: %d,\n\0" as *const u8
-                        as *const libc::c_char,
+                    b"Me: %d, Degree: %4d, TotalOut: %d,\n\0" as *const u8 as *const libc::c_char,
                     me,
                     *nads.offset(me as isize),
                     totalout,
@@ -722,9 +442,7 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                         i = *pind.offset(ii as isize);
                         j = *xadj.offset(i as isize);
                         while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
-                            if *where_0.offset(*adjncy.offset(j as isize) as isize)
-                                == pid_to
-                            {
+                            if *where_0.offset(*adjncy.offset(j as isize) as isize) == pid_to {
                                 let fresh10 = nind;
                                 nind = nind + 1;
                                 *ind.offset(fresh10 as isize) = i;
@@ -760,12 +478,11 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                     (*cand.offset(fresh11 as isize)).val = k;
                                 }
                                 let ref mut fresh12 = *otherpmat.offset(k as isize);
-                                *fresh12
-                                    += if !adjwgt.is_null() {
-                                        *adjwgt.offset(j as isize)
-                                    } else {
-                                        1 as libc::c_int
-                                    };
+                                *fresh12 += if !adjwgt.is_null() {
+                                    *adjwgt.offset(j as isize)
+                                } else {
+                                    1 as libc::c_int
+                                };
                             }
                             j += 1;
                             j;
@@ -775,26 +492,22 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                     }
                     i = 0 as libc::c_int;
                     while i < ncand {
-                        (*cand.offset(i as isize))
-                            .key = *otherpmat
-                            .offset((*cand.offset(i as isize)).val as isize);
+                        (*cand.offset(i as isize)).key =
+                            *otherpmat.offset((*cand.offset(i as isize)).val as isize);
                         i += 1;
                         i;
                     }
                     libmetis__ikvsortd(ncand as size_t, cand);
                     if (*ctrl).dbglvl as libc::c_uint
-                        & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint != 0
+                        & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint
+                        != 0
                     {
                         printf(
                             b"\tMinOut: %4d, to: %3d, TtlWgt: %5d[#:%d]\n\0" as *const u8
                                 as *const libc::c_char,
                             *mypmat.offset(other as isize),
                             other,
-                            libmetis__isum(
-                                ncon as size_t,
-                                cpwgt,
-                                1 as libc::c_int as size_t,
-                            ),
+                            libmetis__isum(ncon as size_t, cpwgt, 1 as libc::c_int as size_t),
                             nind,
                         );
                     }
@@ -816,9 +529,9 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                 j = 0 as libc::c_int;
                                 while j < *nads.offset(k as isize) {
                                     *kpmat
-                                        .offset(
-                                            *(*adids.offset(k as isize)).offset(j as isize) as isize,
-                                        ) = *(*adwgts.offset(k as isize)).offset(j as isize);
+                                        .offset(*(*adids.offset(k as isize)).offset(j as isize)
+                                            as isize) =
+                                        *(*adwgts.offset(k as isize)).offset(j as isize);
                                     j += 1;
                                     j;
                                 }
@@ -848,7 +561,8 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                         j;
                                     }
                                     if (*ctrl).dbglvl as libc::c_uint
-                                        & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint != 0
+                                        & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint
+                                        != 0
                                     {
                                         printf(
                                             b"\t\tto=%d, nadd=%d, %d\n\0" as *const u8
@@ -858,14 +572,13 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                             *nads.offset(k as isize),
                                         );
                                     }
-                                    if *nads.offset(k as isize) + nadd
-                                        < *nads.offset(me as isize)
-                                    {
+                                    if *nads.offset(k as isize) + nadd < *nads.offset(me as isize) {
                                         if target2 == -(1 as libc::c_int)
                                             || *nads.offset(target2 as isize) + bestnadd
                                                 > *nads.offset(k as isize) + nadd
                                             || *nads.offset(target2 as isize) + bestnadd
-                                                == *nads.offset(k as isize) + nadd && bestnadd > nadd
+                                                == *nads.offset(k as isize) + nadd
+                                                && bestnadd > nadd
                                         {
                                             target2 = k;
                                             bestnadd = nadd;
@@ -878,9 +591,8 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                                 j = 0 as libc::c_int;
                                 while j < *nads.offset(k as isize) {
                                     *kpmat
-                                        .offset(
-                                            *(*adids.offset(k as isize)).offset(j as isize) as isize,
-                                        ) = 0 as libc::c_int;
+                                        .offset(*(*adids.offset(k as isize)).offset(j as isize)
+                                            as isize) = 0 as libc::c_int;
                                     j += 1;
                                     j;
                                 }
@@ -902,10 +614,8 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                     }
                     i = 0 as libc::c_int;
                     while i < ncand {
-                        *otherpmat
-                            .offset(
-                                (*cand.offset(i as isize)).val as isize,
-                            ) = 0 as libc::c_int;
+                        *otherpmat.offset((*cand.offset(i as isize)).val as isize) =
+                            0 as libc::c_int;
                         i += 1;
                         i;
                     }
@@ -914,7 +624,8 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                     }
                     if target != -(1 as libc::c_int) {
                         if (*ctrl).dbglvl as libc::c_uint
-                            & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint != 0
+                            & METIS_DBG_CONNINFO as libc::c_int as libc::c_uint
+                            != 0
                         {
                             printf(
                                 b"\t\tScheme: %d. Moving to %d\n\0" as *const u8
@@ -938,10 +649,8 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
             }
             i = 0 as libc::c_int;
             while i < *nads.offset(me as isize) {
-                *mypmat
-                    .offset(
-                        *(*adids.offset(me as isize)).offset(i as isize) as isize,
-                    ) = 0 as libc::c_int;
+                *mypmat.offset(*(*adids.offset(me as isize)).offset(i as isize) as isize) =
+                    0 as libc::c_int;
                 i += 1;
                 i;
             }
@@ -952,21 +661,14 @@ pub unsafe extern "C" fn libmetis__EliminateSubDomainEdges(
                     }
                     1 => {
                         libmetis__MoveGroupMinConnForVol(
-                            ctrl,
-                            graph,
-                            target,
-                            nind,
-                            ind,
-                            vmarker,
-                            pmarker,
-                            modind,
+                            ctrl, graph, target, nind, ind, vmarker, pmarker, modind,
                         );
                     }
                     _ => {
                         gk_errexit(
                             15 as libc::c_int,
-                            b"Unknown objtype of %d\n\0" as *const u8
-                                as *const libc::c_char as *mut libc::c_char,
+                            b"Unknown objtype of %d\n\0" as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             (*ctrl).objtype as libc::c_uint,
                         );
                     }
@@ -1024,8 +726,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
         from = *where_0.offset(i as isize);
         myrinfo = ((*graph).ckrinfo).offset(i as isize);
         if (*myrinfo).inbr == -(1 as libc::c_int) {
-            (*myrinfo)
-                .inbr = libmetis__cnbrpoolGetNext(
+            (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                 ctrl,
                 *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
                     + 1 as libc::c_int,
@@ -1087,14 +788,8 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
                 && (*myrinfo).ed - (*myrinfo).id < 0 as libc::c_int
             {
                 nbnd -= 1;
-                *bndind
-                    .offset(
-                        *bndptr.offset(i as isize) as isize,
-                    ) = *bndind.offset(nbnd as isize);
-                *bndptr
-                    .offset(
-                        *bndind.offset(nbnd as isize) as isize,
-                    ) = *bndptr.offset(i as isize);
+                *bndind.offset(*bndptr.offset(i as isize) as isize) = *bndind.offset(nbnd as isize);
+                *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(i as isize);
                 *bndptr.offset(i as isize) = -(1 as libc::c_int);
             }
             if *bndptr.offset(i as isize) == -(1 as libc::c_int)
@@ -1110,18 +805,11 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
                 && (*myrinfo).ed <= 0 as libc::c_int
             {
                 nbnd -= 1;
-                *bndind
-                    .offset(
-                        *bndptr.offset(i as isize) as isize,
-                    ) = *bndind.offset(nbnd as isize);
-                *bndptr
-                    .offset(
-                        *bndind.offset(nbnd as isize) as isize,
-                    ) = *bndptr.offset(i as isize);
+                *bndind.offset(*bndptr.offset(i as isize) as isize) = *bndind.offset(nbnd as isize);
+                *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(i as isize);
                 *bndptr.offset(i as isize) = -(1 as libc::c_int);
             }
-            if *bndptr.offset(i as isize) == -(1 as libc::c_int)
-                && (*myrinfo).ed > 0 as libc::c_int
+            if *bndptr.offset(i as isize) == -(1 as libc::c_int) && (*myrinfo).ed > 0 as libc::c_int
             {
                 *bndind.offset(nbnd as isize) = i;
                 let fresh14 = nbnd;
@@ -1137,11 +825,10 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
             let mut k_0: idx_t = 0;
             let mut mynbrs_0: *mut cnbr_t = 0 as *mut cnbr_t;
             if (*myrinfo).inbr == -(1 as libc::c_int) {
-                (*myrinfo)
-                    .inbr = libmetis__cnbrpoolGetNext(
+                (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                     ctrl,
-                    *xadj.offset((ii + 1 as libc::c_int) as isize)
-                        - *xadj.offset(ii as isize) + 1 as libc::c_int,
+                    *xadj.offset((ii + 1 as libc::c_int) as isize) - *xadj.offset(ii as isize)
+                        + 1 as libc::c_int,
                 );
                 (*myrinfo).nnbrs = 0 as libc::c_int;
             }
@@ -1174,28 +861,20 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
                         && *bndptr.offset(ii as isize) != -(1 as libc::c_int)
                     {
                         nbnd -= 1;
-                        *bndind
-                            .offset(
-                                *bndptr.offset(ii as isize) as isize,
-                            ) = *bndind.offset(nbnd as isize);
-                        *bndptr
-                            .offset(
-                                *bndind.offset(nbnd as isize) as isize,
-                            ) = *bndptr.offset(ii as isize);
+                        *bndind.offset(*bndptr.offset(ii as isize) as isize) =
+                            *bndind.offset(nbnd as isize);
+                        *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
+                            *bndptr.offset(ii as isize);
                         *bndptr.offset(ii as isize) = -(1 as libc::c_int);
                     }
                 } else if (*myrinfo).ed <= 0 as libc::c_int
                     && *bndptr.offset(ii as isize) != -(1 as libc::c_int)
                 {
                     nbnd -= 1;
-                    *bndind
-                        .offset(
-                            *bndptr.offset(ii as isize) as isize,
-                        ) = *bndind.offset(nbnd as isize);
-                    *bndptr
-                        .offset(
-                            *bndind.offset(nbnd as isize) as isize,
-                        ) = *bndptr.offset(ii as isize);
+                    *bndind.offset(*bndptr.offset(ii as isize) as isize) =
+                        *bndind.offset(nbnd as isize);
+                    *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
+                        *bndptr.offset(ii as isize);
                     *bndptr.offset(ii as isize) = -(1 as libc::c_int);
                 }
             }
@@ -1203,14 +882,10 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForCut(
                 k_0 = 0 as libc::c_int;
                 while k_0 < (*myrinfo).nnbrs {
                     if (*mynbrs_0.offset(k_0 as isize)).pid == from {
-                        if (*mynbrs_0.offset(k_0 as isize)).ed
-                            == *adjwgt.offset(j as isize)
-                        {
+                        if (*mynbrs_0.offset(k_0 as isize)).ed == *adjwgt.offset(j as isize) {
                             (*myrinfo).nnbrs -= 1;
-                            *mynbrs_0
-                                .offset(
-                                    k_0 as isize,
-                                ) = *mynbrs_0.offset((*myrinfo).nnbrs as isize);
+                            *mynbrs_0.offset(k_0 as isize) =
+                                *mynbrs_0.offset((*myrinfo).nnbrs as isize);
                         } else {
                             let ref mut fresh17 = (*mynbrs_0.offset(k_0 as isize)).ed;
                             *fresh17 -= *adjwgt.offset(j as isize);
@@ -1308,8 +983,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
         from = *where_0.offset(i as isize);
         myrinfo = ((*graph).vkrinfo).offset(i as isize);
         if (*myrinfo).inbr == -(1 as libc::c_int) {
-            (*myrinfo)
-                .inbr = libmetis__vnbrpoolGetNext(
+            (*myrinfo).inbr = libmetis__vnbrpoolGetNext(
                 ctrl,
                 *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
                     + 1 as libc::c_int,
@@ -1317,9 +991,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
             (*myrinfo).nnbrs = 0 as libc::c_int;
         }
         mynbrs = ((*ctrl).vnbrpool).offset((*myrinfo).inbr as isize);
-        xgain = if (*myrinfo).nid == 0 as libc::c_int
-            && (*myrinfo).ned > 0 as libc::c_int
-        {
+        xgain = if (*myrinfo).nid == 0 as libc::c_int && (*myrinfo).ned > 0 as libc::c_int {
             *vsize.offset(i as isize)
         } else {
             0 as libc::c_int
@@ -1419,13 +1091,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
                     -(1 as libc::c_int),
                     0 as *mut idx_t,
                 );
-                libmetis__UpdateEdgeSubDomainGraph(
-                    ctrl,
-                    to,
-                    me,
-                    1 as libc::c_int,
-                    0 as *mut idx_t,
-                );
+                libmetis__UpdateEdgeSubDomainGraph(ctrl, to, me, 1 as libc::c_int, 0 as *mut idx_t);
             }
             j += 1;
             j;
@@ -1446,7 +1112,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupMinConnForVol(
             pmarker,
             modind,
         );
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__PrintSubDomainGraph(
@@ -1472,8 +1138,7 @@ pub unsafe extern "C" fn libmetis__PrintSubDomainGraph(
     pmat = libmetis__ismalloc(
         (nparts * nparts) as size_t,
         0 as libc::c_int,
-        b"ComputeSubDomainGraph: pmat\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"ComputeSubDomainGraph: pmat\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     i = 0 as libc::c_int;
     while i < nvtxs {
@@ -1482,8 +1147,8 @@ pub unsafe extern "C" fn libmetis__PrintSubDomainGraph(
         while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
             k = *adjncy.offset(j as isize);
             if *where_0.offset(k as isize) != me {
-                let ref mut fresh19 = *pmat
-                    .offset((me * nparts + *where_0.offset(k as isize)) as isize);
+                let ref mut fresh19 =
+                    *pmat.offset((me * nparts + *where_0.offset(k as isize)) as isize);
                 *fresh19 += *adjwgt.offset(j as isize);
             }
             j += 1;
@@ -1514,8 +1179,7 @@ pub unsafe extern "C" fn libmetis__PrintSubDomainGraph(
         i;
     }
     printf(
-        b"Total adjacent subdomains: %d, Max: %d\n\0" as *const u8
-            as *const libc::c_char,
+        b"Total adjacent subdomains: %d, Max: %d\n\0" as *const u8 as *const libc::c_char,
         total,
         max,
     );

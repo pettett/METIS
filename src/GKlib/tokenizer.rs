@@ -1,12 +1,12 @@
 use ::libc;
 extern "C" {
     fn strchr(_: *const libc::c_char, _: libc::c_int) -> *mut libc::c_char;
-    fn strlen(_: *const libc::c_char) -> libc::c_ulong;
+    fn strlen(_: *const libc::c_char) -> u64;
     fn gk_malloc(nbytes: size_t, msg: *mut libc::c_char) -> *mut libc::c_void;
     fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
     fn gk_strdup(orgstr: *mut libc::c_char) -> *mut libc::c_char;
 }
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct gk_Tokens_t {
@@ -50,8 +50,8 @@ pub unsafe extern "C" fn gk_strtokenize(
     (*tokens).ntoks = ntoks;
     (*tokens)
         .list = gk_malloc(
-        (ntoks as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<*mut libc::c_char>() as libc::c_ulong),
+        (ntoks as u64)
+            .wrapping_mul(::core::mem::size_of::<*mut libc::c_char>() as u64),
         b"strtokenize: tokens->list\0" as *const u8 as *const libc::c_char
             as *mut libc::c_char,
     ) as *mut *mut libc::c_char;

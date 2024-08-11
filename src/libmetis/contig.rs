@@ -1,268 +1,37 @@
+use crate::GKlib::{error::gk_errexit, memory::gk_free};
+
+use super::{
+    compress::libmetis__CompressGraph,
+    gklib::{
+        libmetis__iaxpy, libmetis__icopy, libmetis__iincset, libmetis__imalloc,
+        libmetis__irandArrayPermute, libmetis__iset, libmetis__ismalloc, libmetis__isum,
+        libmetis__rkvsortd, libmetis__rpqCreate, libmetis__rpqDelete, libmetis__rpqDestroy,
+        libmetis__rpqGetTop, libmetis__rpqInsert, libmetis__rpqLength, libmetis__rpqReset,
+        libmetis__rpqSeeTopVal, libmetis__rpqUpdate,
+    },
+    graph::{libmetis__FreeGraph, libmetis__SetupGraph},
+    kwayfm::libmetis__KWayVolUpdate,
+    mcutil::libmetis__BetterBalanceKWay,
+    ometis::{
+        libmetis__MMDOrder, libmetis__MlevelNodeBisectionMultiple, libmetis__SplitGraphOrder,
+    },
+    options::{libmetis__FreeCtrl, libmetis__SetupCtrl},
+    srefine::{
+        libmetis__Allocate2WayNodePartitionMemory, libmetis__Compute2WayNodePartitionParams,
+    },
+    structure::*,
+    timing::{libmetis__InitTimers, libmetis__PrintTimers},
+    util::{libmetis__InitRandom, METIS_ERROR_INPUT, METIS_OK},
+    wspace::{
+        libmetis__AllocateWorkSpace, libmetis__cnbrpoolGetNext, libmetis__iwspacemalloc,
+        libmetis__vnbrpoolGetNext, libmetis__wspacemalloc, libmetis__wspacepop,
+        libmetis__wspacepush,
+    },
+};
 use ::libc;
-extern "C" {
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn libmetis__wspacemalloc(ctrl: *mut ctrl_t, nbytes: size_t) -> *mut libc::c_void;
-    fn libmetis__BetterBalanceKWay(
-        ncon: idx_t,
-        vwgt: *mut idx_t,
-        itvwgt: *mut real_t,
-        a1: idx_t,
-        pt1: *mut idx_t,
-        bm1: *mut real_t,
-        a2: idx_t,
-        pt2: *mut idx_t,
-        bm2: *mut real_t,
-    ) -> libc::c_int;
-    fn libmetis__cnbrpoolGetNext(ctrl: *mut ctrl_t, nnbrs: idx_t) -> idx_t;
-    fn libmetis__vnbrpoolGetNext(ctrl: *mut ctrl_t, nnbrs: idx_t) -> idx_t;
-    fn libmetis__KWayVolUpdate(
-        ctrl: *mut ctrl_t,
-        graph: *mut graph_t,
-        v: idx_t,
-        from: idx_t,
-        to: idx_t,
-        queue: *mut ipq_t,
-        vstatus: *mut idx_t,
-        r_nupd: *mut idx_t,
-        updptr: *mut idx_t,
-        updind: *mut idx_t,
-        bndtype: idx_t,
-        vmarker: *mut idx_t,
-        pmarker: *mut idx_t,
-        modind: *mut idx_t,
-    );
-    fn libmetis__wspacepush(ctrl: *mut ctrl_t);
-    fn libmetis__iwspacemalloc(_: *mut ctrl_t, _: idx_t) -> *mut idx_t;
-    fn libmetis__wspacepop(ctrl: *mut ctrl_t);
-    fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
-    fn gk_errexit(signum: libc::c_int, _: *mut libc::c_char, _: ...);
-    fn libmetis__iincset(n: size_t, baseval: idx_t, x: *mut idx_t) -> *mut idx_t;
-    fn libmetis__isum(n: size_t, x: *mut idx_t, incx: size_t) -> idx_t;
-    fn libmetis__iaxpy(
-        n: size_t,
-        alpha: idx_t,
-        x: *mut idx_t,
-        incx: size_t,
-        y: *mut idx_t,
-        incy: size_t,
-    ) -> *mut idx_t;
-    fn libmetis__imalloc(n: size_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__ismalloc(n: size_t, ival: idx_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__iset(n: size_t, val: idx_t, x: *mut idx_t) -> *mut idx_t;
-    fn libmetis__icopy(n: size_t, a: *mut idx_t, b: *mut idx_t) -> *mut idx_t;
-    fn libmetis__rkvsortd(n: size_t, base: *mut rkv_t);
-}
-pub type __int32_t = libc::c_int;
-pub type __ssize_t = libc::c_long;
-pub type int32_t = __int32_t;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
-pub type gk_idx_t = ssize_t;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mop_t {
-    pub type_0: libc::c_int,
-    pub nbytes: ssize_t,
-    pub ptr: *mut libc::c_void,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mcore_t {
-    pub coresize: size_t,
-    pub corecpos: size_t,
-    pub core: *mut libc::c_void,
-    pub nmops: size_t,
-    pub cmop: size_t,
-    pub mops: *mut gk_mop_t,
-    pub num_callocs: size_t,
-    pub num_hallocs: size_t,
-    pub size_callocs: size_t,
-    pub size_hallocs: size_t,
-    pub cur_callocs: size_t,
-    pub cur_hallocs: size_t,
-    pub max_callocs: size_t,
-    pub max_hallocs: size_t,
-}
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-pub type moptype_et = libc::c_uint;
-pub const METIS_OP_OMETIS: moptype_et = 2;
-pub const METIS_OP_KMETIS: moptype_et = 1;
-pub const METIS_OP_PMETIS: moptype_et = 0;
-pub type mctype_et = libc::c_uint;
-pub const METIS_CTYPE_SHEM: mctype_et = 1;
-pub const METIS_CTYPE_RM: mctype_et = 0;
-pub type miptype_et = libc::c_uint;
-pub const METIS_IPTYPE_METISRB: miptype_et = 4;
-pub const METIS_IPTYPE_NODE: miptype_et = 3;
-pub const METIS_IPTYPE_EDGE: miptype_et = 2;
-pub const METIS_IPTYPE_RANDOM: miptype_et = 1;
-pub const METIS_IPTYPE_GROW: miptype_et = 0;
-pub type mrtype_et = libc::c_uint;
-pub const METIS_RTYPE_SEP1SIDED: mrtype_et = 3;
-pub const METIS_RTYPE_SEP2SIDED: mrtype_et = 2;
-pub const METIS_RTYPE_GREEDY: mrtype_et = 1;
-pub const METIS_RTYPE_FM: mrtype_et = 0;
-pub type mdbglvl_et = libc::c_uint;
-pub const METIS_DBG_MEMORY: mdbglvl_et = 2048;
-pub const METIS_DBG_CONTIGINFO: mdbglvl_et = 256;
-pub const METIS_DBG_CONNINFO: mdbglvl_et = 128;
-pub const METIS_DBG_SEPINFO: mdbglvl_et = 64;
-pub const METIS_DBG_MOVEINFO: mdbglvl_et = 32;
-pub const METIS_DBG_IPART: mdbglvl_et = 16;
-pub const METIS_DBG_REFINE: mdbglvl_et = 8;
-pub const METIS_DBG_COARSEN: mdbglvl_et = 4;
-pub const METIS_DBG_TIME: mdbglvl_et = 2;
-pub const METIS_DBG_INFO: mdbglvl_et = 1;
-pub type mobjtype_et = libc::c_uint;
-pub const METIS_OBJTYPE_NODE: mobjtype_et = 2;
-pub const METIS_OBJTYPE_VOL: mobjtype_et = 1;
-pub const METIS_OBJTYPE_CUT: mobjtype_et = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ikv_t {
-    pub key: idx_t,
-    pub val: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct rkv_t {
-    pub key: real_t,
-    pub val: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ipq_t {
-    pub nnodes: gk_idx_t,
-    pub maxnodes: gk_idx_t,
-    pub heap: *mut ikv_t,
-    pub locator: *mut gk_idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct cnbr_t {
-    pub pid: idx_t,
-    pub ed: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vnbr_t {
-    pub pid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ctrl_t {
-    pub optype: moptype_et,
-    pub objtype: mobjtype_et,
-    pub dbglvl: mdbglvl_et,
-    pub ctype: mctype_et,
-    pub iptype: miptype_et,
-    pub rtype: mrtype_et,
-    pub CoarsenTo: idx_t,
-    pub nIparts: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub seed: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub numflag: idx_t,
-    pub maxvwgt: *mut idx_t,
-    pub ncon: idx_t,
-    pub nparts: idx_t,
-    pub pfactor: real_t,
-    pub ubfactors: *mut real_t,
-    pub tpwgts: *mut real_t,
-    pub pijbm: *mut real_t,
-    pub cfactor: real_t,
-    pub TotalTmr: libc::c_double,
-    pub InitPartTmr: libc::c_double,
-    pub MatchTmr: libc::c_double,
-    pub ContractTmr: libc::c_double,
-    pub CoarsenTmr: libc::c_double,
-    pub UncoarsenTmr: libc::c_double,
-    pub RefTmr: libc::c_double,
-    pub ProjectTmr: libc::c_double,
-    pub SplitTmr: libc::c_double,
-    pub Aux1Tmr: libc::c_double,
-    pub Aux2Tmr: libc::c_double,
-    pub Aux3Tmr: libc::c_double,
-    pub mcore: *mut gk_mcore_t,
-    pub nbrpoolsize: size_t,
-    pub nbrpoolcpos: size_t,
-    pub nbrpoolreallocs: size_t,
-    pub cnbrpool: *mut cnbr_t,
-    pub vnbrpool: *mut vnbr_t,
-    pub maxnads: *mut idx_t,
-    pub nads: *mut idx_t,
-    pub adids: *mut *mut idx_t,
-    pub adwgts: *mut *mut idx_t,
-    pub pvec1: *mut idx_t,
-    pub pvec2: *mut idx_t,
-}
+use libc::printf;
+
+use super::structure::*;
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__FindPartitionInducedComponents(
     mut graph: *mut graph_t,
@@ -308,8 +77,8 @@ pub unsafe extern "C" fn libmetis__FindPartitionInducedComponents(
         where_0 = libmetis__ismalloc(
             nvtxs as size_t,
             0 as libc::c_int,
-            b"FindPartitionInducedComponents: where\0" as *const u8
-                as *const libc::c_char as *mut libc::c_char,
+            b"FindPartitionInducedComponents: where\0" as *const u8 as *const libc::c_char
+                as *mut libc::c_char,
         );
         mustfree_where = 1 as libc::c_int;
     }
@@ -438,14 +207,8 @@ pub unsafe extern "C" fn ComputeBFSOrdering(
         while j < *xadj.offset((i + 1 as libc::c_int) as isize) {
             k = *adjncy.offset(j as isize);
             if *perm.offset(k as isize) != -(1 as libc::c_int) {
-                *bfsperm
-                    .offset(
-                        *perm.offset(k as isize) as isize,
-                    ) = *bfsperm.offset(last as isize);
-                *perm
-                    .offset(
-                        *bfsperm.offset(last as isize) as isize,
-                    ) = *perm.offset(k as isize);
+                *bfsperm.offset(*perm.offset(k as isize) as isize) = *bfsperm.offset(last as isize);
+                *perm.offset(*bfsperm.offset(last as isize) as isize) = *perm.offset(k as isize);
                 let fresh5 = last;
                 last = last + 1;
                 *bfsperm.offset(fresh5 as isize) = k;
@@ -471,8 +234,8 @@ pub unsafe extern "C" fn libmetis__IsConnected(
     );
     if ncmps != 1 as libc::c_int && report != 0 {
         printf(
-            b"The graph is not connected. It has %d connected components.\n\0"
-                as *const u8 as *const libc::c_char,
+            b"The graph is not connected. It has %d connected components.\n\0" as *const u8
+                as *const libc::c_char,
             ncmps,
         );
     }
@@ -507,8 +270,7 @@ pub unsafe extern "C" fn libmetis__IsConnectedSubdomain(
     touched = libmetis__ismalloc(
         nvtxs as size_t,
         0 as libc::c_int,
-        b"IsConnected: touched\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"IsConnected: touched\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     queue = libmetis__imalloc(
         nvtxs as size_t,
@@ -548,8 +310,7 @@ pub unsafe extern "C" fn libmetis__IsConnectedSubdomain(
             *cptr.offset(ncmps as isize) = first;
             i = 0 as libc::c_int;
             while i < nvtxs {
-                if *where_0.offset(i as isize) == pid && *touched.offset(i as isize) == 0
-                {
+                if *where_0.offset(i as isize) == pid && *touched.offset(i as isize) == 0 {
                     break;
                 }
                 i += 1;
@@ -610,7 +371,11 @@ pub unsafe extern "C" fn libmetis__IsConnectedSubdomain(
         &mut cptr as *mut *mut idx_t,
         0 as *mut *mut libc::c_void,
     );
-    return if ncmps == 1 as libc::c_int { 1 as libc::c_int } else { 0 as libc::c_int };
+    return if ncmps == 1 as libc::c_int {
+        1 as libc::c_int
+    } else {
+        0 as libc::c_int
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__FindSepInducedComponents(
@@ -644,8 +409,7 @@ pub unsafe extern "C" fn libmetis__FindSepInducedComponents(
     );
     i = 0 as libc::c_int;
     while i < (*graph).nbnd {
-        *touched
-            .offset(*((*graph).bndind).offset(i as isize) as isize) = 1 as libc::c_int;
+        *touched.offset(*((*graph).bndind).offset(i as isize) as isize) = 1 as libc::c_int;
         i += 1;
         i;
     }
@@ -763,8 +527,7 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
     xadj = (*graph).xadj;
     adjncy = (*graph).adjncy;
     vwgt = (*graph).vwgt;
-    adjwgt = if (*ctrl).objtype as libc::c_uint
-        == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
+    adjwgt = if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
     {
         0 as *mut idx_t
     } else {
@@ -777,9 +540,7 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
     cptr = libmetis__iwspacemalloc(ctrl, nvtxs + 1 as libc::c_int);
     cind = libmetis__iwspacemalloc(ctrl, nvtxs);
     ncmps = libmetis__FindPartitionInducedComponents(graph, where_0, cptr, cind);
-    if (*ctrl).dbglvl as libc::c_uint
-        & METIS_DBG_CONTIGINFO as libc::c_int as libc::c_uint != 0
-    {
+    if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_CONTIGINFO as libc::c_int as libc::c_uint != 0 {
         printf(
             b"I found %d components, for this %d-way partition\n\0" as *const u8
                 as *const libc::c_char,
@@ -805,12 +566,9 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
         todo = libmetis__iwspacemalloc(ctrl, ncmps);
         cand = libmetis__wspacemalloc(
             ctrl,
-            (nparts as libc::c_ulong)
-                .wrapping_mul(::core::mem::size_of::<rkv_t>() as libc::c_ulong),
+            (nparts as u64).wrapping_mul(::core::mem::size_of::<rkv_t>() as u64),
         ) as *mut rkv_t;
-        if (*ctrl).objtype as libc::c_uint
-            == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint
-        {
+        if (*ctrl).objtype as libc::c_uint == METIS_OBJTYPE_VOL as libc::c_int as libc::c_uint {
             modind = libmetis__iwspacemalloc(ctrl, nvtxs);
             vmarker = libmetis__iset(
                 nvtxs as size_t,
@@ -825,12 +583,9 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
         }
         i = 0 as libc::c_int;
         while i < ncmps {
-            let ref mut fresh12 = *pcptr
-                .offset(
-                    *where_0
-                        .offset(*cind.offset(*cptr.offset(i as isize) as isize) as isize)
-                        as isize,
-                );
+            let ref mut fresh12 = *pcptr.offset(
+                *where_0.offset(*cind.offset(*cptr.offset(i as isize) as isize) as isize) as isize,
+            );
             *fresh12 += 1;
             *fresh12;
             i += 1;
@@ -852,12 +607,9 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
         *pcptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int;
         i = 0 as libc::c_int;
         while i < ncmps {
-            let ref mut fresh14 = *pcptr
-                .offset(
-                    *where_0
-                        .offset(*cind.offset(*cptr.offset(i as isize) as isize) as isize)
-                        as isize,
-                );
+            let ref mut fresh14 = *pcptr.offset(
+                *where_0.offset(*cind.offset(*cptr.offset(i as isize) as isize) as isize) as isize,
+            );
             let fresh15 = *fresh14;
             *fresh14 = *fresh14 + 1;
             *pcind.offset(fresh15 as isize) = i;
@@ -898,16 +650,8 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
                         ii;
                     }
                     if bestcid == -(1 as libc::c_int)
-                        || libmetis__isum(
-                            ncon as size_t,
-                            bestcwgt,
-                            1 as libc::c_int as size_t,
-                        )
-                            < libmetis__isum(
-                                ncon as size_t,
-                                cwgt,
-                                1 as libc::c_int as size_t,
-                            )
+                        || libmetis__isum(ncon as size_t, bestcwgt, 1 as libc::c_int as size_t)
+                            < libmetis__isum(ncon as size_t, cwgt, 1 as libc::c_int as size_t)
                     {
                         bestcid = cid;
                         libmetis__icopy(ncon as size_t, cwgt, bestcwgt);
@@ -940,8 +684,7 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
             i = 0 as libc::c_int;
             while i < ntodo {
                 cid = *todo.offset(i as isize);
-                me = *where_0
-                    .offset(*cind.offset(*cptr.offset(cid as isize) as isize) as isize);
+                me = *where_0.offset(*cind.offset(*cptr.offset(cid as isize) as isize) as isize);
                 libmetis__iset(ncon as size_t, 0 as libc::c_int, cwgt);
                 j = *cptr.offset(cid as isize);
                 while j < *cptr.offset((cid + 1 as libc::c_int) as isize) {
@@ -957,11 +700,11 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
                     j;
                 }
                 if (*ctrl).dbglvl as libc::c_uint
-                    & METIS_DBG_CONTIGINFO as libc::c_int as libc::c_uint != 0
+                    & METIS_DBG_CONTIGINFO as libc::c_int as libc::c_uint
+                    != 0
                 {
                     printf(
-                        b"Trying to move %d [%d] from %d\n\0" as *const u8
-                            as *const libc::c_char,
+                        b"Trying to move %d [%d] from %d\n\0" as *const u8 as *const libc::c_char,
                         cid,
                         libmetis__isum(ncon as size_t, cwgt, 1 as libc::c_int as size_t),
                         me,
@@ -976,17 +719,15 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
                         if *cwhere.offset(*adjncy.offset(jj as isize) as isize)
                             != -(1 as libc::c_int)
                         {
-                            let ref mut fresh17 = *cpvec
-                                .offset(
-                                    *cwhere.offset(*adjncy.offset(jj as isize) as isize)
-                                        as isize,
-                                );
-                            *fresh17
-                                += if !adjwgt.is_null() {
-                                    *adjwgt.offset(jj as isize)
-                                } else {
-                                    1 as libc::c_int
-                                };
+                            let ref mut fresh17 =
+                                *cpvec
+                                    .offset(*cwhere.offset(*adjncy.offset(jj as isize) as isize)
+                                        as isize);
+                            *fresh17 += if !adjwgt.is_null() {
+                                *adjwgt.offset(jj as isize)
+                            } else {
+                                1 as libc::c_int
+                            };
                         }
                         jj += 1;
                         jj;
@@ -998,8 +739,7 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
                 j = 0 as libc::c_int;
                 while j < nparts {
                     if *cpvec.offset(j as isize) > 0 as libc::c_int {
-                        (*cand.offset(ncand as isize))
-                            .key = *cpvec.offset(j as isize) as real_t;
+                        (*cand.offset(ncand as isize)).key = *cpvec.offset(j as isize) as real_t;
                         let fresh18 = ncand;
                         ncand = ncand + 1;
                         (*cand.offset(fresh18 as isize)).val = j;
@@ -1035,8 +775,7 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
                             pwgts.offset((target * ncon) as isize),
                             ((*ctrl).pijbm).offset((target * ncon) as isize),
                             1 as libc::c_int,
-                            pwgts
-                                .offset(((*cand.offset(j as isize)).val * ncon) as isize),
+                            pwgts.offset(((*cand.offset(j as isize)).val * ncon) as isize),
                             ((*ctrl).pijbm)
                                 .offset(((*cand.offset(j as isize)).val * ncon) as isize),
                         ) != 0
@@ -1047,11 +786,11 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
                         j;
                     }
                     if (*ctrl).dbglvl as libc::c_uint
-                        & METIS_DBG_CONTIGINFO as libc::c_int as libc::c_uint != 0
+                        & METIS_DBG_CONTIGINFO as libc::c_int as libc::c_uint
+                        != 0
                     {
                         printf(
-                            b"\tMoving it to %d [%d] [%d]\n\0" as *const u8
-                                as *const libc::c_char,
+                            b"\tMoving it to %d [%d] [%d]\n\0" as *const u8 as *const libc::c_char,
                             target,
                             *cpvec.offset(target as isize),
                             ncand,
@@ -1061,32 +800,19 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
                         match (*ctrl).objtype as libc::c_uint {
                             0 => {
                                 libmetis__MoveGroupContigForCut(
-                                    ctrl,
-                                    graph,
-                                    target,
-                                    cid,
-                                    cptr,
-                                    cind,
+                                    ctrl, graph, target, cid, cptr, cind,
                                 );
                             }
                             1 => {
                                 libmetis__MoveGroupContigForVol(
-                                    ctrl,
-                                    graph,
-                                    target,
-                                    cid,
-                                    cptr,
-                                    cind,
-                                    vmarker,
-                                    pmarker,
-                                    modind,
+                                    ctrl, graph, target, cid, cptr, cind, vmarker, pmarker, modind,
                                 );
                             }
                             _ => {
                                 gk_errexit(
                                     15 as libc::c_int,
-                                    b"Unknown objtype %d\n\0" as *const u8
-                                        as *const libc::c_char as *mut libc::c_char,
+                                    b"Unknown objtype %d\n\0" as *const u8 as *const libc::c_char
+                                        as *mut libc::c_char,
                                     (*ctrl).objtype as libc::c_uint,
                                 );
                             }
@@ -1107,8 +833,8 @@ pub unsafe extern "C" fn libmetis__EliminateComponents(
             if !(oldntodo == ntodo) {
                 continue;
             }
-            if (*ctrl).dbglvl as libc::c_uint
-                & METIS_DBG_CONTIGINFO as libc::c_int as libc::c_uint != 0
+            if (*ctrl).dbglvl as libc::c_uint & METIS_DBG_CONTIGINFO as libc::c_int as libc::c_uint
+                != 0
             {
                 printf(
                     b"Stopped at ntodo: %d\n\0" as *const u8 as *const libc::c_char,
@@ -1167,8 +893,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupContigForCut(
         from = *where_0.offset(i as isize);
         myrinfo = ((*graph).ckrinfo).offset(i as isize);
         if (*myrinfo).inbr == -(1 as libc::c_int) {
-            (*myrinfo)
-                .inbr = libmetis__cnbrpoolGetNext(
+            (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                 ctrl,
                 *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
                     + 1 as libc::c_int,
@@ -1223,14 +948,8 @@ pub unsafe extern "C" fn libmetis__MoveGroupContigForCut(
                 && (*myrinfo).ed - (*myrinfo).id < 0 as libc::c_int
             {
                 nbnd -= 1;
-                *bndind
-                    .offset(
-                        *bndptr.offset(i as isize) as isize,
-                    ) = *bndind.offset(nbnd as isize);
-                *bndptr
-                    .offset(
-                        *bndind.offset(nbnd as isize) as isize,
-                    ) = *bndptr.offset(i as isize);
+                *bndind.offset(*bndptr.offset(i as isize) as isize) = *bndind.offset(nbnd as isize);
+                *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(i as isize);
                 *bndptr.offset(i as isize) = -(1 as libc::c_int);
             }
             if *bndptr.offset(i as isize) == -(1 as libc::c_int)
@@ -1246,18 +965,11 @@ pub unsafe extern "C" fn libmetis__MoveGroupContigForCut(
                 && (*myrinfo).ed <= 0 as libc::c_int
             {
                 nbnd -= 1;
-                *bndind
-                    .offset(
-                        *bndptr.offset(i as isize) as isize,
-                    ) = *bndind.offset(nbnd as isize);
-                *bndptr
-                    .offset(
-                        *bndind.offset(nbnd as isize) as isize,
-                    ) = *bndptr.offset(i as isize);
+                *bndind.offset(*bndptr.offset(i as isize) as isize) = *bndind.offset(nbnd as isize);
+                *bndptr.offset(*bndind.offset(nbnd as isize) as isize) = *bndptr.offset(i as isize);
                 *bndptr.offset(i as isize) = -(1 as libc::c_int);
             }
-            if *bndptr.offset(i as isize) == -(1 as libc::c_int)
-                && (*myrinfo).ed > 0 as libc::c_int
+            if *bndptr.offset(i as isize) == -(1 as libc::c_int) && (*myrinfo).ed > 0 as libc::c_int
             {
                 *bndind.offset(nbnd as isize) = i;
                 let fresh20 = nbnd;
@@ -1273,11 +985,10 @@ pub unsafe extern "C" fn libmetis__MoveGroupContigForCut(
             let mut k_0: idx_t = 0;
             let mut mynbrs_0: *mut cnbr_t = 0 as *mut cnbr_t;
             if (*myrinfo).inbr == -(1 as libc::c_int) {
-                (*myrinfo)
-                    .inbr = libmetis__cnbrpoolGetNext(
+                (*myrinfo).inbr = libmetis__cnbrpoolGetNext(
                     ctrl,
-                    *xadj.offset((ii + 1 as libc::c_int) as isize)
-                        - *xadj.offset(ii as isize) + 1 as libc::c_int,
+                    *xadj.offset((ii + 1 as libc::c_int) as isize) - *xadj.offset(ii as isize)
+                        + 1 as libc::c_int,
                 );
                 (*myrinfo).nnbrs = 0 as libc::c_int;
             }
@@ -1310,28 +1021,20 @@ pub unsafe extern "C" fn libmetis__MoveGroupContigForCut(
                         && *bndptr.offset(ii as isize) != -(1 as libc::c_int)
                     {
                         nbnd -= 1;
-                        *bndind
-                            .offset(
-                                *bndptr.offset(ii as isize) as isize,
-                            ) = *bndind.offset(nbnd as isize);
-                        *bndptr
-                            .offset(
-                                *bndind.offset(nbnd as isize) as isize,
-                            ) = *bndptr.offset(ii as isize);
+                        *bndind.offset(*bndptr.offset(ii as isize) as isize) =
+                            *bndind.offset(nbnd as isize);
+                        *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
+                            *bndptr.offset(ii as isize);
                         *bndptr.offset(ii as isize) = -(1 as libc::c_int);
                     }
                 } else if (*myrinfo).ed <= 0 as libc::c_int
                     && *bndptr.offset(ii as isize) != -(1 as libc::c_int)
                 {
                     nbnd -= 1;
-                    *bndind
-                        .offset(
-                            *bndptr.offset(ii as isize) as isize,
-                        ) = *bndind.offset(nbnd as isize);
-                    *bndptr
-                        .offset(
-                            *bndind.offset(nbnd as isize) as isize,
-                        ) = *bndptr.offset(ii as isize);
+                    *bndind.offset(*bndptr.offset(ii as isize) as isize) =
+                        *bndind.offset(nbnd as isize);
+                    *bndptr.offset(*bndind.offset(nbnd as isize) as isize) =
+                        *bndptr.offset(ii as isize);
                     *bndptr.offset(ii as isize) = -(1 as libc::c_int);
                 }
             }
@@ -1339,14 +1042,10 @@ pub unsafe extern "C" fn libmetis__MoveGroupContigForCut(
                 k_0 = 0 as libc::c_int;
                 while k_0 < (*myrinfo).nnbrs {
                     if (*mynbrs_0.offset(k_0 as isize)).pid == from {
-                        if (*mynbrs_0.offset(k_0 as isize)).ed
-                            == *adjwgt.offset(j as isize)
-                        {
+                        if (*mynbrs_0.offset(k_0 as isize)).ed == *adjwgt.offset(j as isize) {
                             (*myrinfo).nnbrs -= 1;
-                            *mynbrs_0
-                                .offset(
-                                    k_0 as isize,
-                                ) = *mynbrs_0.offset((*myrinfo).nnbrs as isize);
+                            *mynbrs_0.offset(k_0 as isize) =
+                                *mynbrs_0.offset((*myrinfo).nnbrs as isize);
                         } else {
                             let ref mut fresh23 = (*mynbrs_0.offset(k_0 as isize)).ed;
                             *fresh23 -= *adjwgt.offset(j as isize);
@@ -1428,8 +1127,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupContigForVol(
         from = *where_0.offset(i as isize);
         myrinfo = ((*graph).vkrinfo).offset(i as isize);
         if (*myrinfo).inbr == -(1 as libc::c_int) {
-            (*myrinfo)
-                .inbr = libmetis__vnbrpoolGetNext(
+            (*myrinfo).inbr = libmetis__vnbrpoolGetNext(
                 ctrl,
                 *xadj.offset((i + 1 as libc::c_int) as isize) - *xadj.offset(i as isize)
                     + 1 as libc::c_int,
@@ -1437,9 +1135,7 @@ pub unsafe extern "C" fn libmetis__MoveGroupContigForVol(
             (*myrinfo).nnbrs = 0 as libc::c_int;
         }
         mynbrs = ((*ctrl).vnbrpool).offset((*myrinfo).inbr as isize);
-        xgain = if (*myrinfo).nid == 0 as libc::c_int
-            && (*myrinfo).ned > 0 as libc::c_int
-        {
+        xgain = if (*myrinfo).nid == 0 as libc::c_int && (*myrinfo).ned > 0 as libc::c_int {
             *vsize.offset(i as isize)
         } else {
             0 as libc::c_int

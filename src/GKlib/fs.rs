@@ -7,10 +7,10 @@ extern "C" {
     fn sprintf(_: *mut libc::c_char, _: *const libc::c_char, _: ...) -> libc::c_int;
     fn fread(
         _: *mut libc::c_void,
-        _: libc::c_ulong,
-        _: libc::c_ulong,
+        _: u64,
+        _: u64,
         _: *mut FILE,
-    ) -> libc::c_ulong;
+    ) -> u64;
     fn feof(__stream: *mut FILE) -> libc::c_int;
     fn strrchr(_: *const libc::c_char, _: libc::c_int) -> *mut libc::c_char;
     fn stat(__file: *const libc::c_char, __buf: *mut stat) -> libc::c_int;
@@ -22,22 +22,22 @@ extern "C" {
     fn gk_fclose(_: *mut FILE);
     fn gk_strdup(orgstr: *mut libc::c_char) -> *mut libc::c_char;
 }
-pub type __intmax_t = libc::c_long;
-pub type __dev_t = libc::c_ulong;
+pub type __intmax_t = i64;
+pub type __dev_t = u64;
 pub type __uid_t = libc::c_uint;
 pub type __gid_t = libc::c_uint;
-pub type __ino_t = libc::c_ulong;
+pub type __ino_t = u64;
 pub type __mode_t = libc::c_uint;
-pub type __nlink_t = libc::c_ulong;
-pub type __off_t = libc::c_long;
-pub type __off64_t = libc::c_long;
-pub type __time_t = libc::c_long;
-pub type __blksize_t = libc::c_long;
-pub type __blkcnt_t = libc::c_long;
-pub type __syscall_slong_t = libc::c_long;
-pub type __syscall_ulong_t = libc::c_ulong;
+pub type __nlink_t = u64;
+pub type __off_t = i64;
+pub type __off64_t = i64;
+pub type __time_t = i64;
+pub type __blksize_t = i64;
+pub type __blkcnt_t = i64;
+pub type __syscall_slong_t = i64;
+pub type __syscall_ulong_t = u64;
 pub type intmax_t = __intmax_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _IO_FILE {
@@ -204,19 +204,19 @@ pub unsafe extern "C" fn gk_getfilestats(
     while feof(fpin) == 0 {
         nread = fread(
             buffer.as_mut_ptr() as *mut libc::c_void,
-            ::core::mem::size_of::<libc::c_char>() as libc::c_ulong,
-            2048 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<libc::c_char>() as u64,
+            2048 as libc::c_int as u64,
             fpin,
         );
-        nbytes = (nbytes as libc::c_ulong).wrapping_add(nread) as size_t as size_t;
+        nbytes = (nbytes as u64).wrapping_add(nread) as size_t as size_t;
         buffer[nread as usize] = '\0' as i32 as libc::c_char;
         cptr = buffer.as_mut_ptr();
         while *cptr as libc::c_int != '\0' as i32 {
             if *cptr as libc::c_int == '\n' as i32 {
                 nlines = nlines.wrapping_add(1);
                 nlines;
-                ntokens = (ntokens as libc::c_ulong)
-                    .wrapping_add(intoken as libc::c_ulong) as size_t as size_t;
+                ntokens = (ntokens as u64)
+                    .wrapping_add(intoken as u64) as size_t as size_t;
                 intoken = 0 as libc::c_int;
                 if max_nlntokens < ntokens.wrapping_sub(oldntokens) {
                     max_nlntokens = ntokens.wrapping_sub(oldntokens);
@@ -225,8 +225,8 @@ pub unsafe extern "C" fn gk_getfilestats(
             } else if *cptr as libc::c_int == ' ' as i32
                 || *cptr as libc::c_int == '\t' as i32
             {
-                ntokens = (ntokens as libc::c_ulong)
-                    .wrapping_add(intoken as libc::c_ulong) as size_t as size_t;
+                ntokens = (ntokens as u64)
+                    .wrapping_add(intoken as u64) as size_t as size_t;
                 intoken = 0 as libc::c_int;
             } else {
                 intoken = 1 as libc::c_int;
@@ -235,7 +235,7 @@ pub unsafe extern "C" fn gk_getfilestats(
             cptr;
         }
     }
-    ntokens = (ntokens as libc::c_ulong).wrapping_add(intoken as libc::c_ulong) as size_t
+    ntokens = (ntokens as u64).wrapping_add(intoken as u64) as size_t
         as size_t;
     if max_nlntokens < ntokens.wrapping_sub(oldntokens) {
         max_nlntokens = ntokens.wrapping_sub(oldntokens);

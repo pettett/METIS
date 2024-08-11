@@ -1,18 +1,10 @@
 use ::libc;
 extern "C" {
-    fn memset(
-        _: *mut libc::c_void,
-        _: libc::c_int,
-        _: libc::c_ulong,
-    ) -> *mut libc::c_void;
-    fn strtol(
-        _: *const libc::c_char,
-        _: *mut *mut libc::c_char,
-        _: libc::c_int,
-    ) -> libc::c_long;
+    fn memset(_: *mut libc::c_void, _: libc::c_int, _: u64) -> *mut libc::c_void;
+    fn strtol(_: *const libc::c_char, _: *mut *mut libc::c_char, _: libc::c_int) -> i64;
     fn exit(_: libc::c_int) -> !;
     fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn strlen(_: *const libc::c_char) -> libc::c_ulong;
+    fn strlen(_: *const libc::c_char) -> u64;
     static mut gk_optarg: *mut libc::c_char;
     static mut gk_optind: libc::c_int;
     fn gk_getopt_long_only(
@@ -25,14 +17,14 @@ extern "C" {
     fn gk_malloc(nbytes: size_t, msg: *mut libc::c_char) -> *mut libc::c_void;
     fn errexit(_: *mut libc::c_char, _: ...);
     fn gk_strdup(orgstr: *mut libc::c_char) -> *mut libc::c_char;
-    fn gk_GetStringID(
-        strmap: *mut gk_StringMap_t,
-        key: *mut libc::c_char,
-    ) -> libc::c_int;
+    fn gk_GetStringID(strmap: *mut gk_StringMap_t, key: *mut libc::c_char) -> libc::c_int;
 }
+
+use crate::libmetis::structure::*;
+
 pub type __int32_t = libc::c_int;
 pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct gk_StringMap_t {
@@ -99,45 +91,7 @@ pub type C2RustUnnamed_5 = libc::c_uint;
 pub const METIS_OBJTYPE_NODE: C2RustUnnamed_5 = 2;
 pub const METIS_OBJTYPE_VOL: C2RustUnnamed_5 = 1;
 pub const METIS_OBJTYPE_CUT: C2RustUnnamed_5 = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct params_t {
-    pub ptype: idx_t,
-    pub objtype: idx_t,
-    pub ctype: idx_t,
-    pub iptype: idx_t,
-    pub rtype: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nooutput: idx_t,
-    pub balance: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub gtype: idx_t,
-    pub ncommon: idx_t,
-    pub seed: idx_t,
-    pub dbglvl: idx_t,
-    pub nparts: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub pfactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub filename: *mut libc::c_char,
-    pub outfile: *mut libc::c_char,
-    pub xyzfile: *mut libc::c_char,
-    pub tpwgtsfile: *mut libc::c_char,
-    pub ubvecstr: *mut libc::c_char,
-    pub wgtflag: idx_t,
-    pub numflag: idx_t,
-    pub tpwgts: *mut real_t,
-    pub ubvec: *mut real_t,
-    pub iotimer: real_t,
-    pub parttimer: real_t,
-    pub reporttimer: real_t,
-    pub maxmemory: size_t,
-}
+
 #[inline]
 unsafe extern "C" fn atoi(mut __nptr: *const libc::c_char) -> libc::c_int {
     return strtol(
@@ -1012,7 +966,6 @@ static mut shorthelpstr: [[libc::c_char; 100]; 4] = unsafe {
         ),
     ]
 };
-#[no_mangle]
 pub unsafe extern "C" fn parse_cmdline(
     mut argc: libc::c_int,
     mut argv: *mut *mut libc::c_char,
@@ -1024,13 +977,13 @@ pub unsafe extern "C" fn parse_cmdline(
     let mut option_index: libc::c_int = 0;
     let mut params: *mut params_t = 0 as *mut params_t;
     params = gk_malloc(
-        ::core::mem::size_of::<params_t>() as libc::c_ulong,
+        ::core::mem::size_of::<params_t>() as u64,
         b"parse_cmdline\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut params_t;
     memset(
         params as *mut libc::c_void,
         0 as libc::c_int,
-        ::core::mem::size_of::<params_t>() as libc::c_ulong,
+        ::core::mem::size_of::<params_t>() as u64,
     );
     (*params).gtype = METIS_GTYPE_DUAL as libc::c_int;
     (*params).ptype = METIS_PTYPE_KWAY as libc::c_int;
@@ -1070,12 +1023,11 @@ pub unsafe extern "C" fn parse_cmdline(
         match c {
             23 => {
                 if !gk_optarg.is_null() {
-                    (*params)
-                        .gtype = gk_GetStringID(gtype_options.as_mut_ptr(), gk_optarg);
+                    (*params).gtype = gk_GetStringID(gtype_options.as_mut_ptr(), gk_optarg);
                     if (*params).gtype == -(1 as libc::c_int) {
                         errexit(
-                            b"Invalid option -%s=%s\n\0" as *const u8
-                                as *const libc::c_char as *mut libc::c_char,
+                            b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             long_options[option_index as usize].name,
                             gk_optarg,
                         );
@@ -1084,12 +1036,11 @@ pub unsafe extern "C" fn parse_cmdline(
             }
             0 => {
                 if !gk_optarg.is_null() {
-                    (*params)
-                        .ptype = gk_GetStringID(ptype_options.as_mut_ptr(), gk_optarg);
+                    (*params).ptype = gk_GetStringID(ptype_options.as_mut_ptr(), gk_optarg);
                     if (*params).ptype == -(1 as libc::c_int) {
                         errexit(
-                            b"Invalid option -%s=%s\n\0" as *const u8
-                                as *const libc::c_char as *mut libc::c_char,
+                            b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             long_options[option_index as usize].name,
                             gk_optarg,
                         );
@@ -1098,15 +1049,11 @@ pub unsafe extern "C" fn parse_cmdline(
             }
             1 => {
                 if !gk_optarg.is_null() {
-                    (*params)
-                        .objtype = gk_GetStringID(
-                        objtype_options.as_mut_ptr(),
-                        gk_optarg,
-                    );
+                    (*params).objtype = gk_GetStringID(objtype_options.as_mut_ptr(), gk_optarg);
                     if (*params).objtype == -(1 as libc::c_int) {
                         errexit(
-                            b"Invalid option -%s=%s\n\0" as *const u8
-                                as *const libc::c_char as *mut libc::c_char,
+                            b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             long_options[option_index as usize].name,
                             gk_optarg,
                         );
@@ -1115,12 +1062,11 @@ pub unsafe extern "C" fn parse_cmdline(
             }
             2 => {
                 if !gk_optarg.is_null() {
-                    (*params)
-                        .ctype = gk_GetStringID(ctype_options.as_mut_ptr(), gk_optarg);
+                    (*params).ctype = gk_GetStringID(ctype_options.as_mut_ptr(), gk_optarg);
                     if (*params).ctype == -(1 as libc::c_int) {
                         errexit(
-                            b"Invalid option -%s=%s\n\0" as *const u8
-                                as *const libc::c_char as *mut libc::c_char,
+                            b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             long_options[option_index as usize].name,
                             gk_optarg,
                         );
@@ -1129,12 +1075,11 @@ pub unsafe extern "C" fn parse_cmdline(
             }
             3 => {
                 if !gk_optarg.is_null() {
-                    (*params)
-                        .iptype = gk_GetStringID(iptype_options.as_mut_ptr(), gk_optarg);
+                    (*params).iptype = gk_GetStringID(iptype_options.as_mut_ptr(), gk_optarg);
                     if (*params).iptype == -(1 as libc::c_int) {
                         errexit(
-                            b"Invalid option -%s=%s\n\0" as *const u8
-                                as *const libc::c_char as *mut libc::c_char,
+                            b"Invalid option -%s=%s\n\0" as *const u8 as *const libc::c_char
+                                as *mut libc::c_char,
                             long_options[option_index as usize].name,
                             gk_optarg,
                         );
@@ -1190,9 +1135,7 @@ pub unsafe extern "C" fn parse_cmdline(
             }
             18 => {
                 i = 0 as libc::c_int;
-                while strlen((helpstr[i as usize]).as_mut_ptr())
-                    > 0 as libc::c_int as libc::c_ulong
-                {
+                while strlen((helpstr[i as usize]).as_mut_ptr()) > 0 as libc::c_int as u64 {
                     printf(
                         b"%s\n\0" as *const u8 as *const libc::c_char,
                         (helpstr[i as usize]).as_mut_ptr(),
@@ -1214,9 +1157,7 @@ pub unsafe extern "C" fn parse_cmdline(
     if argc - gk_optind != 2 as libc::c_int {
         printf(b"Missing parameters.\0" as *const u8 as *const libc::c_char);
         i = 0 as libc::c_int;
-        while strlen((shorthelpstr[i as usize]).as_mut_ptr())
-            > 0 as libc::c_int as libc::c_ulong
-        {
+        while strlen((shorthelpstr[i as usize]).as_mut_ptr()) > 0 as libc::c_int as u64 {
             printf(
                 b"%s\n\0" as *const u8 as *const libc::c_char,
                 (shorthelpstr[i as usize]).as_mut_ptr(),
@@ -1248,14 +1189,14 @@ pub unsafe extern "C" fn parse_cmdline(
     if (*params).ptype == METIS_PTYPE_RB as libc::c_int {
         if (*params).contig != 0 {
             errexit(
-                b"The -contig option cannot be specified with rb partitioning.\n\0"
-                    as *const u8 as *const libc::c_char as *mut libc::c_char,
+                b"The -contig option cannot be specified with rb partitioning.\n\0" as *const u8
+                    as *const libc::c_char as *mut libc::c_char,
             );
         }
         if (*params).minconn != 0 {
             errexit(
-                b"The -minconn option cannot be specified with rb partitioning.\n\0"
-                    as *const u8 as *const libc::c_char as *mut libc::c_char,
+                b"The -minconn option cannot be specified with rb partitioning.\n\0" as *const u8
+                    as *const libc::c_char as *mut libc::c_char,
             );
         }
         if (*params).objtype == METIS_OBJTYPE_VOL as libc::c_int {

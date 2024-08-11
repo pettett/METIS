@@ -1,83 +1,13 @@
 use ::libc;
-extern "C" {
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn libmetis__CreateGraph() -> *mut graph_t;
-    fn libmetis__uvwsorti(n: size_t, base: *mut uvw_t);
-    fn gk_malloc(nbytes: size_t, msg: *mut libc::c_char) -> *mut libc::c_void;
-    fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
-    fn libmetis__imalloc(n: size_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__ismalloc(n: size_t, ival: idx_t, msg: *mut libc::c_char) -> *mut idx_t;
-    fn libmetis__icopy(n: size_t, a: *mut idx_t, b: *mut idx_t) -> *mut idx_t;
-}
-pub type __int32_t = libc::c_int;
-pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct uvw_t {
-    pub u: idx_t,
-    pub v: idx_t,
-    pub w: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
+use libc::printf;
+
+use crate::GKlib::memory::{gk_free, gk_malloc};
+
+use super::{
+    auxapi::*, coarsen::libmetis__CoarsenGraph, contig::*, fortran::*, gklib::*, graph::*,
+    kwayrefine::*, options::*, structure::*, timing::*, util::*, wspace::*,
+};
+
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__CheckGraph(
     mut graph: *mut graph_t,
@@ -172,8 +102,7 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
                 if l == *xadj.offset((k + 1 as libc::c_int) as isize) {
                     if verbose != 0 {
                         printf(
-                            b"Missing edge: (%d %d)!\n\0" as *const u8
-                                as *const libc::c_char,
+                            b"Missing edge: (%d %d)!\n\0" as *const u8 as *const libc::c_char,
                             k + numflag,
                             i + numflag,
                         );
@@ -225,7 +154,11 @@ pub unsafe extern "C" fn libmetis__CheckGraph(
         &mut htable as *mut *mut idx_t as *mut *mut libc::c_void,
         0 as *mut *mut libc::c_void,
     );
-    return if err == 0 as libc::c_int { 1 as libc::c_int } else { 0 as libc::c_int };
+    return if err == 0 as libc::c_int {
+        1 as libc::c_int
+    } else {
+        0 as libc::c_int
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__CheckInputGraphWeights(
@@ -239,9 +172,7 @@ pub unsafe extern "C" fn libmetis__CheckInputGraphWeights(
 ) -> libc::c_int {
     let mut i: idx_t = 0;
     if ncon <= 0 as libc::c_int {
-        printf(
-            b"Input Error: ncon must be >= 1.\n\0" as *const u8 as *const libc::c_char,
-        );
+        printf(b"Input Error: ncon must be >= 1.\n\0" as *const u8 as *const libc::c_char);
         return 0 as libc::c_int;
     }
     if !vwgt.is_null() {
@@ -311,8 +242,7 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     ngraph = libmetis__CreateGraph();
     (*ngraph).nvtxs = nvtxs;
     (*ngraph).ncon = (*graph).ncon;
-    (*ngraph)
-        .vwgt = libmetis__icopy(
+    (*ngraph).vwgt = libmetis__icopy(
         (nvtxs * (*graph).ncon) as size_t,
         (*graph).vwgt,
         libmetis__imalloc(
@@ -320,8 +250,7 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
             b"FixGraph: vwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         ),
     );
-    (*ngraph)
-        .vsize = libmetis__ismalloc(
+    (*ngraph).vsize = libmetis__ismalloc(
         nvtxs as size_t,
         1 as libc::c_int,
         b"FixGraph: vsize\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
@@ -330,9 +259,9 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
         libmetis__icopy(nvtxs as size_t, (*graph).vsize, (*ngraph).vsize);
     }
     edges = gk_malloc(
-        (::core::mem::size_of::<uvw_t>() as libc::c_ulong)
-            .wrapping_mul(2 as libc::c_int as libc::c_ulong)
-            .wrapping_mul(*xadj.offset(nvtxs as isize) as libc::c_ulong),
+        (::core::mem::size_of::<uvw_t>() as u64)
+            .wrapping_mul(2 as libc::c_int as u64)
+            .wrapping_mul(*xadj.offset(nvtxs as isize) as u64),
         b"FixGraph: edges\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut uvw_t;
     nedges = 0 as libc::c_int;
@@ -373,21 +302,18 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
         i;
     }
     nedges = k + 1 as libc::c_int;
-    (*ngraph)
-        .xadj = libmetis__ismalloc(
+    (*ngraph).xadj = libmetis__ismalloc(
         (nvtxs + 1 as libc::c_int) as size_t,
         0 as libc::c_int,
         b"FixGraph: nxadj\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     nxadj = (*ngraph).xadj;
-    (*ngraph)
-        .adjncy = libmetis__imalloc(
+    (*ngraph).adjncy = libmetis__imalloc(
         (2 as libc::c_int * nedges) as size_t,
         b"FixGraph: nadjncy\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     nadjncy = (*ngraph).adjncy;
-    (*ngraph)
-        .adjwgt = libmetis__imalloc(
+    (*ngraph).adjwgt = libmetis__imalloc(
         (2 as libc::c_int * nedges) as size_t,
         b"FixGraph: nadjwgt\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
@@ -419,22 +345,14 @@ pub unsafe extern "C" fn libmetis__FixGraph(mut graph: *mut graph_t) -> *mut gra
     *nxadj.offset(0 as libc::c_int as isize) = 0 as libc::c_int;
     k = 0 as libc::c_int;
     while k < nedges {
-        *nadjncy
-            .offset(
-                *nxadj.offset((*edges.offset(k as isize)).u as isize) as isize,
-            ) = (*edges.offset(k as isize)).v;
-        *nadjncy
-            .offset(
-                *nxadj.offset((*edges.offset(k as isize)).v as isize) as isize,
-            ) = (*edges.offset(k as isize)).u;
-        *nadjwgt
-            .offset(
-                *nxadj.offset((*edges.offset(k as isize)).u as isize) as isize,
-            ) = (*edges.offset(k as isize)).w;
-        *nadjwgt
-            .offset(
-                *nxadj.offset((*edges.offset(k as isize)).v as isize) as isize,
-            ) = (*edges.offset(k as isize)).w;
+        *nadjncy.offset(*nxadj.offset((*edges.offset(k as isize)).u as isize) as isize) =
+            (*edges.offset(k as isize)).v;
+        *nadjncy.offset(*nxadj.offset((*edges.offset(k as isize)).v as isize) as isize) =
+            (*edges.offset(k as isize)).u;
+        *nadjwgt.offset(*nxadj.offset((*edges.offset(k as isize)).u as isize) as isize) =
+            (*edges.offset(k as isize)).w;
+        *nadjwgt.offset(*nxadj.offset((*edges.offset(k as isize)).v as isize) as isize) =
+            (*edges.offset(k as isize)).w;
         let ref mut fresh6 = *nxadj.offset((*edges.offset(k as isize)).u as isize);
         *fresh6 += 1;
         *fresh6;

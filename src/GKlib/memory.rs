@@ -1,50 +1,24 @@
+use super::{
+    error::{__va_list_tag, gk_errexit},
+    io::{__off64_t, __off_t},
+    mcore::{
+        gk_gkmcoreAdd, gk_gkmcoreCreate, gk_gkmcoreDel, gk_gkmcoreDestroy, gk_gkmcorePop,
+        gk_gkmcorePush,
+    },
+};
+use crate::libmetis::{
+    auxapi::*, contig::*, fortran::*, gklib::*, graph::*, kwayrefine::*, options::*, structure::*,
+    timing::*, util::*, wspace::*,
+};
 use ::libc;
+use libc::{fprintf, free, malloc, memmove, printf, realloc};
 extern "C" {
     pub type _IO_wide_data;
     pub type _IO_codecvt;
     pub type _IO_marker;
-    fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
-    static mut stderr: *mut FILE;
-    fn free(_: *mut libc::c_void);
-    fn realloc(_: *mut libc::c_void, _: libc::c_ulong) -> *mut libc::c_void;
-    fn malloc(_: libc::c_ulong) -> *mut libc::c_void;
-    fn memmove(
-        _: *mut libc::c_void,
-        _: *const libc::c_void,
-        _: libc::c_ulong,
-    ) -> *mut libc::c_void;
-    fn gk_gkmcoreAdd(
-        mcore: *mut gk_mcore_t,
-        type_0: libc::c_int,
-        nbytes: size_t,
-        ptr: *mut libc::c_void,
-    );
-    fn gk_errexit(signum: libc::c_int, _: *mut libc::c_char, _: ...);
-    fn gk_gkmcoreDel(mcore: *mut gk_mcore_t, ptr: *mut libc::c_void);
-    fn gk_gkmcorePush(mcore: *mut gk_mcore_t);
-    fn gk_gkmcoreCreate() -> *mut gk_mcore_t;
-    fn gk_gkmcoreDestroy(r_mcore: *mut *mut gk_mcore_t, showstats: libc::c_int);
-    fn gk_gkmcorePop(mcore: *mut gk_mcore_t);
+
 }
-pub type __builtin_va_list = [__va_list_tag; 1];
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct __va_list_tag {
-    pub gp_offset: libc::c_uint,
-    pub fp_offset: libc::c_uint,
-    pub overflow_arg_area: *mut libc::c_void,
-    pub reg_save_area: *mut libc::c_void,
-}
-pub type __int32_t = libc::c_int;
-pub type __int64_t = libc::c_long;
-pub type __off_t = libc::c_long;
-pub type __off64_t = libc::c_long;
-pub type __ssize_t = libc::c_long;
-pub type int32_t = __int32_t;
-pub type int64_t = __int64_t;
-pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
-pub type va_list = __builtin_va_list;
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _IO_FILE {
@@ -142,24 +116,6 @@ pub struct gk_mop_t {
     pub nbytes: ssize_t,
     pub ptr: *mut libc::c_void,
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct gk_mcore_t {
-    pub coresize: size_t,
-    pub corecpos: size_t,
-    pub core: *mut libc::c_void,
-    pub nmops: size_t,
-    pub cmop: size_t,
-    pub mops: *mut gk_mop_t,
-    pub num_callocs: size_t,
-    pub num_hallocs: size_t,
-    pub size_callocs: size_t,
-    pub size_hallocs: size_t,
-    pub cur_callocs: size_t,
-    pub cur_hallocs: size_t,
-    pub max_callocs: size_t,
-    pub max_hallocs: size_t,
-}
 #[thread_local]
 static mut gkmcore: *mut gk_mcore_t = 0 as *const gk_mcore_t as *mut gk_mcore_t;
 #[no_mangle]
@@ -175,16 +131,18 @@ pub unsafe extern "C" fn gk_cFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut libc::c_char
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut libc::c_char as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_cSetMatrix(
@@ -196,9 +154,9 @@ pub unsafe extern "C" fn gk_cSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -213,7 +171,7 @@ pub unsafe extern "C" fn gk_cmalloc(
     mut msg: *mut libc::c_char,
 ) -> *mut libc::c_char {
     return gk_malloc(
-        (::core::mem::size_of::<libc::c_char>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_char>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_char;
 }
@@ -225,7 +183,7 @@ pub unsafe extern "C" fn gk_crealloc(
 ) -> *mut libc::c_char {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<libc::c_char>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_char>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_char;
 }
@@ -237,7 +195,7 @@ pub unsafe extern "C" fn gk_csmalloc(
 ) -> *mut libc::c_char {
     let mut ptr: *mut libc::c_char = 0 as *mut libc::c_char;
     ptr = gk_malloc(
-        (::core::mem::size_of::<libc::c_char>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_char>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_char;
     if ptr.is_null() {
@@ -269,7 +227,7 @@ pub unsafe extern "C" fn gk_ccopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<libc::c_char>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_char>() as u64).wrapping_mul(n) as usize,
     ) as *mut libc::c_char;
 }
 #[no_mangle]
@@ -283,14 +241,14 @@ pub unsafe extern "C" fn gk_cAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut libc::c_char = 0 as *mut *mut libc::c_char;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut libc::c_char>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut libc::c_char>() as u64),
         errmsg,
     ) as *mut *mut libc::c_char;
     if matrix.is_null() {
         return 0 as *mut *mut libc::c_char;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh0 = *matrix.offset(i as isize);
         *fresh0 = gk_csmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
@@ -324,16 +282,18 @@ pub unsafe extern "C" fn gk_iFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut libc::c_int
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut libc::c_int as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_iSetMatrix(
@@ -345,9 +305,9 @@ pub unsafe extern "C" fn gk_iSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -357,12 +317,9 @@ pub unsafe extern "C" fn gk_iSetMatrix(
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_imalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut libc::c_int {
+pub unsafe extern "C" fn gk_imalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut libc::c_int {
     return gk_malloc(
-        (::core::mem::size_of::<libc::c_int>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_int>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_int;
 }
@@ -374,7 +331,7 @@ pub unsafe extern "C" fn gk_irealloc(
 ) -> *mut libc::c_int {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<libc::c_int>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_int>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_int;
 }
@@ -386,7 +343,7 @@ pub unsafe extern "C" fn gk_ismalloc(
 ) -> *mut libc::c_int {
     let mut ptr: *mut libc::c_int = 0 as *mut libc::c_int;
     ptr = gk_malloc(
-        (::core::mem::size_of::<libc::c_int>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_int>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_int;
     if ptr.is_null() {
@@ -418,7 +375,7 @@ pub unsafe extern "C" fn gk_icopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<libc::c_int>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_int>() as u64).wrapping_mul(n) as usize,
     ) as *mut libc::c_int;
 }
 #[no_mangle]
@@ -432,14 +389,14 @@ pub unsafe extern "C" fn gk_iAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut libc::c_int = 0 as *mut *mut libc::c_int;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut libc::c_int>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut libc::c_int>() as u64),
         errmsg,
     ) as *mut *mut libc::c_int;
     if matrix.is_null() {
         return 0 as *mut *mut libc::c_int;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh1 = *matrix.offset(i as isize);
         *fresh1 = gk_ismalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
@@ -473,16 +430,18 @@ pub unsafe extern "C" fn gk_i32FreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut int32_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut int32_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_i32SetMatrix(
@@ -494,9 +453,9 @@ pub unsafe extern "C" fn gk_i32SetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -514,7 +473,7 @@ pub unsafe extern "C" fn gk_i32copy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<int32_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<int32_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut int32_t;
 }
 #[no_mangle]
@@ -543,22 +502,21 @@ pub unsafe extern "C" fn gk_i32AllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut int32_t = 0 as *mut *mut int32_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut int32_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut int32_t>() as u64),
         errmsg,
     ) as *mut *mut int32_t;
     if matrix.is_null() {
         return 0 as *mut *mut int32_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh2 = *matrix.offset(i as isize);
         *fresh2 = gk_i32smalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut int32_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut int32_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -572,12 +530,9 @@ pub unsafe extern "C" fn gk_i32AllocMatrix(
     return matrix;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_i32malloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut int32_t {
+pub unsafe extern "C" fn gk_i32malloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut int32_t {
     return gk_malloc(
-        (::core::mem::size_of::<int32_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<int32_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut int32_t;
 }
@@ -589,7 +544,7 @@ pub unsafe extern "C" fn gk_i32realloc(
 ) -> *mut int32_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<int32_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<int32_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut int32_t;
 }
@@ -601,7 +556,7 @@ pub unsafe extern "C" fn gk_i32smalloc(
 ) -> *mut int32_t {
     let mut ptr: *mut int32_t = 0 as *mut int32_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<int32_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<int32_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut int32_t;
     if ptr.is_null() {
@@ -622,16 +577,18 @@ pub unsafe extern "C" fn gk_i64FreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut int64_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut int64_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_i64SetMatrix(
@@ -643,9 +600,9 @@ pub unsafe extern "C" fn gk_i64SetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -655,12 +612,9 @@ pub unsafe extern "C" fn gk_i64SetMatrix(
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_i64malloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut int64_t {
+pub unsafe extern "C" fn gk_i64malloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut int64_t {
     return gk_malloc(
-        (::core::mem::size_of::<int64_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<int64_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut int64_t;
 }
@@ -672,7 +626,7 @@ pub unsafe extern "C" fn gk_i64realloc(
 ) -> *mut int64_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<int64_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<int64_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut int64_t;
 }
@@ -684,7 +638,7 @@ pub unsafe extern "C" fn gk_i64smalloc(
 ) -> *mut int64_t {
     let mut ptr: *mut int64_t = 0 as *mut int64_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<int64_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<int64_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut int64_t;
     if ptr.is_null() {
@@ -716,7 +670,7 @@ pub unsafe extern "C" fn gk_i64copy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<int64_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<int64_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut int64_t;
 }
 #[no_mangle]
@@ -730,22 +684,21 @@ pub unsafe extern "C" fn gk_i64AllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut int64_t = 0 as *mut *mut int64_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut int64_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut int64_t>() as u64),
         errmsg,
     ) as *mut *mut int64_t;
     if matrix.is_null() {
         return 0 as *mut *mut int64_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh3 = *matrix.offset(i as isize);
         *fresh3 = gk_i64smalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut int64_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut int64_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -771,16 +724,18 @@ pub unsafe extern "C" fn gk_zFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut ssize_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut ssize_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_zSetMatrix(
@@ -792,9 +747,9 @@ pub unsafe extern "C" fn gk_zSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -812,7 +767,7 @@ pub unsafe extern "C" fn gk_zcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<ssize_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<ssize_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut ssize_t;
 }
 #[no_mangle]
@@ -831,12 +786,9 @@ pub unsafe extern "C" fn gk_zset(
     return x;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_zmalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut ssize_t {
+pub unsafe extern "C" fn gk_zmalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut ssize_t {
     return gk_malloc(
-        (::core::mem::size_of::<ssize_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<ssize_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut ssize_t;
 }
@@ -851,22 +803,21 @@ pub unsafe extern "C" fn gk_zAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut ssize_t = 0 as *mut *mut ssize_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut ssize_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut ssize_t>() as u64),
         errmsg,
     ) as *mut *mut ssize_t;
     if matrix.is_null() {
         return 0 as *mut *mut ssize_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh4 = *matrix.offset(i as isize);
         *fresh4 = gk_zsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut ssize_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut ssize_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -887,7 +838,7 @@ pub unsafe extern "C" fn gk_zrealloc(
 ) -> *mut ssize_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<ssize_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<ssize_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut ssize_t;
 }
@@ -899,7 +850,7 @@ pub unsafe extern "C" fn gk_zsmalloc(
 ) -> *mut ssize_t {
     let mut ptr: *mut ssize_t = 0 as *mut ssize_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<ssize_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<ssize_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut ssize_t;
     if ptr.is_null() {
@@ -920,16 +871,18 @@ pub unsafe extern "C" fn gk_fFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut libc::c_float
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut libc::c_float as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_fSetMatrix(
@@ -941,9 +894,9 @@ pub unsafe extern "C" fn gk_fSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -958,7 +911,7 @@ pub unsafe extern "C" fn gk_fmalloc(
     mut msg: *mut libc::c_char,
 ) -> *mut libc::c_float {
     return gk_malloc(
-        (::core::mem::size_of::<libc::c_float>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_float>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_float;
 }
@@ -970,7 +923,7 @@ pub unsafe extern "C" fn gk_frealloc(
 ) -> *mut libc::c_float {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<libc::c_float>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_float>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_float;
 }
@@ -982,7 +935,7 @@ pub unsafe extern "C" fn gk_fsmalloc(
 ) -> *mut libc::c_float {
     let mut ptr: *mut libc::c_float = 0 as *mut libc::c_float;
     ptr = gk_malloc(
-        (::core::mem::size_of::<libc::c_float>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_float>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_float;
     if ptr.is_null() {
@@ -1014,7 +967,7 @@ pub unsafe extern "C" fn gk_fcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<libc::c_float>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_float>() as u64).wrapping_mul(n) as usize,
     ) as *mut libc::c_float;
 }
 #[no_mangle]
@@ -1028,15 +981,14 @@ pub unsafe extern "C" fn gk_fAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut libc::c_float = 0 as *mut *mut libc::c_float;
     matrix = gk_malloc(
-        ndim1
-            .wrapping_mul(::core::mem::size_of::<*mut libc::c_float>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut libc::c_float>() as u64),
         errmsg,
     ) as *mut *mut libc::c_float;
     if matrix.is_null() {
         return 0 as *mut *mut libc::c_float;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh5 = *matrix.offset(i as isize);
         *fresh5 = gk_fsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
@@ -1070,16 +1022,18 @@ pub unsafe extern "C" fn gk_dFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut libc::c_double
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut libc::c_double as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_dSetMatrix(
@@ -1091,9 +1045,9 @@ pub unsafe extern "C" fn gk_dSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -1110,7 +1064,7 @@ pub unsafe extern "C" fn gk_drealloc(
 ) -> *mut libc::c_double {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<libc::c_double>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_double>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_double;
 }
@@ -1122,7 +1076,7 @@ pub unsafe extern "C" fn gk_dsmalloc(
 ) -> *mut libc::c_double {
     let mut ptr: *mut libc::c_double = 0 as *mut libc::c_double;
     ptr = gk_malloc(
-        (::core::mem::size_of::<libc::c_double>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_double>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_double;
     if ptr.is_null() {
@@ -1154,7 +1108,7 @@ pub unsafe extern "C" fn gk_dcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<libc::c_double>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_double>() as u64).wrapping_mul(n) as usize,
     ) as *mut libc::c_double;
 }
 #[no_mangle]
@@ -1168,17 +1122,14 @@ pub unsafe extern "C" fn gk_dAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut libc::c_double = 0 as *mut *mut libc::c_double;
     matrix = gk_malloc(
-        ndim1
-            .wrapping_mul(
-                ::core::mem::size_of::<*mut libc::c_double>() as libc::c_ulong,
-            ),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut libc::c_double>() as u64),
         errmsg,
     ) as *mut *mut libc::c_double;
     if matrix.is_null() {
         return 0 as *mut *mut libc::c_double;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh6 = *matrix.offset(i as isize);
         *fresh6 = gk_dsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
@@ -1205,7 +1156,7 @@ pub unsafe extern "C" fn gk_dmalloc(
     mut msg: *mut libc::c_char,
 ) -> *mut libc::c_double {
     return gk_malloc(
-        (::core::mem::size_of::<libc::c_double>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<libc::c_double>() as u64).wrapping_mul(n),
         msg,
     ) as *mut libc::c_double;
 }
@@ -1222,16 +1173,18 @@ pub unsafe extern "C" fn gk_idxFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_idx_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_idx_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_idxSetMatrix(
@@ -1243,9 +1196,9 @@ pub unsafe extern "C" fn gk_idxSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -1280,22 +1233,21 @@ pub unsafe extern "C" fn gk_idxAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_idx_t = 0 as *mut *mut gk_idx_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_idx_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_idx_t>() as u64),
         errmsg,
     ) as *mut *mut gk_idx_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_idx_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh7 = *matrix.offset(i as isize);
         *fresh7 = gk_idxsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut gk_idx_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut gk_idx_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -1317,7 +1269,7 @@ pub unsafe extern "C" fn gk_idxcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_idx_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_idx_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_idx_t;
 }
 #[no_mangle]
@@ -1328,7 +1280,7 @@ pub unsafe extern "C" fn gk_idxsmalloc(
 ) -> *mut gk_idx_t {
     let mut ptr: *mut gk_idx_t = 0 as *mut gk_idx_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_idx_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_idx_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_idx_t;
     if ptr.is_null() {
@@ -1344,17 +1296,14 @@ pub unsafe extern "C" fn gk_idxrealloc(
 ) -> *mut gk_idx_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_idx_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_idx_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_idx_t;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_idxmalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut gk_idx_t {
+pub unsafe extern "C" fn gk_idxmalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut gk_idx_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_idx_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_idx_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_idx_t;
 }
@@ -1371,16 +1320,18 @@ pub unsafe extern "C" fn gk_ckvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_ckv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_ckv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_ckvSetMatrix(
@@ -1392,9 +1343,9 @@ pub unsafe extern "C" fn gk_ckvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -1426,7 +1377,7 @@ pub unsafe extern "C" fn gk_ckvsmalloc(
 ) -> *mut gk_ckv_t {
     let mut ptr: *mut gk_ckv_t = 0 as *mut gk_ckv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_ckv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_ckv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_ckv_t;
     if ptr.is_null() {
@@ -1442,17 +1393,14 @@ pub unsafe extern "C" fn gk_ckvrealloc(
 ) -> *mut gk_ckv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_ckv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_ckv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_ckv_t;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_ckvmalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut gk_ckv_t {
+pub unsafe extern "C" fn gk_ckvmalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut gk_ckv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_ckv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_ckv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_ckv_t;
 }
@@ -1465,7 +1413,7 @@ pub unsafe extern "C" fn gk_ckvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_ckv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_ckv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_ckv_t;
 }
 #[no_mangle]
@@ -1479,22 +1427,21 @@ pub unsafe extern "C" fn gk_ckvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_ckv_t = 0 as *mut *mut gk_ckv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_ckv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_ckv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_ckv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_ckv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh8 = *matrix.offset(i as isize);
         *fresh8 = gk_ckvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut gk_ckv_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut gk_ckv_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -1517,9 +1464,9 @@ pub unsafe extern "C" fn gk_ikvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -1541,16 +1488,18 @@ pub unsafe extern "C" fn gk_ikvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_ikv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_ikv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_ikvset(
@@ -1575,7 +1524,7 @@ pub unsafe extern "C" fn gk_ikvrealloc(
 ) -> *mut gk_ikv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_ikv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_ikv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_ikv_t;
 }
@@ -1587,7 +1536,7 @@ pub unsafe extern "C" fn gk_ikvsmalloc(
 ) -> *mut gk_ikv_t {
     let mut ptr: *mut gk_ikv_t = 0 as *mut gk_ikv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_ikv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_ikv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_ikv_t;
     if ptr.is_null() {
@@ -1596,12 +1545,9 @@ pub unsafe extern "C" fn gk_ikvsmalloc(
     return gk_ikvset(n, ival, ptr);
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_ikvmalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut gk_ikv_t {
+pub unsafe extern "C" fn gk_ikvmalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut gk_ikv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_ikv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_ikv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_ikv_t;
 }
@@ -1614,7 +1560,7 @@ pub unsafe extern "C" fn gk_ikvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_ikv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_ikv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_ikv_t;
 }
 #[no_mangle]
@@ -1628,22 +1574,21 @@ pub unsafe extern "C" fn gk_ikvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_ikv_t = 0 as *mut *mut gk_ikv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_ikv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_ikv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_ikv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_ikv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh9 = *matrix.offset(i as isize);
         *fresh9 = gk_ikvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut gk_ikv_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut gk_ikv_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -1669,16 +1614,18 @@ pub unsafe extern "C" fn gk_i32kvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_i32kv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_i32kv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_i32kvSetMatrix(
@@ -1690,9 +1637,9 @@ pub unsafe extern "C" fn gk_i32kvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -1707,7 +1654,7 @@ pub unsafe extern "C" fn gk_i32kvmalloc(
     mut msg: *mut libc::c_char,
 ) -> *mut gk_i32kv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_i32kv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_i32kv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_i32kv_t;
 }
@@ -1719,7 +1666,7 @@ pub unsafe extern "C" fn gk_i32kvrealloc(
 ) -> *mut gk_i32kv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_i32kv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_i32kv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_i32kv_t;
 }
@@ -1731,7 +1678,7 @@ pub unsafe extern "C" fn gk_i32kvsmalloc(
 ) -> *mut gk_i32kv_t {
     let mut ptr: *mut gk_i32kv_t = 0 as *mut gk_i32kv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_i32kv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_i32kv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_i32kv_t;
     if ptr.is_null() {
@@ -1763,7 +1710,7 @@ pub unsafe extern "C" fn gk_i32kvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_i32kv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_i32kv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_i32kv_t;
 }
 #[no_mangle]
@@ -1777,14 +1724,14 @@ pub unsafe extern "C" fn gk_i32kvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_i32kv_t = 0 as *mut *mut gk_i32kv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_i32kv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_i32kv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_i32kv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_i32kv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh10 = *matrix.offset(i as isize);
         *fresh10 = gk_i32kvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
@@ -1815,9 +1762,9 @@ pub unsafe extern "C" fn gk_i64kvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -1839,16 +1786,18 @@ pub unsafe extern "C" fn gk_i64kvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_i64kv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_i64kv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_i64kvmalloc(
@@ -1856,7 +1805,7 @@ pub unsafe extern "C" fn gk_i64kvmalloc(
     mut msg: *mut libc::c_char,
 ) -> *mut gk_i64kv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_i64kv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_i64kv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_i64kv_t;
 }
@@ -1868,7 +1817,7 @@ pub unsafe extern "C" fn gk_i64kvrealloc(
 ) -> *mut gk_i64kv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_i64kv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_i64kv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_i64kv_t;
 }
@@ -1880,7 +1829,7 @@ pub unsafe extern "C" fn gk_i64kvsmalloc(
 ) -> *mut gk_i64kv_t {
     let mut ptr: *mut gk_i64kv_t = 0 as *mut gk_i64kv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_i64kv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_i64kv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_i64kv_t;
     if ptr.is_null() {
@@ -1912,7 +1861,7 @@ pub unsafe extern "C" fn gk_i64kvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_i64kv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_i64kv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_i64kv_t;
 }
 #[no_mangle]
@@ -1926,14 +1875,14 @@ pub unsafe extern "C" fn gk_i64kvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_i64kv_t = 0 as *mut *mut gk_i64kv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_i64kv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_i64kv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_i64kv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_i64kv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh11 = *matrix.offset(i as isize);
         *fresh11 = gk_i64kvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
@@ -1964,9 +1913,9 @@ pub unsafe extern "C" fn gk_zkvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -1988,16 +1937,18 @@ pub unsafe extern "C" fn gk_zkvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_zkv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_zkv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_zkvcopy(
@@ -2008,7 +1959,7 @@ pub unsafe extern "C" fn gk_zkvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_zkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_zkv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_zkv_t;
 }
 #[no_mangle]
@@ -2019,7 +1970,7 @@ pub unsafe extern "C" fn gk_zkvsmalloc(
 ) -> *mut gk_zkv_t {
     let mut ptr: *mut gk_zkv_t = 0 as *mut gk_zkv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_zkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_zkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_zkv_t;
     if ptr.is_null() {
@@ -2043,12 +1994,9 @@ pub unsafe extern "C" fn gk_zkvset(
     return x;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_zkvmalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut gk_zkv_t {
+pub unsafe extern "C" fn gk_zkvmalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut gk_zkv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_zkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_zkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_zkv_t;
 }
@@ -2063,22 +2011,21 @@ pub unsafe extern "C" fn gk_zkvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_zkv_t = 0 as *mut *mut gk_zkv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_zkv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_zkv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_zkv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_zkv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh12 = *matrix.offset(i as isize);
         *fresh12 = gk_zkvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut gk_zkv_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut gk_zkv_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -2099,7 +2046,7 @@ pub unsafe extern "C" fn gk_zkvrealloc(
 ) -> *mut gk_zkv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_zkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_zkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_zkv_t;
 }
@@ -2116,16 +2063,18 @@ pub unsafe extern "C" fn gk_fkvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_fkv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_fkv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_fkvSetMatrix(
@@ -2137,9 +2086,9 @@ pub unsafe extern "C" fn gk_fkvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -2149,12 +2098,9 @@ pub unsafe extern "C" fn gk_fkvSetMatrix(
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_fkvmalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut gk_fkv_t {
+pub unsafe extern "C" fn gk_fkvmalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut gk_fkv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_fkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_fkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_fkv_t;
 }
@@ -2166,7 +2112,7 @@ pub unsafe extern "C" fn gk_fkvrealloc(
 ) -> *mut gk_fkv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_fkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_fkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_fkv_t;
 }
@@ -2178,7 +2124,7 @@ pub unsafe extern "C" fn gk_fkvsmalloc(
 ) -> *mut gk_fkv_t {
     let mut ptr: *mut gk_fkv_t = 0 as *mut gk_fkv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_fkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_fkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_fkv_t;
     if ptr.is_null() {
@@ -2210,7 +2156,7 @@ pub unsafe extern "C" fn gk_fkvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_fkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_fkv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_fkv_t;
 }
 #[no_mangle]
@@ -2224,22 +2170,21 @@ pub unsafe extern "C" fn gk_fkvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_fkv_t = 0 as *mut *mut gk_fkv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_fkv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_fkv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_fkv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_fkv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh13 = *matrix.offset(i as isize);
         *fresh13 = gk_fkvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut gk_fkv_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut gk_fkv_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -2265,16 +2210,18 @@ pub unsafe extern "C" fn gk_dkvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_dkv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_dkv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_dkvSetMatrix(
@@ -2286,9 +2233,9 @@ pub unsafe extern "C" fn gk_dkvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -2308,22 +2255,21 @@ pub unsafe extern "C" fn gk_dkvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_dkv_t = 0 as *mut *mut gk_dkv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_dkv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_dkv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_dkv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_dkv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh14 = *matrix.offset(i as isize);
         *fresh14 = gk_dkvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut gk_dkv_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut gk_dkv_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -2337,12 +2283,9 @@ pub unsafe extern "C" fn gk_dkvAllocMatrix(
     return matrix;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_dkvmalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut gk_dkv_t {
+pub unsafe extern "C" fn gk_dkvmalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut gk_dkv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_dkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_dkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_dkv_t;
 }
@@ -2354,7 +2297,7 @@ pub unsafe extern "C" fn gk_dkvrealloc(
 ) -> *mut gk_dkv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_dkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_dkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_dkv_t;
 }
@@ -2366,7 +2309,7 @@ pub unsafe extern "C" fn gk_dkvsmalloc(
 ) -> *mut gk_dkv_t {
     let mut ptr: *mut gk_dkv_t = 0 as *mut gk_dkv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_dkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_dkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_dkv_t;
     if ptr.is_null() {
@@ -2398,7 +2341,7 @@ pub unsafe extern "C" fn gk_dkvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_dkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_dkv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_dkv_t;
 }
 #[no_mangle]
@@ -2411,9 +2354,9 @@ pub unsafe extern "C" fn gk_skvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -2435,16 +2378,18 @@ pub unsafe extern "C" fn gk_skvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_skv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_skv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_skvAllocMatrix(
@@ -2457,22 +2402,21 @@ pub unsafe extern "C" fn gk_skvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_skv_t = 0 as *mut *mut gk_skv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_skv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_skv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_skv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_skv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh15 = *matrix.offset(i as isize);
         *fresh15 = gk_skvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
             while j < i {
                 gk_free(
-                    &mut *matrix.offset(j as isize) as *mut *mut gk_skv_t
-                        as *mut *mut libc::c_void,
+                    &mut *matrix.offset(j as isize) as *mut *mut gk_skv_t as *mut *mut libc::c_void,
                     0 as *mut *mut libc::c_void,
                 );
                 j += 1;
@@ -2486,12 +2430,9 @@ pub unsafe extern "C" fn gk_skvAllocMatrix(
     return matrix;
 }
 #[no_mangle]
-pub unsafe extern "C" fn gk_skvmalloc(
-    mut n: size_t,
-    mut msg: *mut libc::c_char,
-) -> *mut gk_skv_t {
+pub unsafe extern "C" fn gk_skvmalloc(mut n: size_t, mut msg: *mut libc::c_char) -> *mut gk_skv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_skv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_skv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_skv_t;
 }
@@ -2503,7 +2444,7 @@ pub unsafe extern "C" fn gk_skvrealloc(
 ) -> *mut gk_skv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_skv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_skv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_skv_t;
 }
@@ -2515,7 +2456,7 @@ pub unsafe extern "C" fn gk_skvsmalloc(
 ) -> *mut gk_skv_t {
     let mut ptr: *mut gk_skv_t = 0 as *mut gk_skv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_skv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_skv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_skv_t;
     if ptr.is_null() {
@@ -2547,7 +2488,7 @@ pub unsafe extern "C" fn gk_skvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_skv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_skv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_skv_t;
 }
 #[no_mangle]
@@ -2560,9 +2501,9 @@ pub unsafe extern "C" fn gk_idxkvSetMatrix(
     let mut i: gk_idx_t = 0;
     let mut j: gk_idx_t = 0;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         j = 0 as libc::c_int as gk_idx_t;
-        while (j as libc::c_ulong) < ndim2 {
+        while (j as u64) < ndim2 {
             *(*matrix.offset(i as isize)).offset(j as isize) = value;
             j += 1;
             j;
@@ -2584,16 +2525,18 @@ pub unsafe extern "C" fn gk_idxkvFreeMatrix(
     }
     matrix = *r_matrix;
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
-            &mut *matrix.offset(i as isize) as *mut *mut gk_idxkv_t
-                as *mut *mut libc::c_void,
+            &mut *matrix.offset(i as isize) as *mut *mut gk_idxkv_t as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
         );
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_idxkvAllocMatrix(
@@ -2606,14 +2549,14 @@ pub unsafe extern "C" fn gk_idxkvAllocMatrix(
     let mut j: gk_idx_t = 0;
     let mut matrix: *mut *mut gk_idxkv_t = 0 as *mut *mut gk_idxkv_t;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_idxkv_t>() as libc::c_ulong),
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut gk_idxkv_t>() as u64),
         errmsg,
     ) as *mut *mut gk_idxkv_t;
     if matrix.is_null() {
         return 0 as *mut *mut gk_idxkv_t;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh16 = *matrix.offset(i as isize);
         *fresh16 = gk_idxkvsmalloc(ndim2, value, errmsg);
         if (*matrix.offset(i as isize)).is_null() {
@@ -2640,7 +2583,7 @@ pub unsafe extern "C" fn gk_idxkvmalloc(
     mut msg: *mut libc::c_char,
 ) -> *mut gk_idxkv_t {
     return gk_malloc(
-        (::core::mem::size_of::<gk_idxkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_idxkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_idxkv_t;
 }
@@ -2652,7 +2595,7 @@ pub unsafe extern "C" fn gk_idxkvrealloc(
 ) -> *mut gk_idxkv_t {
     return gk_realloc(
         ptr as *mut libc::c_void,
-        (::core::mem::size_of::<gk_idxkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_idxkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_idxkv_t;
 }
@@ -2664,7 +2607,7 @@ pub unsafe extern "C" fn gk_idxkvsmalloc(
 ) -> *mut gk_idxkv_t {
     let mut ptr: *mut gk_idxkv_t = 0 as *mut gk_idxkv_t;
     ptr = gk_malloc(
-        (::core::mem::size_of::<gk_idxkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_idxkv_t>() as u64).wrapping_mul(n),
         msg,
     ) as *mut gk_idxkv_t;
     if ptr.is_null() {
@@ -2696,7 +2639,7 @@ pub unsafe extern "C" fn gk_idxkvcopy(
     return memmove(
         b as *mut libc::c_void,
         a as *mut libc::c_void,
-        (::core::mem::size_of::<gk_idxkv_t>() as libc::c_ulong).wrapping_mul(n),
+        (::core::mem::size_of::<gk_idxkv_t>() as u64).wrapping_mul(n) as usize,
     ) as *mut gk_idxkv_t;
 }
 #[no_mangle]
@@ -2711,20 +2654,18 @@ pub unsafe extern "C" fn gk_AllocMatrix(
     let mut matrix: *mut *mut libc::c_void = 0 as *mut *mut libc::c_void;
     *r_matrix = 0 as *mut *mut libc::c_void;
     matrix = gk_malloc(
-        ndim1.wrapping_mul(::core::mem::size_of::<*mut libc::c_void>() as libc::c_ulong),
-        b"gk_AllocMatrix: matrix\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        ndim1.wrapping_mul(::core::mem::size_of::<*mut libc::c_void>() as u64),
+        b"gk_AllocMatrix: matrix\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut *mut libc::c_void;
     if matrix.is_null() {
         return;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         let ref mut fresh17 = *matrix.offset(i as isize);
         *fresh17 = gk_malloc(
             ndim2.wrapping_mul(elmlen),
-            b"gk_AllocMatrix: matrix[i]\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"gk_AllocMatrix: matrix[i]\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         if (*fresh17).is_null() {
             j = 0 as libc::c_int as gk_idx_t;
@@ -2756,7 +2697,7 @@ pub unsafe extern "C" fn gk_FreeMatrix(
         return;
     }
     i = 0 as libc::c_int as gk_idx_t;
-    while (i as libc::c_ulong) < ndim1 {
+    while (i as u64) < ndim1 {
         gk_free(
             &mut *matrix.offset(i as isize) as *mut *mut libc::c_void,
             0 as *mut *mut libc::c_void,
@@ -2764,7 +2705,10 @@ pub unsafe extern "C" fn gk_FreeMatrix(
         i += 1;
         i;
     }
-    gk_free(r_matrix as *mut *mut libc::c_void, 0 as *mut *mut libc::c_void);
+    gk_free(
+        r_matrix as *mut *mut libc::c_void,
+        0 as *mut *mut libc::c_void,
+    );
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_malloc_init() -> libc::c_int {
@@ -2781,7 +2725,7 @@ pub unsafe extern "C" fn gk_malloc_init() -> libc::c_int {
 pub unsafe extern "C" fn gk_malloc_cleanup(mut showstats: libc::c_int) {
     if !gkmcore.is_null() {
         gk_gkmcorePop(gkmcore);
-        if (*gkmcore).cmop == 0 as libc::c_int as libc::c_ulong {
+        if (*gkmcore).cmop == 0 as libc::c_int as u64 {
             gk_gkmcoreDestroy(&mut gkmcore, showstats);
             gkmcore = 0 as *mut gk_mcore_t;
         }
@@ -2793,28 +2737,24 @@ pub unsafe extern "C" fn gk_malloc(
     mut msg: *mut libc::c_char,
 ) -> *mut libc::c_void {
     let mut ptr: *mut libc::c_void = 0 as *mut libc::c_void;
-    if nbytes == 0 as libc::c_int as libc::c_ulong {
+    if nbytes == 0 as libc::c_int as u64 {
         nbytes = nbytes.wrapping_add(1);
         nbytes;
     }
-    ptr = malloc(nbytes);
+    ptr = malloc(nbytes as usize);
     if ptr.is_null() {
-        fprintf(
-            stderr,
-            b"   Current memory used:  %10zu bytes\n\0" as *const u8
-                as *const libc::c_char,
+        printf(
+            b"   Current memory used:  %10zu bytes\n\0" as *const u8 as *const libc::c_char,
             gk_GetCurMemoryUsed(),
         );
-        fprintf(
-            stderr,
-            b"   Maximum memory used:  %10zu bytes\n\0" as *const u8
-                as *const libc::c_char,
+        printf(
+            b"   Maximum memory used:  %10zu bytes\n\0" as *const u8 as *const libc::c_char,
             gk_GetMaxMemoryUsed(),
         );
         gk_errexit(
             6 as libc::c_int,
-            b"***Memory allocation failed for %s. Requested size: %zu bytes\0"
-                as *const u8 as *const libc::c_char as *mut libc::c_char,
+            b"***Memory allocation failed for %s. Requested size: %zu bytes\0" as *const u8
+                as *const libc::c_char as *mut libc::c_char,
             msg,
             nbytes,
         );
@@ -2832,25 +2772,21 @@ pub unsafe extern "C" fn gk_realloc(
     mut msg: *mut libc::c_char,
 ) -> *mut libc::c_void {
     let mut ptr: *mut libc::c_void = 0 as *mut libc::c_void;
-    if nbytes == 0 as libc::c_int as libc::c_ulong {
+    if nbytes == 0 as libc::c_int as u64 {
         nbytes = nbytes.wrapping_add(1);
         nbytes;
     }
     if !gkmcore.is_null() && !oldptr.is_null() {
         gk_gkmcoreDel(gkmcore, oldptr);
     }
-    ptr = realloc(oldptr, nbytes);
+    ptr = realloc(oldptr, nbytes as usize);
     if ptr.is_null() {
-        fprintf(
-            stderr,
-            b"   Maximum memory used: %10zu bytes\n\0" as *const u8
-                as *const libc::c_char,
+        printf(
+            b"   Maximum memory used: %10zu bytes\n\0" as *const u8 as *const libc::c_char,
             gk_GetMaxMemoryUsed(),
         );
-        fprintf(
-            stderr,
-            b"   Current memory used: %10zu bytes\n\0" as *const u8
-                as *const libc::c_char,
+        printf(
+            b"   Current memory used: %10zu bytes\n\0" as *const u8 as *const libc::c_char,
             gk_GetCurMemoryUsed(),
         );
         gk_errexit(
@@ -2891,21 +2827,21 @@ pub unsafe extern "C" fn gk_free(mut ptr1: *mut *mut libc::c_void, mut args: ...
             }
         }
         *ptr = 0 as *mut libc::c_void;
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_GetCurMemoryUsed() -> size_t {
     if gkmcore.is_null() {
-        return 0 as libc::c_int as size_t
+        return 0 as libc::c_int as size_t;
     } else {
-        return (*gkmcore).cur_hallocs
+        return (*gkmcore).cur_hallocs;
     };
 }
 #[no_mangle]
 pub unsafe extern "C" fn gk_GetMaxMemoryUsed() -> size_t {
     if gkmcore.is_null() {
-        return 0 as libc::c_int as size_t
+        return 0 as libc::c_int as size_t;
     } else {
-        return (*gkmcore).max_hallocs
+        return (*gkmcore).max_hallocs;
     };
 }

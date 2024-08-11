@@ -13,22 +13,22 @@ extern "C" {
     fn sscanf(_: *const libc::c_char, _: *const libc::c_char, _: ...) -> libc::c_int;
     fn fread(
         _: *mut libc::c_void,
-        _: libc::c_ulong,
-        _: libc::c_ulong,
+        _: u64,
+        _: u64,
         _: *mut FILE,
-    ) -> libc::c_ulong;
+    ) -> u64;
     fn fwrite(
         _: *const libc::c_void,
-        _: libc::c_ulong,
-        _: libc::c_ulong,
+        _: u64,
+        _: u64,
         _: *mut FILE,
-    ) -> libc::c_ulong;
+    ) -> u64;
     fn strtof(_: *const libc::c_char, _: *mut *mut libc::c_char) -> libc::c_float;
     fn strtol(
         _: *const libc::c_char,
         _: *mut *mut libc::c_char,
         _: libc::c_int,
-    ) -> libc::c_long;
+    ) -> i64;
     fn fabs(_: libc::c_double) -> libc::c_double;
     fn gk_imax(n: size_t, x: *mut libc::c_int) -> libc::c_int;
     fn gk_fsum(n: size_t, x: *mut libc::c_float, incx: size_t) -> libc::c_float;
@@ -93,16 +93,16 @@ extern "C" {
     fn memset(
         _: *mut libc::c_void,
         _: libc::c_int,
-        _: libc::c_ulong,
+        _: u64,
     ) -> *mut libc::c_void;
 }
 pub type __int32_t = libc::c_int;
-pub type __off_t = libc::c_long;
-pub type __off64_t = libc::c_long;
-pub type __ssize_t = libc::c_long;
+pub type __off_t = i64;
+pub type __off64_t = i64;
+pub type __ssize_t = i64;
 pub type int32_t = __int32_t;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _IO_FILE {
@@ -179,7 +179,7 @@ pub struct gk_csr_t {
 pub unsafe extern "C" fn gk_csr_Create() -> *mut gk_csr_t {
     let mut mat: *mut gk_csr_t = 0 as *mut gk_csr_t;
     mat = gk_malloc(
-        ::core::mem::size_of::<gk_csr_t>() as libc::c_ulong,
+        ::core::mem::size_of::<gk_csr_t>() as u64,
         b"gk_csr_Create: mat\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut gk_csr_t;
     gk_csr_Init(mat);
@@ -190,7 +190,7 @@ pub unsafe extern "C" fn gk_csr_Init(mut mat: *mut gk_csr_t) {
     memset(
         mat as *mut libc::c_void,
         0 as libc::c_int,
-        ::core::mem::size_of::<gk_csr_t>() as libc::c_ulong,
+        ::core::mem::size_of::<gk_csr_t>() as u64,
     );
     (*mat).ncols = -(1 as libc::c_int);
     (*mat).nrows = (*mat).ncols;
@@ -383,7 +383,7 @@ pub unsafe extern "C" fn gk_csr_ExtractSubmatrix(
         );
     }
     i = nrows as ssize_t;
-    while i >= 0 as libc::c_int as libc::c_long {
+    while i >= 0 as libc::c_int as i64 {
         let ref mut fresh0 = *((*nmat).rowptr).offset(i as isize);
         *fresh0 -= *((*nmat).rowptr).offset(0 as libc::c_int as isize);
         i -= 1;
@@ -471,7 +471,7 @@ pub unsafe extern "C" fn gk_csr_ExtractRows(
     (*nmat).ncols = (*mat).ncols;
     nnz = 0 as libc::c_int as ssize_t;
     i = 0 as libc::c_int as ssize_t;
-    while i < nrows as libc::c_long {
+    while i < nrows as i64 {
         nnz
             += *((*mat).rowptr)
                 .offset((*rind.offset(i as isize) + 1 as libc::c_int) as isize)
@@ -501,22 +501,22 @@ pub unsafe extern "C" fn gk_csr_ExtractRows(
     nnz = 0 as libc::c_int as ssize_t;
     j = 0 as libc::c_int as ssize_t;
     ii = 0 as libc::c_int as ssize_t;
-    while ii < nrows as libc::c_long {
+    while ii < nrows as i64 {
         i = *rind.offset(ii as isize) as ssize_t;
         gk_icopy(
-            (*((*mat).rowptr).offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            (*((*mat).rowptr).offset((i + 1 as libc::c_int as i64) as isize)
                 - *((*mat).rowptr).offset(i as isize)) as size_t,
             ((*mat).rowind).offset(*((*mat).rowptr).offset(i as isize) as isize),
             ((*nmat).rowind).offset(nnz as isize),
         );
         gk_fcopy(
-            (*((*mat).rowptr).offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            (*((*mat).rowptr).offset((i + 1 as libc::c_int as i64) as isize)
                 - *((*mat).rowptr).offset(i as isize)) as size_t,
             ((*mat).rowval).offset(*((*mat).rowptr).offset(i as isize) as isize),
             ((*nmat).rowval).offset(nnz as isize),
         );
         nnz
-            += *((*mat).rowptr).offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            += *((*mat).rowptr).offset((i + 1 as libc::c_int as i64) as isize)
                 - *((*mat).rowptr).offset(i as isize);
         j += 1;
         *((*nmat).rowptr).offset(j as isize) = nnz;
@@ -540,13 +540,13 @@ pub unsafe extern "C" fn gk_csr_ExtractPartition(
     (*nmat).ncols = (*mat).ncols;
     nnz = 0 as libc::c_int as ssize_t;
     i = 0 as libc::c_int as ssize_t;
-    while i < (*mat).nrows as libc::c_long {
+    while i < (*mat).nrows as i64 {
         if *part.offset(i as isize) == pid {
             (*nmat).nrows += 1;
             (*nmat).nrows;
             nnz
                 += *((*mat).rowptr)
-                    .offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                    .offset((i + 1 as libc::c_int as i64) as isize)
                     - *((*mat).rowptr).offset(i as isize);
         }
         i += 1;
@@ -574,23 +574,23 @@ pub unsafe extern "C" fn gk_csr_ExtractPartition(
     nnz = 0 as libc::c_int as ssize_t;
     j = 0 as libc::c_int as ssize_t;
     i = 0 as libc::c_int as ssize_t;
-    while i < (*mat).nrows as libc::c_long {
+    while i < (*mat).nrows as i64 {
         if *part.offset(i as isize) == pid {
             gk_icopy(
-                (*((*mat).rowptr).offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                (*((*mat).rowptr).offset((i + 1 as libc::c_int as i64) as isize)
                     - *((*mat).rowptr).offset(i as isize)) as size_t,
                 ((*mat).rowind).offset(*((*mat).rowptr).offset(i as isize) as isize),
                 ((*nmat).rowind).offset(nnz as isize),
             );
             gk_fcopy(
-                (*((*mat).rowptr).offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                (*((*mat).rowptr).offset((i + 1 as libc::c_int as i64) as isize)
                     - *((*mat).rowptr).offset(i as isize)) as size_t,
                 ((*mat).rowval).offset(*((*mat).rowptr).offset(i as isize) as isize),
                 ((*nmat).rowval).offset(nnz as isize),
             );
             nnz
                 += *((*mat).rowptr)
-                    .offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                    .offset((i + 1 as libc::c_int as i64) as isize)
                     - *((*mat).rowptr).offset(i as isize);
             j += 1;
             *((*nmat).rowptr).offset(j as isize) = nnz;
@@ -620,12 +620,12 @@ pub unsafe extern "C" fn gk_csr_Split(
     ncolors = gk_imax(*rowptr.offset(nrows as isize) as size_t, color)
         + 1 as libc::c_int;
     smats = gk_malloc(
-        (::core::mem::size_of::<*mut gk_csr_t>() as libc::c_ulong)
-            .wrapping_mul(ncolors as libc::c_ulong),
+        (::core::mem::size_of::<*mut gk_csr_t>() as u64)
+            .wrapping_mul(ncolors as u64),
         b"gk_csr_Split: smats\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     ) as *mut *mut gk_csr_t;
     i = 0 as libc::c_int as ssize_t;
-    while i < ncolors as libc::c_long {
+    while i < ncolors as i64 {
         let ref mut fresh1 = *smats.offset(i as isize);
         *fresh1 = gk_csr_Create();
         (**smats.offset(i as isize)).nrows = (*mat).nrows;
@@ -641,9 +641,9 @@ pub unsafe extern "C" fn gk_csr_Split(
         i;
     }
     i = 0 as libc::c_int as ssize_t;
-    while i < nrows as libc::c_long {
+    while i < nrows as i64 {
         j = *rowptr.offset(i as isize);
-        while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+        while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize) {
             let ref mut fresh3 = *((**smats.offset(*color.offset(j as isize) as isize))
                 .rowptr)
                 .offset(i as isize);
@@ -656,24 +656,24 @@ pub unsafe extern "C" fn gk_csr_Split(
         i;
     }
     i = 0 as libc::c_int as ssize_t;
-    while i < ncolors as libc::c_long {
+    while i < ncolors as i64 {
         j = 1 as libc::c_int as ssize_t;
-        while j < nrows as libc::c_long {
+        while j < nrows as i64 {
             let ref mut fresh4 = *((**smats.offset(i as isize)).rowptr)
                 .offset(j as isize);
             *fresh4
                 += *((**smats.offset(i as isize)).rowptr)
-                    .offset((j - 1 as libc::c_int as libc::c_long) as isize);
+                    .offset((j - 1 as libc::c_int as i64) as isize);
             j += 1;
             j;
         }
         j = nrows as ssize_t;
-        while j > 0 as libc::c_int as libc::c_long {
+        while j > 0 as libc::c_int as i64 {
             *((**smats.offset(i as isize)).rowptr)
                 .offset(
                     j as isize,
                 ) = *((**smats.offset(i as isize)).rowptr)
-                .offset((j - 1 as libc::c_int as libc::c_long) as isize);
+                .offset((j - 1 as libc::c_int as i64) as isize);
             j -= 1;
             j;
         }
@@ -683,7 +683,7 @@ pub unsafe extern "C" fn gk_csr_Split(
         i;
     }
     i = 0 as libc::c_int as ssize_t;
-    while i < ncolors as libc::c_long {
+    while i < ncolors as i64 {
         let ref mut fresh5 = (**smats.offset(i as isize)).rowind;
         *fresh5 = gk_imalloc(
             *((**smats.offset(i as isize)).rowptr).offset(nrows as isize) as size_t,
@@ -700,9 +700,9 @@ pub unsafe extern "C" fn gk_csr_Split(
         i;
     }
     i = 0 as libc::c_int as ssize_t;
-    while i < nrows as libc::c_long {
+    while i < nrows as i64 {
         j = *rowptr.offset(i as isize);
-        while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+        while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize) {
             *((**smats.offset(*color.offset(j as isize) as isize)).rowind)
                 .offset(
                     *((**smats.offset(*color.offset(j as isize) as isize)).rowptr)
@@ -725,14 +725,14 @@ pub unsafe extern "C" fn gk_csr_Split(
         i;
     }
     i = 0 as libc::c_int as ssize_t;
-    while i < ncolors as libc::c_long {
+    while i < ncolors as i64 {
         j = nrows as ssize_t;
-        while j > 0 as libc::c_int as libc::c_long {
+        while j > 0 as libc::c_int as i64 {
             *((**smats.offset(i as isize)).rowptr)
                 .offset(
                     j as isize,
                 ) = *((**smats.offset(i as isize)).rowptr)
-                .offset((j - 1 as libc::c_int as libc::c_long) as isize);
+                .offset((j - 1 as libc::c_int as i64) as isize);
             j -= 1;
             j;
         }
@@ -790,10 +790,10 @@ pub unsafe extern "C" fn gk_csr_Read(
         );
         if fread(
             &mut (*mat).nrows as *mut int32_t as *mut libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            1 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            1 as libc::c_int as u64,
             fpin,
-        ) != 1 as libc::c_int as libc::c_ulong
+        ) != 1 as libc::c_int as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -804,10 +804,10 @@ pub unsafe extern "C" fn gk_csr_Read(
         }
         if fread(
             &mut (*mat).ncols as *mut int32_t as *mut libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            1 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            1 as libc::c_int as u64,
             fpin,
-        ) != 1 as libc::c_int as libc::c_ulong
+        ) != 1 as libc::c_int as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -824,10 +824,10 @@ pub unsafe extern "C" fn gk_csr_Read(
         );
         if fread(
             (*mat).rowptr as *mut libc::c_void,
-            ::core::mem::size_of::<ssize_t>() as libc::c_ulong,
-            ((*mat).nrows + 1 as libc::c_int) as libc::c_ulong,
+            ::core::mem::size_of::<ssize_t>() as u64,
+            ((*mat).nrows + 1 as libc::c_int) as u64,
             fpin,
-        ) != ((*mat).nrows + 1 as libc::c_int) as libc::c_ulong
+        ) != ((*mat).nrows + 1 as libc::c_int) as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -844,10 +844,10 @@ pub unsafe extern "C" fn gk_csr_Read(
         );
         if fread(
             (*mat).rowind as *mut libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            *((*mat).rowptr).offset((*mat).nrows as isize) as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            *((*mat).rowptr).offset((*mat).nrows as isize) as u64,
             fpin,
-        ) != *((*mat).rowptr).offset((*mat).nrows as isize) as libc::c_ulong
+        ) != *((*mat).rowptr).offset((*mat).nrows as isize) as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -865,10 +865,10 @@ pub unsafe extern "C" fn gk_csr_Read(
             );
             if fread(
                 (*mat).rowval as *mut libc::c_void,
-                ::core::mem::size_of::<libc::c_float>() as libc::c_ulong,
-                *((*mat).rowptr).offset((*mat).nrows as isize) as libc::c_ulong,
+                ::core::mem::size_of::<libc::c_float>() as u64,
+                *((*mat).rowptr).offset((*mat).nrows as isize) as u64,
                 fpin,
-            ) != *((*mat).rowptr).offset((*mat).nrows as isize) as libc::c_ulong
+            ) != *((*mat).rowptr).offset((*mat).nrows as isize) as u64
             {
                 gk_errexit(
                     15 as libc::c_int,
@@ -890,10 +890,10 @@ pub unsafe extern "C" fn gk_csr_Read(
         );
         if fread(
             &mut (*mat).nrows as *mut int32_t as *mut libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            1 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            1 as libc::c_int as u64,
             fpin,
-        ) != 1 as libc::c_int as libc::c_ulong
+        ) != 1 as libc::c_int as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -904,10 +904,10 @@ pub unsafe extern "C" fn gk_csr_Read(
         }
         if fread(
             &mut (*mat).ncols as *mut int32_t as *mut libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            1 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            1 as libc::c_int as u64,
             fpin,
-        ) != 1 as libc::c_int as libc::c_ulong
+        ) != 1 as libc::c_int as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -924,10 +924,10 @@ pub unsafe extern "C" fn gk_csr_Read(
         );
         if fread(
             (*mat).colptr as *mut libc::c_void,
-            ::core::mem::size_of::<ssize_t>() as libc::c_ulong,
-            ((*mat).ncols + 1 as libc::c_int) as libc::c_ulong,
+            ::core::mem::size_of::<ssize_t>() as u64,
+            ((*mat).ncols + 1 as libc::c_int) as u64,
             fpin,
-        ) != ((*mat).ncols + 1 as libc::c_int) as libc::c_ulong
+        ) != ((*mat).ncols + 1 as libc::c_int) as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -944,10 +944,10 @@ pub unsafe extern "C" fn gk_csr_Read(
         );
         if fread(
             (*mat).colind as *mut libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            *((*mat).colptr).offset((*mat).ncols as isize) as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            *((*mat).colptr).offset((*mat).ncols as isize) as u64,
             fpin,
-        ) != *((*mat).colptr).offset((*mat).ncols as isize) as libc::c_ulong
+        ) != *((*mat).colptr).offset((*mat).ncols as isize) as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -965,10 +965,10 @@ pub unsafe extern "C" fn gk_csr_Read(
             );
             if fread(
                 (*mat).colval as *mut libc::c_void,
-                ::core::mem::size_of::<libc::c_float>() as libc::c_ulong,
-                *((*mat).colptr).offset((*mat).ncols as isize) as libc::c_ulong,
+                ::core::mem::size_of::<libc::c_float>() as u64,
+                *((*mat).colptr).offset((*mat).ncols as isize) as u64,
                 fpin,
-            ) != *((*mat).colptr).offset((*mat).ncols as isize) as libc::c_ulong
+            ) != *((*mat).colptr).offset((*mat).ncols as isize) as u64
             {
                 gk_errexit(
                     15 as libc::c_int,
@@ -989,7 +989,7 @@ pub unsafe extern "C" fn gk_csr_Read(
         );
         loop {
             if gk_getline(&mut line, &mut lnlen, fpin)
-                <= 0 as libc::c_int as libc::c_long
+                <= 0 as libc::c_int as i64
             {
                 gk_errexit(
                     15 as libc::c_int,
@@ -1028,7 +1028,7 @@ pub unsafe extern "C" fn gk_csr_Read(
         );
         loop {
             if gk_getline(&mut line, &mut lnlen, fpin)
-                <= 0 as libc::c_int as libc::c_long
+                <= 0 as libc::c_int as i64
             {
                 gk_errexit(
                     15 as libc::c_int,
@@ -1051,7 +1051,7 @@ pub unsafe extern "C" fn gk_csr_Read(
             &mut fmt as *mut size_t,
             &mut ncon as *mut size_t,
         ) as size_t;
-        if nfields < 2 as libc::c_int as libc::c_ulong {
+        if nfields < 2 as libc::c_int as u64 {
             gk_errexit(
                 15 as libc::c_int,
                 b"Header line must contain at least 2 integers (#vtxs and #edges).\n\0"
@@ -1059,9 +1059,9 @@ pub unsafe extern "C" fn gk_csr_Read(
             );
         }
         ncols = nrows;
-        nnz = (nnz as libc::c_ulong).wrapping_mul(2 as libc::c_int as libc::c_ulong)
+        nnz = (nnz as u64).wrapping_mul(2 as libc::c_int as u64)
             as size_t as size_t;
-        if fmt > 111 as libc::c_int as libc::c_ulong {
+        if fmt > 111 as libc::c_int as u64 {
             gk_errexit(
                 15 as libc::c_int,
                 b"Cannot read this type of file format [fmt=%zu]!\n\0" as *const u8
@@ -1072,7 +1072,7 @@ pub unsafe extern "C" fn gk_csr_Read(
         sprintf(
             fmtstr.as_mut_ptr(),
             b"%03zu\0" as *const u8 as *const libc::c_char,
-            fmt.wrapping_rem(1000 as libc::c_int as libc::c_ulong),
+            fmt.wrapping_rem(1000 as libc::c_int as u64),
         );
         readsizes = (fmtstr[0 as libc::c_int as usize] as libc::c_int == '1' as i32)
             as libc::c_int;
@@ -1081,8 +1081,8 @@ pub unsafe extern "C" fn gk_csr_Read(
         readvals = (fmtstr[2 as libc::c_int as usize] as libc::c_int == '1' as i32)
             as libc::c_int;
         numbering = 1 as libc::c_int;
-        ncon = if ncon == 0 as libc::c_int as libc::c_ulong {
-            1 as libc::c_int as libc::c_ulong
+        ncon = if ncon == 0 as libc::c_int as u64 {
+            1 as libc::c_int as u64
         } else {
             ncon
         };
@@ -1097,8 +1097,8 @@ pub unsafe extern "C" fn gk_csr_Read(
             0 as *mut size_t,
         );
         if readvals == 1 as libc::c_int
-            && nnz.wrapping_rem(2 as libc::c_int as libc::c_ulong)
-                == 1 as libc::c_int as libc::c_ulong
+            && nnz.wrapping_rem(2 as libc::c_int as u64)
+                == 1 as libc::c_int as u64
         {
             gk_errexit(
                 15 as libc::c_int,
@@ -1109,7 +1109,7 @@ pub unsafe extern "C" fn gk_csr_Read(
             );
         }
         if readvals == 1 as libc::c_int {
-            nnz = nnz.wrapping_div(2 as libc::c_int as libc::c_ulong);
+            nnz = nnz.wrapping_div(2 as libc::c_int as u64);
         }
         fpin = gk_fopen(
             filename,
@@ -1121,7 +1121,7 @@ pub unsafe extern "C" fn gk_csr_Read(
     (*mat).nrows = nrows as int32_t;
     (*mat)
         .rowptr = gk_zmalloc(
-        nrows.wrapping_add(1 as libc::c_int as libc::c_ulong),
+        nrows.wrapping_add(1 as libc::c_int as u64),
         b"gk_csr_Read: rowptr\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     rowptr = (*mat).rowptr;
@@ -1164,10 +1164,10 @@ pub unsafe extern "C" fn gk_csr_Read(
     *rowptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
     k = 0 as libc::c_int as ssize_t;
     i = 0 as libc::c_int as ssize_t;
-    while (i as libc::c_ulong) < nrows {
+    while (i as u64) < nrows {
         loop {
             if gk_getline(&mut line, &mut lnlen, fpin)
-                == -(1 as libc::c_int) as libc::c_long
+                == -(1 as libc::c_int) as i64
             {
                 gk_errexit(
                     15 as libc::c_int,
@@ -1189,46 +1189,46 @@ pub unsafe extern "C" fn gk_csr_Read(
                     15 as libc::c_int,
                     b"The line for vertex %zd does not have size information\n\0"
                         as *const u8 as *const libc::c_char as *mut libc::c_char,
-                    i + 1 as libc::c_int as libc::c_long,
+                    i + 1 as libc::c_int as i64,
                 );
             }
             if *((*mat).rsizes).offset(i as isize) < 0 as libc::c_int as libc::c_float {
                 errexit(
                     b"The size for vertex %zd must be >= 0\n\0" as *const u8
                         as *const libc::c_char as *mut libc::c_char,
-                    i + 1 as libc::c_int as libc::c_long,
+                    i + 1 as libc::c_int as i64,
                 );
             }
             head = tail;
         }
         if readwgts != 0 {
             l = 0 as libc::c_int as ssize_t;
-            while (l as libc::c_ulong) < ncon {
+            while (l as u64) < ncon {
                 *((*mat).rwgts)
                     .offset(
-                        (i as libc::c_ulong)
+                        (i as u64)
                             .wrapping_mul(ncon)
-                            .wrapping_add(l as libc::c_ulong) as isize,
+                            .wrapping_add(l as u64) as isize,
                     ) = strtof(head, &mut tail);
                 if tail == head {
                     errexit(
                         b"The line for vertex %zd does not have enough weights for the %d constraints.\n\0"
                             as *const u8 as *const libc::c_char as *mut libc::c_char,
-                        i + 1 as libc::c_int as libc::c_long,
+                        i + 1 as libc::c_int as i64,
                         ncon,
                     );
                 }
                 if *((*mat).rwgts)
                     .offset(
-                        (i as libc::c_ulong)
+                        (i as u64)
                             .wrapping_mul(ncon)
-                            .wrapping_add(l as libc::c_ulong) as isize,
+                            .wrapping_add(l as u64) as isize,
                     ) < 0 as libc::c_int as libc::c_float
                 {
                     errexit(
                         b"The weight vertex %zd and constraint %zd must be >= 0\n\0"
                             as *const u8 as *const libc::c_char as *mut libc::c_char,
-                        i + 1 as libc::c_int as libc::c_long,
+                        i + 1 as libc::c_int as i64,
                         l,
                     );
                 }
@@ -1254,8 +1254,8 @@ pub unsafe extern "C" fn gk_csr_Read(
                     i,
                 );
             }
-            ncols = if *rowind.offset(k as isize) as libc::c_ulong >= ncols {
-                *rowind.offset(k as isize) as libc::c_ulong
+            ncols = if *rowind.offset(k as isize) as u64 >= ncols {
+                *rowind.offset(k as isize) as u64
             } else {
                 ncols
             };
@@ -1276,16 +1276,16 @@ pub unsafe extern "C" fn gk_csr_Read(
             k += 1;
             k;
         }
-        *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) = k;
+        *rowptr.offset((i + 1 as libc::c_int as i64) as isize) = k;
         i += 1;
         i;
     }
     if format == 3 as libc::c_int {
         (*mat).ncols = (*mat).nrows;
     } else {
-        (*mat).ncols = ncols.wrapping_add(1 as libc::c_int as libc::c_ulong) as int32_t;
+        (*mat).ncols = ncols.wrapping_add(1 as libc::c_int as u64) as int32_t;
     }
-    if k as libc::c_ulong != nnz {
+    if k as u64 != nnz {
         gk_errexit(
             15 as libc::c_int,
             b"gk_csr_Read: Something wrong with the number of nonzeros in the input file. NNZ=%zd, ActualNNZ=%zd.\n\0"
@@ -1327,33 +1327,33 @@ pub unsafe extern "C" fn gk_csr_Write(
         );
         fwrite(
             &mut (*mat).nrows as *mut int32_t as *const libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            1 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            1 as libc::c_int as u64,
             fpout,
         );
         fwrite(
             &mut (*mat).ncols as *mut int32_t as *const libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            1 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            1 as libc::c_int as u64,
             fpout,
         );
         fwrite(
             (*mat).rowptr as *const libc::c_void,
-            ::core::mem::size_of::<ssize_t>() as libc::c_ulong,
-            ((*mat).nrows + 1 as libc::c_int) as libc::c_ulong,
+            ::core::mem::size_of::<ssize_t>() as u64,
+            ((*mat).nrows + 1 as libc::c_int) as u64,
             fpout,
         );
         fwrite(
             (*mat).rowind as *const libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            *((*mat).rowptr).offset((*mat).nrows as isize) as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            *((*mat).rowptr).offset((*mat).nrows as isize) as u64,
             fpout,
         );
         if writevals != 0 {
             fwrite(
                 (*mat).rowval as *const libc::c_void,
-                ::core::mem::size_of::<libc::c_float>() as libc::c_ulong,
-                *((*mat).rowptr).offset((*mat).nrows as isize) as libc::c_ulong,
+                ::core::mem::size_of::<libc::c_float>() as u64,
+                *((*mat).rowptr).offset((*mat).nrows as isize) as u64,
                 fpout,
             );
         }
@@ -1375,33 +1375,33 @@ pub unsafe extern "C" fn gk_csr_Write(
         );
         fwrite(
             &mut (*mat).nrows as *mut int32_t as *const libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            1 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            1 as libc::c_int as u64,
             fpout,
         );
         fwrite(
             &mut (*mat).ncols as *mut int32_t as *const libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            1 as libc::c_int as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            1 as libc::c_int as u64,
             fpout,
         );
         fwrite(
             (*mat).colptr as *const libc::c_void,
-            ::core::mem::size_of::<ssize_t>() as libc::c_ulong,
-            ((*mat).ncols + 1 as libc::c_int) as libc::c_ulong,
+            ::core::mem::size_of::<ssize_t>() as u64,
+            ((*mat).ncols + 1 as libc::c_int) as u64,
             fpout,
         );
         fwrite(
             (*mat).colind as *const libc::c_void,
-            ::core::mem::size_of::<int32_t>() as libc::c_ulong,
-            *((*mat).colptr).offset((*mat).ncols as isize) as libc::c_ulong,
+            ::core::mem::size_of::<int32_t>() as u64,
+            *((*mat).colptr).offset((*mat).ncols as isize) as u64,
             fpout,
         );
         if writevals != 0 {
             fwrite(
                 (*mat).colval as *const libc::c_void,
-                ::core::mem::size_of::<libc::c_float>() as libc::c_ulong,
-                *((*mat).colptr).offset((*mat).ncols as isize) as libc::c_ulong,
+                ::core::mem::size_of::<libc::c_float>() as u64,
+                *((*mat).colptr).offset((*mat).ncols as isize) as u64,
                 fpout,
             );
         }
@@ -1429,10 +1429,10 @@ pub unsafe extern "C" fn gk_csr_Write(
         numbering = 1 as libc::c_int;
     }
     i = 0 as libc::c_int as ssize_t;
-    while i < (*mat).nrows as libc::c_long {
+    while i < (*mat).nrows as i64 {
         j = *((*mat).rowptr).offset(i as isize);
         while j
-            < *((*mat).rowptr).offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            < *((*mat).rowptr).offset((i + 1 as libc::c_int as i64) as isize)
         {
             fprintf(
                 fpout,
@@ -1516,9 +1516,9 @@ pub unsafe extern "C" fn gk_csr_Prune(
                     as *mut libc::c_char,
             );
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     let ref mut fresh9 = *collen
                         .offset(*rowind.offset(j as isize) as isize);
@@ -1531,7 +1531,7 @@ pub unsafe extern "C" fn gk_csr_Prune(
                 i;
             }
             i = 0 as libc::c_int as ssize_t;
-            while i < ncols as libc::c_long {
+            while i < ncols as i64 {
                 *collen
                     .offset(
                         i as isize,
@@ -1548,9 +1548,9 @@ pub unsafe extern "C" fn gk_csr_Prune(
             *nrowptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
             nnz = 0 as libc::c_int as ssize_t;
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     if *collen.offset(*rowind.offset(j as isize) as isize) != 0 {
                         *nrowind.offset(nnz as isize) = *rowind.offset(j as isize);
@@ -1561,7 +1561,7 @@ pub unsafe extern "C" fn gk_csr_Prune(
                     j += 1;
                     j;
                 }
-                *nrowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) = nnz;
+                *nrowptr.offset((i + 1 as libc::c_int as i64) as isize) = nnz;
                 i += 1;
                 i;
             }
@@ -1574,15 +1574,15 @@ pub unsafe extern "C" fn gk_csr_Prune(
             *nrowptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
             nnz = 0 as libc::c_int as ssize_t;
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
-                if *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
-                    - *rowptr.offset(i as isize) >= minf as libc::c_long
-                    && *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
-                        - *rowptr.offset(i as isize) <= maxf as libc::c_long
+            while i < nrows as i64 {
+                if *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
+                    - *rowptr.offset(i as isize) >= minf as i64
+                    && *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
+                        - *rowptr.offset(i as isize) <= maxf as i64
                 {
                     j = *rowptr.offset(i as isize);
                     while j
-                        < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                        < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                     {
                         *nrowind.offset(nnz as isize) = *rowind.offset(j as isize);
                         *nrowval.offset(nnz as isize) = *rowval.offset(j as isize);
@@ -1592,7 +1592,7 @@ pub unsafe extern "C" fn gk_csr_Prune(
                         nnz;
                     }
                 }
-                *nrowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) = nnz;
+                *nrowptr.offset((i + 1 as libc::c_int as i64) as isize) = nnz;
                 i += 1;
                 i;
             }
@@ -1680,14 +1680,14 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
             }
             gk_zcopy((nrows + 1 as libc::c_int) as size_t, rowptr, nrowptr);
             i = 0 as libc::c_int as ssize_t;
-            while i < ncols as libc::c_long {
-                maxlen = (if maxlen as libc::c_long
-                    >= *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            while i < ncols as i64 {
+                maxlen = (if maxlen as i64
+                    >= *colptr.offset((i + 1 as libc::c_int as i64) as isize)
                         - *colptr.offset(i as isize)
                 {
-                    maxlen as libc::c_long
+                    maxlen as i64
                 } else {
-                    *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                    *colptr.offset((i + 1 as libc::c_int as i64) as isize)
                         - *colptr.offset(i as isize)
                 }) as libc::c_int;
                 i += 1;
@@ -1699,11 +1699,11 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
                     as *mut libc::c_char,
             );
             i = 0 as libc::c_int as ssize_t;
-            while i < ncols as libc::c_long {
+            while i < ncols as i64 {
                 tsum = 0.0f64 as libc::c_float;
                 ncand = 0 as libc::c_int;
                 j = *colptr.offset(i as isize);
-                while j < *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *colptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     (*cand.offset(ncand as isize))
                         .val = *colind.offset(j as isize) as ssize_t;
@@ -1722,7 +1722,7 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
                 gk_fkvsortd(ncand as size_t, cand);
                 rsum = 0.0f64 as libc::c_float;
                 j = 0 as libc::c_int as ssize_t;
-                while j < ncand as libc::c_long && rsum <= fraction * tsum {
+                while j < ncand as i64 && rsum <= fraction * tsum {
                     rsum
                         += if norm == 1 as libc::c_int {
                             (*cand.offset(j as isize)).key
@@ -1756,7 +1756,7 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
             );
             nnz = 0 as libc::c_int as ssize_t;
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
                 while j < *nrowptr.offset(i as isize) {
                     *nrowind.offset(nnz as isize) = *nrowind.offset(j as isize);
@@ -1771,11 +1771,11 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
                 i;
             }
             i = nrows as ssize_t;
-            while i > 0 as libc::c_int as libc::c_long {
+            while i > 0 as libc::c_int as i64 {
                 *nrowptr
                     .offset(
                         i as isize,
-                    ) = *nrowptr.offset((i - 1 as libc::c_int as libc::c_long) as isize);
+                    ) = *nrowptr.offset((i - 1 as libc::c_int as i64) as isize);
                 i -= 1;
                 i;
             }
@@ -1790,14 +1790,14 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
                 );
             }
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
-                maxlen = (if maxlen as libc::c_long
-                    >= *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            while i < nrows as i64 {
+                maxlen = (if maxlen as i64
+                    >= *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                         - *rowptr.offset(i as isize)
                 {
-                    maxlen as libc::c_long
+                    maxlen as i64
                 } else {
-                    *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                    *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                         - *rowptr.offset(i as isize)
                 }) as libc::c_int;
                 i += 1;
@@ -1809,11 +1809,11 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
                     as *mut libc::c_char,
             );
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 tsum = 0.0f64 as libc::c_float;
                 ncand = 0 as libc::c_int;
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     (*cand.offset(ncand as isize))
                         .val = *rowind.offset(j as isize) as ssize_t;
@@ -1832,7 +1832,7 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
                 gk_fkvsortd(ncand as size_t, cand);
                 rsum = 0.0f64 as libc::c_float;
                 j = 0 as libc::c_int as ssize_t;
-                while j < ncand as libc::c_long && rsum <= fraction * tsum {
+                while j < ncand as i64 && rsum <= fraction * tsum {
                     rsum
                         += if norm == 1 as libc::c_int {
                             (*cand.offset(j as isize)).key
@@ -1853,7 +1853,7 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
                 }
                 *nrowptr
                     .offset(
-                        (i + 1 as libc::c_int as libc::c_long) as isize,
+                        (i + 1 as libc::c_int as i64) as isize,
                     ) = *rowptr.offset(i as isize) + j;
                 i += 1;
                 i;
@@ -1865,10 +1865,10 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
             nnz = 0 as libc::c_int as ssize_t;
             *nrowptr.offset(0 as libc::c_int as isize) = nnz;
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
                 while j
-                    < *nrowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                    < *nrowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     *nrowind.offset(nnz as isize) = *nrowind.offset(j as isize);
                     *nrowval.offset(nnz as isize) = *nrowval.offset(j as isize);
@@ -1877,7 +1877,7 @@ pub unsafe extern "C" fn gk_csr_LowFilter(
                     nnz += 1;
                     nnz;
                 }
-                *nrowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) = nnz;
+                *nrowptr.offset((i + 1 as libc::c_int as i64) as isize) = nnz;
                 i += 1;
                 i;
             }
@@ -1968,10 +1968,10 @@ pub unsafe extern "C" fn gk_csr_TopKPlusFilter(
             );
             gk_zcopy((nrows + 1 as libc::c_int) as size_t, rowptr, nrowptr);
             i = 0 as libc::c_int as ssize_t;
-            while i < ncols as libc::c_long {
+            while i < ncols as i64 {
                 ncand = 0 as libc::c_int;
                 j = *colptr.offset(i as isize);
-                while j < *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *colptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     (*cand.offset(ncand as isize))
                         .val = *colind.offset(j as isize) as ssize_t;
@@ -2002,7 +2002,7 @@ pub unsafe extern "C" fn gk_csr_TopKPlusFilter(
                     j += 1;
                     j;
                 }
-                while j < ncand as libc::c_long {
+                while j < ncand as i64 {
                     if (*cand.offset(j as isize)).key < keepval {
                         break;
                     }
@@ -2028,7 +2028,7 @@ pub unsafe extern "C" fn gk_csr_TopKPlusFilter(
             }
             nnz = 0 as libc::c_int as ssize_t;
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
                 while j < *nrowptr.offset(i as isize) {
                     *nrowind.offset(nnz as isize) = *nrowind.offset(j as isize);
@@ -2043,11 +2043,11 @@ pub unsafe extern "C" fn gk_csr_TopKPlusFilter(
                 i;
             }
             i = nrows as ssize_t;
-            while i > 0 as libc::c_int as libc::c_long {
+            while i > 0 as libc::c_int as i64 {
                 *nrowptr
                     .offset(
                         i as isize,
-                    ) = *nrowptr.offset((i - 1 as libc::c_int as libc::c_long) as isize);
+                    ) = *nrowptr.offset((i - 1 as libc::c_int as i64) as isize);
                 i -= 1;
                 i;
             }
@@ -2073,10 +2073,10 @@ pub unsafe extern "C" fn gk_csr_TopKPlusFilter(
             *nrowptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
             nnz = 0 as libc::c_int as ssize_t;
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 ncand = 0 as libc::c_int;
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     (*cand.offset(ncand as isize))
                         .val = *rowind.offset(j as isize) as ssize_t;
@@ -2100,7 +2100,7 @@ pub unsafe extern "C" fn gk_csr_TopKPlusFilter(
                     nnz += 1;
                     nnz;
                 }
-                while j < ncand as libc::c_long {
+                while j < ncand as i64 {
                     if (*cand.offset(j as isize)).key < keepval {
                         break;
                     }
@@ -2114,7 +2114,7 @@ pub unsafe extern "C" fn gk_csr_TopKPlusFilter(
                     nnz += 1;
                     nnz;
                 }
-                *nrowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) = nnz;
+                *nrowptr.offset((i + 1 as libc::c_int as i64) as isize) = nnz;
                 i += 1;
                 i;
             }
@@ -2201,12 +2201,12 @@ pub unsafe extern "C" fn gk_csr_ZScoreFilter(
             *nrowptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
             nnz = 0 as libc::c_int as ssize_t;
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 avgwgt = zscore
-                    / (*rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                    / (*rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                         - *rowptr.offset(i as isize)) as libc::c_float;
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     if *rowval.offset(j as isize) > avgwgt {
                         *nrowind.offset(nnz as isize) = *rowind.offset(j as isize);
@@ -2217,7 +2217,7 @@ pub unsafe extern "C" fn gk_csr_ZScoreFilter(
                     j += 1;
                     j;
                 }
-                *nrowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) = nnz;
+                *nrowptr.offset((i + 1 as libc::c_int as i64) as isize) = nnz;
                 i += 1;
                 i;
             }
@@ -2260,7 +2260,7 @@ pub unsafe extern "C" fn gk_csr_CompactColumns(mut mat: *mut gk_csr_t) {
             as *mut libc::c_char,
     );
     i = 0 as libc::c_int as ssize_t;
-    while i < ncols as libc::c_long {
+    while i < ncols as i64 {
         (*clens.offset(i as isize)).key = 0 as libc::c_int;
         (*clens.offset(i as isize)).val = i;
         i += 1;
@@ -2277,7 +2277,7 @@ pub unsafe extern "C" fn gk_csr_CompactColumns(mut mat: *mut gk_csr_t) {
     gk_ikvsortd(ncols as size_t, clens);
     nncols = 0 as libc::c_int;
     i = 0 as libc::c_int as ssize_t;
-    while i < ncols as libc::c_long {
+    while i < ncols as i64 {
         if !((*clens.offset(i as isize)).key > 0 as libc::c_int) {
             break;
         }
@@ -2353,14 +2353,14 @@ pub unsafe extern "C" fn gk_csr_SortIndices(
     let mut cand: *mut gk_ikv_t = 0 as *mut gk_ikv_t;
     let mut tval: *mut libc::c_float = 0 as *mut libc::c_float;
     i = 0 as libc::c_int as ssize_t;
-    while i < n as libc::c_long {
-        nn = (if nn as libc::c_long
-            >= *ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+    while i < n as i64 {
+        nn = (if nn as i64
+            >= *ptr.offset((i + 1 as libc::c_int as i64) as isize)
                 - *ptr.offset(i as isize)
         {
-            nn as libc::c_long
+            nn as i64
         } else {
-            *ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            *ptr.offset((i + 1 as libc::c_int as i64) as isize)
                 - *ptr.offset(i as isize)
         }) as libc::c_int;
         i += 1;
@@ -2377,13 +2377,13 @@ pub unsafe extern "C" fn gk_csr_SortIndices(
             as *mut libc::c_char,
     );
     i = 0 as libc::c_int as ssize_t;
-    while i < n as libc::c_long {
+    while i < n as i64 {
         k = 0 as libc::c_int as ssize_t;
         j = *ptr.offset(i as isize);
-        while j < *ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+        while j < *ptr.offset((i + 1 as libc::c_int as i64) as isize) {
             if j > *ptr.offset(i as isize)
                 && *ind.offset(j as isize)
-                    < *ind.offset((j - 1 as libc::c_int as libc::c_long) as isize)
+                    < *ind.offset((j - 1 as libc::c_int as i64) as isize)
             {
                 k = 1 as libc::c_int as ssize_t;
             }
@@ -2400,12 +2400,12 @@ pub unsafe extern "C" fn gk_csr_SortIndices(
         }
         if k != 0 {
             gk_ikvsorti(
-                (*ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                (*ptr.offset((i + 1 as libc::c_int as i64) as isize)
                     - *ptr.offset(i as isize)) as size_t,
                 cand,
             );
             j = *ptr.offset(i as isize);
-            while j < *ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+            while j < *ptr.offset((i + 1 as libc::c_int as i64) as isize) {
                 *ind
                     .offset(
                         j as isize,
@@ -2475,7 +2475,7 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
             nr = (*mat).ncols as ssize_t;
             (*mat)
                 .colptr = gk_zsmalloc(
-                (nr + 1 as libc::c_int as libc::c_long) as size_t,
+                (nr + 1 as libc::c_int as i64) as size_t,
                 0 as libc::c_int as ssize_t,
                 b"gk_csr_CreateIndex: rptr\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
@@ -2527,7 +2527,7 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
             nr = (*mat).nrows as ssize_t;
             (*mat)
                 .rowptr = gk_zsmalloc(
-                (nr + 1 as libc::c_int as libc::c_long) as size_t,
+                (nr + 1 as libc::c_int as i64) as size_t,
                 0 as libc::c_int as ssize_t,
                 b"gk_csr_CreateIndex: rptr\0" as *const u8 as *const libc::c_char
                     as *mut libc::c_char,
@@ -2565,7 +2565,7 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
     i = 0 as libc::c_int as ssize_t;
     while i < nf {
         j = *fptr.offset(i as isize);
-        while j < *fptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+        while j < *fptr.offset((i + 1 as libc::c_int as i64) as isize) {
             let ref mut fresh15 = *rptr.offset(*find.offset(j as isize) as isize);
             *fresh15 += 1;
             *fresh15;
@@ -2578,25 +2578,25 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
     i = 1 as libc::c_int as ssize_t;
     while i < nr {
         let ref mut fresh16 = *rptr.offset(i as isize);
-        *fresh16 += *rptr.offset((i - 1 as libc::c_int as libc::c_long) as isize);
+        *fresh16 += *rptr.offset((i - 1 as libc::c_int as i64) as isize);
         i += 1;
         i;
     }
     i = nr;
-    while i > 0 as libc::c_int as libc::c_long {
+    while i > 0 as libc::c_int as i64 {
         *rptr
             .offset(
                 i as isize,
-            ) = *rptr.offset((i - 1 as libc::c_int as libc::c_long) as isize);
+            ) = *rptr.offset((i - 1 as libc::c_int as i64) as isize);
         i -= 1;
         i;
     }
     *rptr.offset(0 as libc::c_int as isize) = 0 as libc::c_int as ssize_t;
-    if *rptr.offset(nr as isize) > 6 as libc::c_int as libc::c_long * nr {
+    if *rptr.offset(nr as isize) > 6 as libc::c_int as i64 * nr {
         i = 0 as libc::c_int as ssize_t;
         while i < nf {
             j = *fptr.offset(i as isize);
-            while j < *fptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+            while j < *fptr.offset((i + 1 as libc::c_int as i64) as isize) {
                 let ref mut fresh17 = *rptr.offset(*find.offset(j as isize) as isize);
                 let fresh18 = *fresh17;
                 *fresh17 = *fresh17 + 1;
@@ -2608,11 +2608,11 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
             i;
         }
         i = nr;
-        while i > 0 as libc::c_int as libc::c_long {
+        while i > 0 as libc::c_int as i64 {
             *rptr
                 .offset(
                     i as isize,
-                ) = *rptr.offset((i - 1 as libc::c_int as libc::c_long) as isize);
+                ) = *rptr.offset((i - 1 as libc::c_int as i64) as isize);
             i -= 1;
             i;
         }
@@ -2621,7 +2621,7 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
             i = 0 as libc::c_int as ssize_t;
             while i < nf {
                 j = *fptr.offset(i as isize);
-                while j < *fptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+                while j < *fptr.offset((i + 1 as libc::c_int as i64) as isize) {
                     let ref mut fresh19 = *rptr
                         .offset(*find.offset(j as isize) as isize);
                     let fresh20 = *fresh19;
@@ -2634,11 +2634,11 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
                 i;
             }
             i = nr;
-            while i > 0 as libc::c_int as libc::c_long {
+            while i > 0 as libc::c_int as i64 {
                 *rptr
                     .offset(
                         i as isize,
-                    ) = *rptr.offset((i - 1 as libc::c_int as libc::c_long) as isize);
+                    ) = *rptr.offset((i - 1 as libc::c_int as i64) as isize);
                 i -= 1;
                 i;
             }
@@ -2649,7 +2649,7 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
             i = 0 as libc::c_int as ssize_t;
             while i < nf {
                 j = *fptr.offset(i as isize);
-                while j < *fptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+                while j < *fptr.offset((i + 1 as libc::c_int as i64) as isize) {
                     k = *find.offset(j as isize) as ssize_t;
                     *rind.offset(*rptr.offset(k as isize) as isize) = i as libc::c_int;
                     let ref mut fresh21 = *rptr.offset(k as isize);
@@ -2666,7 +2666,7 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
             i = 0 as libc::c_int as ssize_t;
             while i < nf {
                 j = *fptr.offset(i as isize);
-                while j < *fptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+                while j < *fptr.offset((i + 1 as libc::c_int as i64) as isize) {
                     let ref mut fresh23 = *rptr
                         .offset(*find.offset(j as isize) as isize);
                     let fresh24 = *fresh23;
@@ -2680,11 +2680,11 @@ pub unsafe extern "C" fn gk_csr_CreateIndex(
             }
         }
         i = nr;
-        while i > 0 as libc::c_int as libc::c_long {
+        while i > 0 as libc::c_int as i64 {
             *rptr
                 .offset(
                     i as isize,
-                ) = *rptr.offset((i - 1 as libc::c_int as libc::c_long) as isize);
+                ) = *rptr.offset((i - 1 as libc::c_int as i64) as isize);
             i -= 1;
             i;
         }
@@ -2708,10 +2708,10 @@ pub unsafe extern "C" fn gk_csr_Normalize(
         ptr = (*mat).rowptr;
         val = (*mat).rowval;
         i = 0 as libc::c_int as ssize_t;
-        while i < n as libc::c_long {
+        while i < n as i64 {
             sum = 0.0f64 as libc::c_float;
             j = *ptr.offset(i as isize);
-            while j < *ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+            while j < *ptr.offset((i + 1 as libc::c_int as i64) as isize) {
                 if norm == 2 as libc::c_int {
                     sum += *val.offset(j as isize) * *val.offset(j as isize);
                 } else if norm == 1 as libc::c_int {
@@ -2727,7 +2727,7 @@ pub unsafe extern "C" fn gk_csr_Normalize(
                     sum = (1.0f64 / sum as libc::c_double) as libc::c_float;
                 }
                 j = *ptr.offset(i as isize);
-                while j < *ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+                while j < *ptr.offset((i + 1 as libc::c_int as i64) as isize) {
                     *val.offset(j as isize) *= sum;
                     j += 1;
                     j;
@@ -2742,10 +2742,10 @@ pub unsafe extern "C" fn gk_csr_Normalize(
         ptr = (*mat).colptr;
         val = (*mat).colval;
         i = 0 as libc::c_int as ssize_t;
-        while i < n as libc::c_long {
+        while i < n as i64 {
             sum = 0.0f64 as libc::c_float;
             j = *ptr.offset(i as isize);
-            while j < *ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+            while j < *ptr.offset((i + 1 as libc::c_int as i64) as isize) {
                 if norm == 2 as libc::c_int {
                     sum += *val.offset(j as isize) * *val.offset(j as isize);
                 } else if norm == 1 as libc::c_int {
@@ -2761,7 +2761,7 @@ pub unsafe extern "C" fn gk_csr_Normalize(
                     sum = (1.0f64 / sum as libc::c_double) as libc::c_float;
                 }
                 j = *ptr.offset(i as isize);
-                while j < *ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize) {
+                while j < *ptr.offset((i + 1 as libc::c_int as i64) as isize) {
                     *val.offset(j as isize) *= sum;
                     j += 1;
                     j;
@@ -2793,12 +2793,12 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
     match type_0 {
         1 => {
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 maxtf = fabs(
                     *rowval.offset(*rowptr.offset(i as isize) as isize) as libc::c_double,
                 ) as libc::c_float;
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     maxtf = (if (maxtf as libc::c_double)
                         < fabs(*rowval.offset(j as isize) as libc::c_double)
@@ -2811,7 +2811,7 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                     j;
                 }
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     *rowval
                         .offset(
@@ -2828,12 +2828,12 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
         }
         10 => {
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 maxtf = fabs(
                     *rowval.offset(*rowptr.offset(i as isize) as isize) as libc::c_double,
                 ) as libc::c_float;
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     maxtf = (if (maxtf as libc::c_double)
                         < fabs(*rowval.offset(j as isize) as libc::c_double)
@@ -2846,7 +2846,7 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                     j;
                 }
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     *rowval
                         .offset(
@@ -2863,9 +2863,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
         }
         2 => {
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     if *rowval.offset(j as isize) as libc::c_double != 0.0f64 {
                         *rowval
@@ -2889,9 +2889,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
         }
         3 => {
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     if *rowval.offset(j as isize) as libc::c_double != 0.0f64 {
                         *rowval
@@ -2919,9 +2919,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
         }
         4 => {
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     if *rowval.offset(j as isize) as libc::c_double != 0.0f64 {
                         *rowval
@@ -2953,9 +2953,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
         }
         5 => {
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     if *rowval.offset(j as isize) as libc::c_double != 0.0f64 {
                         *rowval
@@ -2987,9 +2987,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
         }
         6 => {
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     if *rowval.offset(j as isize) as libc::c_double != 0.0f64 {
                         *rowval
@@ -3052,9 +3052,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                     as *mut libc::c_char,
             );
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     let ref mut fresh25 = *collen
                         .offset(*rowind.offset(j as isize) as isize);
@@ -3067,7 +3067,7 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                 i;
             }
             i = 0 as libc::c_int as ssize_t;
-            while i < ncols as libc::c_long {
+            while i < ncols as i64 {
                 *cscale
                     .offset(
                         i as isize,
@@ -3083,9 +3083,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                 i;
             }
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     *rowval.offset(j as isize)
                         *= *cscale.offset(*rowind.offset(j as isize) as isize);
@@ -3115,9 +3115,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                     as *mut libc::c_char,
             );
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     let ref mut fresh26 = *collen
                         .offset(*rowind.offset(j as isize) as isize);
@@ -3131,7 +3131,7 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
             }
             nnzcols = 0 as libc::c_int;
             i = 0 as libc::c_int as ssize_t;
-            while i < ncols as libc::c_long {
+            while i < ncols as i64 {
                 nnzcols
                     += if *collen.offset(i as isize) > 0 as libc::c_int {
                         1 as libc::c_int
@@ -3141,11 +3141,11 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                 i += 1;
                 i;
             }
-            bgfreq = (if 10 as libc::c_int as libc::c_long
+            bgfreq = (if 10 as libc::c_int as i64
                 >= (0.5f64 * *rowptr.offset(nrows as isize) as libc::c_double
                     / nnzcols as libc::c_double) as ssize_t
             {
-                10 as libc::c_int as libc::c_long
+                10 as libc::c_int as i64
             } else {
                 (0.5f64 * *rowptr.offset(nrows as isize) as libc::c_double
                     / nnzcols as libc::c_double) as ssize_t
@@ -3158,7 +3158,7 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                 bgfreq,
             );
             i = 0 as libc::c_int as ssize_t;
-            while i < ncols as libc::c_long {
+            while i < ncols as i64 {
                 *cscale
                     .offset(
                         i as isize,
@@ -3174,9 +3174,9 @@ pub unsafe extern "C" fn gk_csr_Scale(mut mat: *mut gk_csr_t, mut type_0: libc::
                 i;
             }
             i = 0 as libc::c_int as ssize_t;
-            while i < nrows as libc::c_long {
+            while i < nrows as i64 {
                 j = *rowptr.offset(i as isize);
-                while j < *rowptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                while j < *rowptr.offset((i + 1 as libc::c_int as i64) as isize)
                 {
                     *rowval.offset(j as isize)
                         *= *cscale.offset(*rowind.offset(j as isize) as isize);
@@ -3264,12 +3264,12 @@ pub unsafe extern "C" fn gk_csr_ComputeSums(
         }
     }
     i = 0 as libc::c_int as ssize_t;
-    while i < n as libc::c_long {
+    while i < n as i64 {
         *sums
             .offset(
                 i as isize,
             ) = gk_fsum(
-            (*ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            (*ptr.offset((i + 1 as libc::c_int as i64) as isize)
                 - *ptr.offset(i as isize)) as size_t,
             val.offset(*ptr.offset(i as isize) as isize),
             1 as libc::c_int as size_t,
@@ -3340,12 +3340,12 @@ pub unsafe extern "C" fn gk_csr_ComputeSquaredNorms(
         }
     }
     i = 0 as libc::c_int as ssize_t;
-    while i < n as libc::c_long {
+    while i < n as i64 {
         *norms
             .offset(
                 i as isize,
             ) = gk_fdot(
-            (*ptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+            (*ptr.offset((i + 1 as libc::c_int as i64) as isize)
                 - *ptr.offset(i as isize)) as size_t,
             val.offset(*ptr.offset(i as isize) as isize),
             1 as libc::c_int as size_t,
@@ -3626,12 +3626,12 @@ pub unsafe extern "C" fn gk_csr_GetSimilarRows(
         1 => {
             ncand = 0 as libc::c_int;
             ii = 0 as libc::c_int as ssize_t;
-            while ii < nqterms as libc::c_long {
+            while ii < nqterms as i64 {
                 i = *qind.offset(ii as isize) as ssize_t;
-                if i < ncols as libc::c_long {
+                if i < ncols as i64 {
                     j = *colptr.offset(i as isize);
                     while j
-                        < *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                        < *colptr.offset((i + 1 as libc::c_int as i64) as isize)
                     {
                         k = *colind.offset(j as isize) as ssize_t;
                         if *marker.offset(k as isize) == -(1 as libc::c_int) {
@@ -3655,12 +3655,12 @@ pub unsafe extern "C" fn gk_csr_GetSimilarRows(
         2 => {
             ncand = 0 as libc::c_int;
             ii = 0 as libc::c_int as ssize_t;
-            while ii < nqterms as libc::c_long {
+            while ii < nqterms as i64 {
                 i = *qind.offset(ii as isize) as ssize_t;
-                if i < ncols as libc::c_long {
+                if i < ncols as i64 {
                     j = *colptr.offset(i as isize);
                     while j
-                        < *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                        < *colptr.offset((i + 1 as libc::c_int as i64) as isize)
                     {
                         k = *colind.offset(j as isize) as ssize_t;
                         if *marker.offset(k as isize) == -(1 as libc::c_int) {
@@ -3689,7 +3689,7 @@ pub unsafe extern "C" fn gk_csr_GetSimilarRows(
                 1 as libc::c_int as size_t,
             );
             i = 0 as libc::c_int as ssize_t;
-            while i < ncand as libc::c_long {
+            while i < ncand as i64 {
                 (*cand.offset(i as isize))
                     .key = (*cand.offset(i as isize)).key
                     / (*rnorms.offset((*cand.offset(i as isize)).val as isize) + mynorm
@@ -3701,12 +3701,12 @@ pub unsafe extern "C" fn gk_csr_GetSimilarRows(
         3 => {
             ncand = 0 as libc::c_int;
             ii = 0 as libc::c_int as ssize_t;
-            while ii < nqterms as libc::c_long {
+            while ii < nqterms as i64 {
                 i = *qind.offset(ii as isize) as ssize_t;
-                if i < ncols as libc::c_long {
+                if i < ncols as i64 {
                     j = *colptr.offset(i as isize);
                     while j
-                        < *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                        < *colptr.offset((i + 1 as libc::c_int as i64) as isize)
                     {
                         k = *colind.offset(j as isize) as ssize_t;
                         if *marker.offset(k as isize) == -(1 as libc::c_int) {
@@ -3734,7 +3734,7 @@ pub unsafe extern "C" fn gk_csr_GetSimilarRows(
             rsums = (*mat).rsums;
             mysum = gk_fsum(nqterms as size_t, qval, 1 as libc::c_int as size_t);
             i = 0 as libc::c_int as ssize_t;
-            while i < ncand as libc::c_long {
+            while i < ncand as i64 {
                 (*cand.offset(i as isize))
                     .key = (*cand.offset(i as isize)).key
                     / (*rsums.offset((*cand.offset(i as isize)).val as isize) + mysum
@@ -3746,12 +3746,12 @@ pub unsafe extern "C" fn gk_csr_GetSimilarRows(
         4 => {
             ncand = 0 as libc::c_int;
             ii = 0 as libc::c_int as ssize_t;
-            while ii < nqterms as libc::c_long {
+            while ii < nqterms as i64 {
                 i = *qind.offset(ii as isize) as ssize_t;
-                if i < ncols as libc::c_long {
+                if i < ncols as i64 {
                     j = *colptr.offset(i as isize);
                     while j
-                        < *colptr.offset((i + 1 as libc::c_int as libc::c_long) as isize)
+                        < *colptr.offset((i + 1 as libc::c_int as i64) as isize)
                     {
                         k = *colind.offset(j as isize) as ssize_t;
                         if *marker.offset(k as isize) == -(1 as libc::c_int) {
@@ -3778,7 +3778,7 @@ pub unsafe extern "C" fn gk_csr_GetSimilarRows(
             }
             mysum = gk_fsum(nqterms as size_t, qval, 1 as libc::c_int as size_t);
             i = 0 as libc::c_int as ssize_t;
-            while i < ncand as libc::c_long {
+            while i < ncand as i64 {
                 (*cand.offset(i as isize)).key = (*cand.offset(i as isize)).key / mysum;
                 i += 1;
                 i;
@@ -3796,7 +3796,7 @@ pub unsafe extern "C" fn gk_csr_GetSimilarRows(
     }
     j = 0 as libc::c_int as ssize_t;
     i = 0 as libc::c_int as ssize_t;
-    while i < ncand as libc::c_long {
+    while i < ncand as i64 {
         *marker.offset((*cand.offset(i as isize)).val as isize) = -(1 as libc::c_int);
         if (*cand.offset(i as isize)).key >= minsim {
             let fresh31 = j;

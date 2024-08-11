@@ -26,107 +26,9 @@ extern "C" {
         ind: *mut idx_t,
     );
 }
-pub type __int32_t = libc::c_int;
-pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
-pub type idx_t = int32_t;
-pub type real_t = libc::c_float;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct ckrinfo_t {
-    pub id: idx_t,
-    pub ed: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct vkrinfo_t {
-    pub nid: idx_t,
-    pub ned: idx_t,
-    pub gv: idx_t,
-    pub nnbrs: idx_t,
-    pub inbr: idx_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct nrinfo_t {
-    pub edegrees: [idx_t; 2],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct params_t {
-    pub ptype: idx_t,
-    pub objtype: idx_t,
-    pub ctype: idx_t,
-    pub iptype: idx_t,
-    pub rtype: idx_t,
-    pub no2hop: idx_t,
-    pub minconn: idx_t,
-    pub contig: idx_t,
-    pub nooutput: idx_t,
-    pub balance: idx_t,
-    pub ncuts: idx_t,
-    pub niter: idx_t,
-    pub gtype: idx_t,
-    pub ncommon: idx_t,
-    pub seed: idx_t,
-    pub dbglvl: idx_t,
-    pub nparts: idx_t,
-    pub nseps: idx_t,
-    pub ufactor: idx_t,
-    pub pfactor: idx_t,
-    pub compress: idx_t,
-    pub ccorder: idx_t,
-    pub filename: *mut libc::c_char,
-    pub outfile: *mut libc::c_char,
-    pub xyzfile: *mut libc::c_char,
-    pub tpwgtsfile: *mut libc::c_char,
-    pub ubvecstr: *mut libc::c_char,
-    pub wgtflag: idx_t,
-    pub numflag: idx_t,
-    pub tpwgts: *mut real_t,
-    pub ubvec: *mut real_t,
-    pub iotimer: real_t,
-    pub parttimer: real_t,
-    pub reporttimer: real_t,
-    pub maxmemory: size_t,
-}
+
+use crate::libmetis::structure::*;
+
 #[no_mangle]
 pub unsafe extern "C" fn ComputePartitionInfo(
     mut params: *mut params_t,
@@ -186,10 +88,8 @@ pub unsafe extern "C" fn ComputePartitionInfo(
             let ref mut fresh0 = *kpwgts.offset((*where_0.offset(i as isize) * ncon + j) as isize);
             *fresh0 += *vwgt.offset((i * ncon + j) as isize);
             j += 1;
-            j;
         }
         i += 1;
-        i;
     }
     printf(b" - Balance:\n\0" as *const u8 as *const libc::c_char);
     j = 0 as libc::c_int;
@@ -212,7 +112,6 @@ pub unsafe extern "C" fn ComputePartitionInfo(
                 k = i;
             }
             i += 1;
-            i;
         }
         printf(
             b"     constraint #%d:  %5.3f out of %5.3f\n\0" as *const u8 as *const libc::c_char,
@@ -229,7 +128,6 @@ pub unsafe extern "C" fn ComputePartitionInfo(
                         as libc::c_double),
         );
         j += 1;
-        j;
     }
     printf(b"\n\0" as *const u8 as *const libc::c_char);
     if ncon == 1 as libc::c_int {
@@ -291,10 +189,8 @@ pub unsafe extern "C" fn ComputePartitionInfo(
                     *pdom.offset(*where_0.offset(*adjncy.offset(j as isize) as isize) as isize);
                 *fresh1 += *adjwgt.offset(j as isize);
                 j += 1;
-                j;
             }
             ii += 1;
-            ii;
         }
         *pdom.offset(pid as isize) = 0 as libc::c_int;
         ndom = 0 as libc::c_int;
@@ -306,7 +202,6 @@ pub unsafe extern "C" fn ComputePartitionInfo(
                 0 as libc::c_int
             };
             i += 1;
-            i;
         }
         tndom += ndom;
         if pid == 0 as libc::c_int || maxndom < ndom {
@@ -316,7 +211,6 @@ pub unsafe extern "C" fn ComputePartitionInfo(
             minndom = ndom;
         }
         pid += 1;
-        pid;
     }
     printf(
         b" - Subdomain connectivity: max: %d, min: %d, avg: %.2f\n\n\0" as *const u8
@@ -355,16 +249,13 @@ pub unsafe extern "C" fn ComputePartitionInfo(
                 *where_0.offset(*cind.offset(*cptr.offset(i as isize) as isize) as isize) as isize,
             );
             *fresh2 += 1;
-            *fresh2;
             if *cpwgts.offset(
                 *where_0.offset(*cind.offset(*cptr.offset(i as isize) as isize) as isize) as isize,
             ) == 2 as libc::c_int
             {
                 nover += 1;
-                nover;
             }
             i += 1;
-            i;
         }
         printf(
             b" - There are %d non-contiguous partitions.\n   Total components after removing the cut edges: %d,\n   max components: %d for pid: %d.\n\0"

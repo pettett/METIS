@@ -13,7 +13,7 @@ extern "C" {
 }
 pub type __int32_t = libc::c_int;
 pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 pub type idx_t = int32_t;
 pub type real_t = libc::c_float;
 #[derive(Copy, Clone)]

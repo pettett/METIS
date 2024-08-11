@@ -10,14 +10,14 @@ extern "C" {
     fn strncmp(
         _: *const libc::c_char,
         _: *const libc::c_char,
-        _: libc::c_ulong,
+        _: u64,
     ) -> libc::c_int;
     fn strchr(_: *const libc::c_char, _: libc::c_int) -> *mut libc::c_char;
-    fn strlen(_: *const libc::c_char) -> libc::c_ulong;
+    fn strlen(_: *const libc::c_char) -> u64;
 }
-pub type __off_t = libc::c_long;
-pub type __off64_t = libc::c_long;
-pub type size_t = libc::c_ulong;
+pub type __off_t = i64;
+pub type __off64_t = i64;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _IO_FILE {
@@ -268,10 +268,10 @@ unsafe extern "C" fn gk_getopt_internal(
             if strncmp(
                 (*p).name,
                 nextchar,
-                nameend.offset_from(nextchar) as libc::c_long as libc::c_ulong,
+                nameend.offset_from(nextchar) as i64 as u64,
             ) == 0
             {
-                if nameend.offset_from(nextchar) as libc::c_long as libc::c_uint
+                if nameend.offset_from(nextchar) as i64 as libc::c_uint
                     == strlen((*p).name) as libc::c_uint
                 {
                     pfound = p;
@@ -493,11 +493,11 @@ unsafe extern "C" fn gk_getopt_internal(
             if strncmp(
                 (*p_0).name,
                 nextchar,
-                nameend_0.offset_from(nextchar) as libc::c_long as libc::c_ulong,
+                nameend_0.offset_from(nextchar) as i64 as u64,
             ) == 0
             {
-                if nameend_0.offset_from(nextchar) as libc::c_long as libc::c_uint
-                    as libc::c_ulong == strlen((*p_0).name)
+                if nameend_0.offset_from(nextchar) as i64 as libc::c_uint
+                    as u64 == strlen((*p_0).name)
                 {
                     pfound_0 = p_0;
                     indfound_0 = option_index_0;

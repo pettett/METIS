@@ -1,7 +1,7 @@
 use ::libc;
-pub type __int32_t = libc::c_int;
-pub type int32_t = __int32_t;
-pub type idx_t = int32_t;
+
+use super::structure::*;
+
 #[no_mangle]
 pub unsafe extern "C" fn libmetis__Change2CNumbering(
     mut nvtxs: idx_t,

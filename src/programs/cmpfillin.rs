@@ -9,11 +9,7 @@ extern "C" {
         r_maxlnz: *mut size_t,
         r_opc: *mut size_t,
     );
-    fn ReadPOVector(
-        graph: *mut graph_t,
-        filename: *mut libc::c_char,
-        vector: *mut idx_t,
-    );
+    fn ReadPOVector(graph: *mut graph_t, filename: *mut libc::c_char, vector: *mut idx_t);
     fn ReadGraph(_: *mut params_t) -> *mut graph_t;
     fn libmetis__FreeGraph(graph: *mut *mut graph_t);
     fn libmetis__imalloc(n: size_t, msg: *mut libc::c_char) -> *mut idx_t;
@@ -21,7 +17,7 @@ extern "C" {
 }
 pub type __int32_t = libc::c_int;
 pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 pub type idx_t = int32_t;
 pub type real_t = libc::c_float;
 #[derive(Copy, Clone)]
@@ -120,10 +116,7 @@ pub struct params_t {
     pub reporttimer: real_t,
     pub maxmemory: size_t,
 }
-unsafe fn main_0(
-    mut argc: libc::c_int,
-    mut argv: *mut *mut libc::c_char,
-) -> libc::c_int {
+unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> libc::c_int {
     let mut i: idx_t = 0;
     let mut perm: *mut idx_t = 0 as *mut idx_t;
     let mut iperm: *mut idx_t = 0 as *mut idx_t;
@@ -182,8 +175,8 @@ unsafe fn main_0(
     }
     if (*graph).ncon != 1 as libc::c_int {
         printf(
-            b"Ordering can only be applied to graphs with one constraint.\n\0"
-                as *const u8 as *const libc::c_char,
+            b"Ordering can only be applied to graphs with one constraint.\n\0" as *const u8
+                as *const libc::c_char,
         );
         exit(0 as libc::c_int);
     }
@@ -203,45 +196,43 @@ unsafe fn main_0(
         i;
     }
     printf(
-        b"**********************************************************************\n\0"
-            as *const u8 as *const libc::c_char,
+        b"**********************************************************************\n\0" as *const u8
+            as *const libc::c_char,
     );
     printf(
         b"%s\0" as *const u8 as *const libc::c_char,
-        b"METIS 5.0 Copyright 1998-13, Regents of the University of Minnesota\n\0"
-            as *const u8 as *const libc::c_char,
-    );
-    printf(
-        b"Graph Information ---------------------------------------------------\n\0"
-            as *const u8 as *const libc::c_char,
-    );
-    printf(
-        b"  Name: %s, #Vertices: %d, #Edges: %d\n\n\0" as *const u8
+        b"METIS 5.0 Copyright 1998-13, Regents of the University of Minnesota\n\0" as *const u8
             as *const libc::c_char,
+    );
+    printf(
+        b"Graph Information ---------------------------------------------------\n\0" as *const u8
+            as *const libc::c_char,
+    );
+    printf(
+        b"  Name: %s, #Vertices: %d, #Edges: %d\n\n\0" as *const u8 as *const libc::c_char,
         *argv.offset(1 as libc::c_int as isize),
         (*graph).nvtxs,
         (*graph).nedges / 2 as libc::c_int,
     );
     printf(
-        b"Fillin... -----------------------------------------------------------\n\0"
-            as *const u8 as *const libc::c_char,
+        b"Fillin... -----------------------------------------------------------\n\0" as *const u8
+            as *const libc::c_char,
     );
     ComputeFillIn(graph, perm, iperm, &mut maxlnz, &mut opc);
     printf(
-        b"  Nonzeros: %6.3le \tOperation Count: %6.3le\n\0" as *const u8
-            as *const libc::c_char,
+        b"  Nonzeros: %6.3le \tOperation Count: %6.3le\n\0" as *const u8 as *const libc::c_char,
         maxlnz as libc::c_double,
         opc as libc::c_double,
     );
     printf(
-        b"**********************************************************************\n\0"
-            as *const u8 as *const libc::c_char,
+        b"**********************************************************************\n\0" as *const u8
+            as *const libc::c_char,
     );
     libmetis__FreeGraph(&mut graph);
     return 0;
 }
 pub fn main() {
-    let mut args: Vec::<*mut libc::c_char> = Vec::new();
+    let mut args: Vec<*mut libc::c_char> = Vec::new();
     for arg in ::std::env::args() {
         args.push(
             (::std::ffi::CString::new(arg))
@@ -251,11 +242,9 @@ pub fn main() {
     }
     args.push(::core::ptr::null_mut());
     unsafe {
-        ::std::process::exit(
-            main_0(
-                (args.len() - 1) as libc::c_int,
-                args.as_mut_ptr() as *mut *mut libc::c_char,
-            ) as i32,
-        )
+        ::std::process::exit(main_0(
+            (args.len() - 1) as libc::c_int,
+            args.as_mut_ptr() as *mut *mut libc::c_char,
+        ) as i32)
     }
 }

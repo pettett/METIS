@@ -5,9 +5,9 @@ extern "C" {
     fn gk_free(ptr1: *mut *mut libc::c_void, _: ...);
     fn gk_errexit(signum: libc::c_int, _: *mut libc::c_char, _: ...);
 }
-pub type __ssize_t = libc::c_long;
+pub type __ssize_t = i64;
 pub type ssize_t = __ssize_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct gk_ikv_t {
@@ -25,7 +25,7 @@ pub struct gk_HTable_t {
 pub unsafe extern "C" fn HTable_Create(mut nelements: libc::c_int) -> *mut gk_HTable_t {
     let mut htable: *mut gk_HTable_t = 0 as *mut gk_HTable_t;
     htable = gk_malloc(
-        ::core::mem::size_of::<gk_HTable_t>() as libc::c_ulong,
+        ::core::mem::size_of::<gk_HTable_t>() as u64,
         b"HTable_Create: htable\0" as *const u8 as *const libc::c_char
             as *mut libc::c_char,
     ) as *mut gk_HTable_t;

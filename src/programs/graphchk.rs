@@ -1,10 +1,6 @@
 use ::libc;
 extern "C" {
-    fn memset(
-        _: *mut libc::c_void,
-        _: libc::c_int,
-        _: libc::c_ulong,
-    ) -> *mut libc::c_void;
+    fn memset(_: *mut libc::c_void, _: libc::c_int, _: u64) -> *mut libc::c_void;
     fn exit(_: libc::c_int) -> !;
     fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
     fn WriteGraph(graph: *mut graph_t, filename: *mut libc::c_char);
@@ -21,7 +17,7 @@ extern "C" {
 }
 pub type __int32_t = libc::c_int;
 pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 pub type idx_t = int32_t;
 pub type real_t = libc::c_float;
 #[derive(Copy, Clone)]
@@ -120,10 +116,7 @@ pub struct params_t {
     pub reporttimer: real_t,
     pub maxmemory: size_t,
 }
-unsafe fn main_0(
-    mut argc: libc::c_int,
-    mut argv: *mut *mut libc::c_char,
-) -> libc::c_int {
+unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> libc::c_int {
     let mut graph: *mut graph_t = 0 as *mut graph_t;
     let mut fgraph: *mut graph_t = 0 as *mut graph_t;
     let mut filename: [libc::c_char; 256] = [0; 256];
@@ -167,8 +160,8 @@ unsafe fn main_0(
     };
     if argc != 2 as libc::c_int && argc != 3 as libc::c_int {
         printf(
-            b"Usage: %s <GraphFile> [FixedGraphFile (for storing the fixed graph)]\n\0"
-                as *const u8 as *const libc::c_char,
+            b"Usage: %s <GraphFile> [FixedGraphFile (for storing the fixed graph)]\n\0" as *const u8
+                as *const libc::c_char,
             *argv.offset(0 as libc::c_int as isize),
         );
         exit(0 as libc::c_int);
@@ -176,7 +169,7 @@ unsafe fn main_0(
     memset(
         &mut params as *mut params_t as *mut libc::c_void,
         0 as libc::c_int,
-        ::core::mem::size_of::<params_t>() as libc::c_ulong,
+        ::core::mem::size_of::<params_t>() as u64,
     );
     params.filename = gk_strdup(*argv.offset(1 as libc::c_int as isize));
     graph = ReadGraph(&mut params);
@@ -185,13 +178,13 @@ unsafe fn main_0(
         exit(0 as libc::c_int);
     }
     printf(
-        b"**********************************************************************\n\0"
-            as *const u8 as *const libc::c_char,
+        b"**********************************************************************\n\0" as *const u8
+            as *const libc::c_char,
     );
     printf(
         b"%s\0" as *const u8 as *const libc::c_char,
-        b"METIS 5.0 Copyright 1998-13, Regents of the University of Minnesota\n\0"
-            as *const u8 as *const libc::c_char,
+        b"METIS 5.0 Copyright 1998-13, Regents of the University of Minnesota\n\0" as *const u8
+            as *const libc::c_char,
     );
     printf(
         b" (HEAD: %s, Built on: %s, %s)\n\0" as *const u8 as *const libc::c_char,
@@ -202,53 +195,42 @@ unsafe fn main_0(
     printf(
         b" size of idx_t: %zubits, real_t: %zubits, idx_t *: %zubits\n\0" as *const u8
             as *const libc::c_char,
-        (8 as libc::c_int as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<idx_t>() as libc::c_ulong),
-        (8 as libc::c_int as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<real_t>() as libc::c_ulong),
-        (8 as libc::c_int as libc::c_ulong)
-            .wrapping_mul(::core::mem::size_of::<*mut idx_t>() as libc::c_ulong),
+        (8 as libc::c_int as u64).wrapping_mul(::core::mem::size_of::<idx_t>() as u64),
+        (8 as libc::c_int as u64).wrapping_mul(::core::mem::size_of::<real_t>() as u64),
+        (8 as libc::c_int as u64).wrapping_mul(::core::mem::size_of::<*mut idx_t>() as u64),
     );
     printf(b"\n\0" as *const u8 as *const libc::c_char);
     printf(
-        b"Graph Information ---------------------------------------------------\n\0"
-            as *const u8 as *const libc::c_char,
+        b"Graph Information ---------------------------------------------------\n\0" as *const u8
+            as *const libc::c_char,
     );
     printf(
-        b"  Name: %s, #Vertices: %d, #Edges: %d\n\n\0" as *const u8
-            as *const libc::c_char,
+        b"  Name: %s, #Vertices: %d, #Edges: %d\n\n\0" as *const u8 as *const libc::c_char,
         params.filename,
         (*graph).nvtxs,
         (*graph).nedges / 2 as libc::c_int,
     );
     printf(
-        b"Checking Graph... ---------------------------------------------------\n\0"
-            as *const u8 as *const libc::c_char,
+        b"Checking Graph... ---------------------------------------------------\n\0" as *const u8
+            as *const libc::c_char,
     );
     if libmetis__CheckGraph(graph, 1 as libc::c_int, 1 as libc::c_int) != 0 {
-        printf(
-            b"   The format of the graph is correct!\n\0" as *const u8
-                as *const libc::c_char,
-        );
+        printf(b"   The format of the graph is correct!\n\0" as *const u8 as *const libc::c_char);
     } else {
-        printf(
-            b"   The format of the graph is incorrect!\n\0" as *const u8
-                as *const libc::c_char,
-        );
+        printf(b"   The format of the graph is incorrect!\n\0" as *const u8 as *const libc::c_char);
         if argc == 3 as libc::c_int {
             fgraph = libmetis__FixGraph(graph);
             WriteGraph(fgraph, *argv.offset(2 as libc::c_int as isize));
             libmetis__FreeGraph(&mut fgraph);
             printf(
-                b"   A corrected version was stored at %s\n\0" as *const u8
-                    as *const libc::c_char,
+                b"   A corrected version was stored at %s\n\0" as *const u8 as *const libc::c_char,
                 *argv.offset(2 as libc::c_int as isize),
             );
         }
     }
     printf(
-        b"\n**********************************************************************\n\0"
-            as *const u8 as *const libc::c_char,
+        b"\n**********************************************************************\n\0" as *const u8
+            as *const libc::c_char,
     );
     libmetis__FreeGraph(&mut graph);
     gk_free(
@@ -260,7 +242,7 @@ unsafe fn main_0(
     return 0;
 }
 pub fn main() {
-    let mut args: Vec::<*mut libc::c_char> = Vec::new();
+    let mut args: Vec<*mut libc::c_char> = Vec::new();
     for arg in ::std::env::args() {
         args.push(
             (::std::ffi::CString::new(arg))
@@ -270,11 +252,9 @@ pub fn main() {
     }
     args.push(::core::ptr::null_mut());
     unsafe {
-        ::std::process::exit(
-            main_0(
-                (args.len() - 1) as libc::c_int,
-                args.as_mut_ptr() as *mut *mut libc::c_char,
-            ) as i32,
-        )
+        ::std::process::exit(main_0(
+            (args.len() - 1) as libc::c_int,
+            args.as_mut_ptr() as *mut *mut libc::c_char,
+        ) as i32)
     }
 }

@@ -8,7 +8,7 @@ extern "C" {
 }
 pub type __int32_t = libc::c_int;
 pub type int32_t = __int32_t;
-pub type size_t = libc::c_ulong;
+pub type size_t = u64;
 pub type idx_t = int32_t;
 pub type real_t = libc::c_float;
 #[derive(Copy, Clone)]
@@ -33,41 +33,9 @@ pub struct vkrinfo_t {
 pub struct nrinfo_t {
     pub edegrees: [idx_t; 2],
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct graph_t {
-    pub nvtxs: idx_t,
-    pub nedges: idx_t,
-    pub ncon: idx_t,
-    pub xadj: *mut idx_t,
-    pub vwgt: *mut idx_t,
-    pub vsize: *mut idx_t,
-    pub adjncy: *mut idx_t,
-    pub adjwgt: *mut idx_t,
-    pub tvwgt: *mut idx_t,
-    pub invtvwgt: *mut real_t,
-    pub free_xadj: libc::c_int,
-    pub free_vwgt: libc::c_int,
-    pub free_vsize: libc::c_int,
-    pub free_adjncy: libc::c_int,
-    pub free_adjwgt: libc::c_int,
-    pub label: *mut idx_t,
-    pub cmap: *mut idx_t,
-    pub mincut: idx_t,
-    pub minvol: idx_t,
-    pub where_0: *mut idx_t,
-    pub pwgts: *mut idx_t,
-    pub nbnd: idx_t,
-    pub bndptr: *mut idx_t,
-    pub bndind: *mut idx_t,
-    pub id: *mut idx_t,
-    pub ed: *mut idx_t,
-    pub ckrinfo: *mut ckrinfo_t,
-    pub vkrinfo: *mut vkrinfo_t,
-    pub nrinfo: *mut nrinfo_t,
-    pub coarser: *mut graph_t,
-    pub finer: *mut graph_t,
-}
+
+use crate::libmetis::structure::*;
+
 #[no_mangle]
 pub unsafe extern "C" fn ComputeFillIn(
     mut graph: *mut graph_t,
@@ -125,13 +93,11 @@ pub unsafe extern "C" fn ComputeFillIn(
     );
     xnzsub = libmetis__imalloc(
         (nvtxs + 2 as libc::c_int) as size_t,
-        b"ComputeFillIn: xnzsub\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"ComputeFillIn: xnzsub\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     nzsub = libmetis__imalloc(
         (maxsub + 1 as libc::c_int) as size_t,
-        b"ComputeFillIn: nzsub\0" as *const u8 as *const libc::c_char
-            as *mut libc::c_char,
+        b"ComputeFillIn: nzsub\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
     );
     if smbfct(
         nvtxs,
@@ -154,8 +120,7 @@ pub unsafe extern "C" fn ComputeFillIn(
         maxsub *= 2 as libc::c_int;
         nzsub = libmetis__imalloc(
             (maxsub + 1 as libc::c_int) as size_t,
-            b"ComputeFillIn: nzsub\0" as *const u8 as *const libc::c_char
-                as *mut libc::c_char,
+            b"ComputeFillIn: nzsub\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
         );
         if smbfct(
             nvtxs,
@@ -171,8 +136,7 @@ pub unsafe extern "C" fn ComputeFillIn(
         ) != 0
         {
             errexit(
-                b"MAXSUB is too small!\0" as *const u8 as *const libc::c_char
-                    as *mut libc::c_char,
+                b"MAXSUB is too small!\0" as *const u8 as *const libc::c_char as *mut libc::c_char,
             );
         }
     }
@@ -187,15 +151,12 @@ pub unsafe extern "C" fn ComputeFillIn(
     opc = 0 as libc::c_int as size_t;
     i = 0 as libc::c_int;
     while i < nvtxs {
-        opc = (opc as libc::c_ulong)
-            .wrapping_add(
-                ((*xlnz.offset((i + 1 as libc::c_int) as isize)
-                    - *xlnz.offset(i as isize))
-                    * (*xlnz.offset((i + 1 as libc::c_int) as isize)
-                        - *xlnz.offset(i as isize))
-                    - (*xlnz.offset((i + 1 as libc::c_int) as isize)
-                        - *xlnz.offset(i as isize))) as libc::c_ulong,
-            ) as size_t as size_t;
+        opc = (opc as u64).wrapping_add(
+            ((*xlnz.offset((i + 1 as libc::c_int) as isize) - *xlnz.offset(i as isize))
+                * (*xlnz.offset((i + 1 as libc::c_int) as isize) - *xlnz.offset(i as isize))
+                - (*xlnz.offset((i + 1 as libc::c_int) as isize) - *xlnz.offset(i as isize)))
+                as u64,
+        ) as size_t as size_t;
         i += 1;
         i;
     }
@@ -320,9 +281,7 @@ pub unsafe extern "C" fn smbfct(
         if mrgk != 0 as libc::c_int {
             *marker.offset(k as isize) = *marker.offset(mrgk as isize);
         }
-        if *xadj.offset(node as isize)
-            >= *xadj.offset((node + 1 as libc::c_int) as isize)
-        {
+        if *xadj.offset(node as isize) >= *xadj.offset((node + 1 as libc::c_int) as isize) {
             *xlnz.offset((k + 1 as libc::c_int) as isize) = *xlnz.offset(k as isize);
         } else {
             *rchlnk.offset(k as isize) = neqns + 1 as libc::c_int;
@@ -350,7 +309,8 @@ pub unsafe extern "C" fn smbfct(
                 j;
             }
             lmax = 0 as libc::c_int;
-            if mrkflg != 0 as libc::c_int || mrgk == 0 as libc::c_int
+            if mrkflg != 0 as libc::c_int
+                || mrgk == 0 as libc::c_int
                 || *mrglnk.offset(mrgk as isize) != 0 as libc::c_int
             {
                 i = k;
@@ -469,10 +429,7 @@ pub unsafe extern "C" fn smbfct(
                     }
                 }
             } else {
-                *xnzsub
-                    .offset(
-                        k as isize,
-                    ) = *xnzsub.offset(mrgk as isize) + 1 as libc::c_int;
+                *xnzsub.offset(k as isize) = *xnzsub.offset(mrgk as isize) + 1 as libc::c_int;
                 knz = *xlnz.offset((mrgk + 1 as libc::c_int) as isize)
                     - (*xlnz.offset(mrgk as isize) + 1 as libc::c_int);
             }
@@ -482,10 +439,7 @@ pub unsafe extern "C" fn smbfct(
                 *mrglnk.offset(k as isize) = *mrglnk.offset(i as isize);
                 *mrglnk.offset(i as isize) = k;
             }
-            *xlnz
-                .offset(
-                    (k + 1 as libc::c_int) as isize,
-                ) = *xlnz.offset(k as isize) + knz;
+            *xlnz.offset((k + 1 as libc::c_int) as isize) = *xlnz.offset(k as isize) + knz;
         }
         k += 1;
         k;
@@ -493,31 +447,18 @@ pub unsafe extern "C" fn smbfct(
     if flag == 0 as libc::c_int {
         *maxlnz = *xlnz.offset(neqns as isize) - 1 as libc::c_int;
         *maxsub = *xnzsub.offset(neqns as isize);
-        *xnzsub
-            .offset(
-                (neqns + 1 as libc::c_int) as isize,
-            ) = *xnzsub.offset(neqns as isize);
+        *xnzsub.offset((neqns + 1 as libc::c_int) as isize) = *xnzsub.offset(neqns as isize);
     }
     marker = marker.offset(1);
-    marker;
     mrglnk = mrglnk.offset(1);
-    mrglnk;
     rchlnk = rchlnk.offset(1);
-    rchlnk;
     nzsub = nzsub.offset(1);
-    nzsub;
     xnzsub = xnzsub.offset(1);
-    xnzsub;
     xlnz = xlnz.offset(1);
-    xlnz;
     invp = invp.offset(1);
-    invp;
     perm = perm.offset(1);
-    perm;
     adjncy = adjncy.offset(1);
-    adjncy;
     xadj = xadj.offset(1);
-    xadj;
     gk_free(
         &mut rchlnk as *mut *mut idx_t as *mut *mut libc::c_void,
         &mut mrglnk as *mut *mut idx_t,
